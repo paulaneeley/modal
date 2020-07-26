@@ -36,7 +36,7 @@ lemma fin_conj_cons_imp {Γ : ctx} {φ b : form} {L : list form} :
  prfK Γ (fin_conj (φ::L) ⊃ (φ ⊃ b)) → prfK Γ (fin_conj L ⊃ (φ ⊃ b)) :=
 begin
 intro h, dsimp [fin_conj] at h, rw and_right_imp at h,
-rw imp_imp_if_imp at h, exact h
+rw imp_imp_iff_imp at h, exact h
 end
 
 

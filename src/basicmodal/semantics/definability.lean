@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import language syntax.syntax semantics.semantics data.set.basic paths
+import ..language basicmodal.syntax.syntax basicmodal.semantics.semantics data.set.basic basicmodal.paths
 
 open form
 local attribute [instance] classical.prop_decidable
@@ -64,31 +64,28 @@ end
 -- TODO:
 theorem symm_def : defines ((p 0) ⊃ (□ (◇ (p 0)))) (symm_class) :=
 begin
--- direct:
-/-intro f,
-split,
-{exact symm_helper (p 0) f},
-{intros h1 x y h2, let v := λ n y, n = 0 ∧ f.rel x y, 
-dsimp at h1, specialize h1 v y,
-simp [forces, v] at h1, specialize h1 h2 x, sorry}
--/
 -- by contradiction:
 simp, rw defines, intro f, split,
 {exact symm_helper (p 0) f},
 {intro h1, by_contradiction h2, rw symm_class at h2,
 rw set.nmem_set_of_eq at h2, rw symmetric at h2,
 rw not_forall at h2, cases h2 with x h2, rw not_forall at h2,
-cases h2 with y h2, rw not_imp at h2, cases h2,
-let v := λ n x, n = 0 ∧ ¬ f.rel y x, specialize h1 v x,
-have h3 : v 0 x,
-{sorry}, 
-specialize h1 h3 y h2_left, rw forces at h1, rw forces at h1,
-have h4 : (∀ (y_1 : f.states), f.rel y y_1 → forces f v y_1 (¬p 0)),
-{intros w h4 h5, have h6 : ¬f.rel y w, 
-{sorry},
- exact absurd h4 h6}, 
-specialize h1 h4, exact h1}
+cases h2 with y h2, rw not_imp at h2,
+let v := λ n x, n = 0 ∧ ¬ f.rel y x,
+specialize h1 v x,
+simp [forces, v] at h1,
+specialize h1 h2.right y h2.left, 
+apply h1,
+intros y1 h3 h4, exact absurd h3 h4}
 end
+-- direct:
+/-intro f,
+split,
+{exact symm_helper (p 0) f},
+{intros h1 x y h2, let v := λ n y, n = 0 ∧ f.rel x y, ??
+dsimp at h1, specialize h1 v y,
+simp [forces, v] at h1, specialize h1 h2 x, sorry}
+-/
 
 
 lemma trans_helper : ∀ φ f, f ∈ trans_class → f_valid (□ φ ⊃ □ (□ φ)) f :=

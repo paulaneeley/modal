@@ -39,13 +39,12 @@ def u_valid (φ : form) :=
 -- A context is true at a world in a model if each 
 -- formula of the context is true at that world in that model
 def forces_ctx (f : frame) (v : nat → f.states → Prop) 
-  (Γ : ctx) : f.states → Prop := λ x, ∀ φ, φ ∈ Γ → forces f v x φ
-
--- I'm not sure which definition to use...
-inductive sem_csq2 (Γ : ctx) (φ :form) : Prop
-| is_true (f : ∀ (F : frame) (v : nat → F.states → Prop) (x : F.states),
-forces_ctx F v Γ x → forces F v x φ) : sem_csq2
+  (x : f.states) (Γ : ctx) := ∀ φ, (φ ∈ Γ → forces f v x φ)
 
 -- φ is a global semantic consequence of Γ
 def sem_csq (Γ : ctx) (φ : form) :=
   ∀ f v x, (∀ ψ ∈ Γ, m_valid ψ f v) → forces f v x φ
+
+-- I'm not sure which definition to use...
+def sem_csq2 (Γ : ctx) (φ : form) :=
+  ∀ f v x, (∀ y, forces_ctx f v y Γ) → forces f v x φ

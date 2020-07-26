@@ -1,8 +1,4 @@
--- Following the textbook "Dynamic Epistemic Logic" by 
--- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-
--- Def 2.1, pg 12
 inductive form : Type
   | bot  : form
   | var  (n : nat) : form 
@@ -21,5 +17,6 @@ infix `⊃`         := form.impl
 notation `¬` φ    := form.impl φ form.bot
 notation `⊤`:80   := ¬ form.bot
 notation φ `∨` ψ  := (¬φ ⊃ ψ)
+notation φ `↔` ψ  := (φ ⊃ ψ) & (ψ ⊃ φ)
 notation `□`:80   := form.box 
 notation `◇`:80   := λ φ, ¬(□(¬φ))

@@ -1,7 +1,4 @@
--- Following the textbook "Dynamic Epistemic Logic" by 
--- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
-
-import language
+import ..language
 
 ---------------------- Proof System ----------------------
 

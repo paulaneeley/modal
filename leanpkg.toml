@@ -1,6 +1,8 @@
 [package]
-name = "productrule"
+name = "modal"
 version = "0.1"
-lean_version = "3.4.2"
+lean_version = "leanprover-community/lean:3.17.1"
 path = "src"
 
+[dependencies]
+mathlib = {git = "https://github.com/leanprover-community/mathlib", rev = "a6d3d65f457b5910b1bc24c5b7a1ffb803919a13"}
