@@ -33,7 +33,6 @@ def trans_class : set (frame) := { f : frame | transitive (f.rel) }
 def euclid_class : set (frame) := { f : frame | euclidean (f.rel) }
 def equiv_class : set (frame) := { f : frame | equivalence (f.rel) }
 def ref_trans_class : set (frame) := ref_class ∩ trans_class
-def ref_trans__euc_class : set (frame) := ref_class ∩ trans_class ∩ euclid_class
 
 
 lemma ref_helper : ∀ φ f, f ∈ ref_class → f_valid ((box φ) ⊃ φ) f :=

@@ -19,7 +19,7 @@ inductive formPA (agents : Type) : Type
   | box  {} (a : agents) 
             (φ : formPA)     : formPA
   | update {} (φ ψ : formPA) : formPA
-  | dual {} (φ ψ : formPA)   : formPA
+--  | dual {} (φ ψ : formPA)   : formPA
 
 -- Notation
 --local notation `⊥`:80   := formPA.bot
@@ -35,4 +35,4 @@ notation φ ↔ ψ          := (φ ⊃ ψ) & (ψ ⊃ φ)
 notation `K`:80         := formPA.box -- "a knows that φ"
 notation `C`:80         := λ φ a, ~(K a (~φ)) -- "φ is consistent with a's knowledge"
 notation `U`:80         := formPA.update
-notation `D`:80         := formPA.dual
+notation `D`:80         := λ φ ψ, ~(U φ (~ψ))

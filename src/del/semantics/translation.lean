@@ -1,8 +1,9 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..languageDEL ..syntax.syntaxDEL data.set.basic
+import ..languageDEL ..syntax.syntaxDEL data.set.basic ..syntax.syntaxlemmasDEL
 variables {agents : Type}
+open prfPA
 
 
 ---------------------- Completeness by Translation ----------------------
@@ -16,9 +17,6 @@ def subformulas : formPA agents → set (formPA agents)
   | (φ ⊃ ψ)  := {(φ ⊃ ψ)} ∪ (subformulas φ) ∪ (subformulas ψ)
   | (K a φ)  := {(K a φ)} ∪ (subformulas φ)
   | (U φ ψ)  := {(U φ ψ)} ∪ (subformulas φ) ∪ (subformulas ψ)
-  | (D φ ψ)  := {(D φ ψ)} ∪ (subformulas φ) ∪ (subformulas ψ)
-
-
 
 --lemma subform_self (ψ : formPA agents) : ψ ∈ subformulas(ψ) := sorry
 --lemma subform_and (φ ψ : formPA agents) : ψ ∈ subformulas(φ & ψ) := or.inr (subform_self ψ)
@@ -32,7 +30,6 @@ def subformulas : formPA agents → set (formPA agents)
   | (φ ⊃ ψ)   := 1 + complexity(φ) + complexity(ψ) --1 + max((complexity φ), (complexity ψ))
   | (K a φ)   := 1 + (complexity φ)
   | (U φ ψ)   := (4 + (complexity φ)) * (complexity ψ)
-  | (D φ ψ)   := (4 + (complexity φ)) * (complexity ψ)
 
 
 -- Lemma 7.22, pg 188
@@ -59,30 +56,25 @@ lemma actual_4 : ∀ φ ψ χ : formPA agents, (complexity φ + (1 + (4 + (compl
   | (φ & ψ)        := (translate φ) & (translate ψ)
   | (φ ⊃ ψ)        := (translate φ) ⊃ (translate ψ)
   | (K a φ)        := K a (translate φ)
+  | (U φ ⊥)        := translate (φ ⊃ ⊥)
   | (U φ (p n))    := translate (φ ⊃ (p n))
   | (U φ (~ψ))     := have _, from actual_1 φ ψ, translate (φ ⊃ ~ (U φ ψ))
   | (U φ (ψ & χ))  := have _, from actual_2 φ ψ χ, translate ((U φ ψ) & (U φ χ))
+  | (U φ (ψ ⊃ χ))  := have _, from actual_2 φ ψ χ, translate ((U φ ψ) ⊃ (U φ χ))
   | (U φ (K a ψ))  := have _, from actual_3 φ ψ, translate (φ ⊃ (K a (U φ ψ)))
   | (U φ (U ψ χ))  := have _, from actual_4 φ ψ χ, translate (U (φ & (U φ ψ)) χ)
-  | (U _ ⊥)         := sorry
-  | (U _ (_⊃p _))   := sorry
-  | (U _ (_⊃_&_))   := sorry
-  | (U _ (_⊃(_⊃_))) := sorry
-  | (U _ (_⊃K _ _)) := sorry
-  | (U _ (_⊃U _ _)) := sorry
-  | (U _ (_⊃D _ _)) := sorry
-  | (U _ (D _ _))   := sorry
-  | (D _ _)         := sorry
   using_well_founded { rel_tac := λ _ _, `[exact ⟨_, measure_wf complexity⟩] }
-
-
 
 
 theorem equiv_translation (Γ : ctx agents) : ∀ φ : formPA agents, prfPA Γ (φ ↔ (translate φ)) :=
 begin
 simp,
 intro φ,
-induction φ, repeat {sorry},
+induction φ, 
+repeat {rw translate},
+exact mp (mp pl3 iden) iden,
+exact mp (mp pl3 iden) iden,
+repeat {sorry},
 end
 
 

@@ -20,16 +20,16 @@ inductive prfPA : ctx agents → formPA agents → Prop
 | pl3 {Γ} {φ ψ}          : prfPA Γ (φ ⊃ (ψ ⊃ (φ & ψ)))
 | pl4 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ φ)
 | pl5 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ ψ)
-| pl6 {Γ} {φ}            : prfPA Γ (⊥ ⊃ φ)
+| pl6 {Γ} {φ}            : prfPA Γ (~~φ ⊃ φ)
 | kdist {Γ} {φ ψ} {a}    : prfPA Γ ((K a (φ ⊃ ψ)) ⊃ ((K a φ) ⊃ (K a ψ)))
 | truth {Γ} {φ} {a}      : prfPA Γ ((K a φ) ⊃ φ)
 | posintro {Γ} {φ} {a}   : prfPA Γ ((K a φ) ⊃ (K a (K a φ)))
-| negintro {Γ} {φ} {a}   : prfPA Γ (~(K a φ) ⊃ (K a ~(K a φ)))
+| negintro {Γ} {φ} {a}   : prfPA Γ ((~(K a φ)) ⊃ (K a ~(K a φ)))
 | mp {Γ} {φ ψ} 
   (hpq: prfPA Γ (φ ⊃ ψ)) 
-  (hp : prfPA Γ φ)        : prfPA Γ ψ
+  (hp : prfPA Γ φ)       : prfPA Γ ψ
 | nec {Γ} {φ} {a}
-  (hp: prfPA Γ φ)         : prfPA Γ φ → prfPA Γ (K a φ)
+  (hp: prfPA Γ φ)        : prfPA Γ (K a φ)
 | atomicperm {Γ} {φ} 
   {n}                    : prfPA Γ ((U φ (p n)) ↔ (φ ⊃ (p n)))
 | announceneg {Γ} {φ ψ}  : prfPA Γ ((U φ (~ψ)) ↔ (φ ⊃ ~(U φ ψ)))

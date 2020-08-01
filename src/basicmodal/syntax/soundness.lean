@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..language data.set.basic ..semantics.definability ..semantics.semantics 
+import ..language data.set.basic ..semantics.semantics ..semantics.definability
 
 
 ---------------------- Soundness ----------------------
@@ -15,38 +15,38 @@ intros f v x φ, split,
 {intros h1 h2, specialize h1 h2, exact h1}
 end
 
-theorem soundness (Γ : ctx) 
-  (φ : form) : prfK Γ φ → sem_csq Γ φ :=
-begin
-intro h,
-induction h,
-{intros f v x h, specialize h h_φ, have h1 := h h_h, 
-rw m_valid at h1, specialize h1 x, exact h1},
-{intros f v x h2 h3 h4, exact h3}, 
-{intros f v x h2 h3 h4 h5, apply h3, 
-exact h5, apply h4, exact h5}, 
-/-
-{intros f x v h1 h2 h3,
-by_contradiction h4,
-specialize h2 h4, specialize h3 h4, 
-rw ← not_forces_imp at h2, exact h2 h3},-/
-{intros f v x h1 h2 h3, simp [forces] at *, 
-exact and.intro h2 h3},
-{intros f v x h1 h2, exact h2.left},
-{intros f v x h1 h2, exact h2.right},
-{intros f v x h1 h2, apply h2, intro h3, exact h3},
-{intros f v x h1 h2 h3, simp [forces] at *, 
-intros x' h4, specialize h3 x' h4,
-specialize h2 x' h4 h3, exact h2}, 
-{intros f v x h, 
-specialize h_ih_hpq f v x h,
-specialize h_ih_hp f v x h,
-exact h_ih_hpq h_ih_hp}, 
-{intros f v x h1 y h2,
-rw sem_csq at h_ih,
-specialize h_ih f v y h1, 
-exact h_ih},
-end
+-- theorem soundness (Γ : ctx) 
+--   (φ : form) : prfK Γ φ → sem_csq Γ φ :=
+-- begin
+-- intro h,
+-- induction h,
+-- {intros f v x h, specialize h h_φ, have h1 := h h_h, 
+-- rw m_valid at h1, specialize h1 x, exact h1},
+-- {intros f v x h2 h3 h4, exact h3}, 
+-- {intros f v x h2 h3 h4 h5, apply h3, 
+-- exact h5, apply h4, exact h5}, 
+-- /-
+-- {intros f x v h1 h2 h3,
+-- by_contradiction h4,
+-- specialize h2 h4, specialize h3 h4, 
+-- rw ← not_forces_imp at h2, exact h2 h3},-/
+-- {intros f v x h1 h2 h3, simp [forces] at *, 
+-- exact and.intro h2 h3},
+-- {intros f v x h1 h2, exact h2.left},
+-- {intros f v x h1 h2, exact h2.right},
+-- {intros f v x h1 h2, apply h2, intro h3, exact h3},
+-- {intros f v x h1 h2 h3, simp [forces] at *, 
+-- intros x' h4, specialize h3 x' h4,
+-- specialize h2 x' h4 h3, exact h2}, 
+-- {intros f v x h, 
+-- specialize h_ih_hpq f v x h,
+-- specialize h_ih_hp f v x h,
+-- exact h_ih_hpq h_ih_hp}, 
+-- {intros f v x h1 y h2,
+-- rw sem_csq at h_ih,
+-- specialize h_ih f v y h1, 
+-- exact h_ih},
+-- end
 
 theorem soundness2 (Γ : ctx) 
   (φ : form) : prfK Γ φ → sem_csq2 Γ φ :=
@@ -59,11 +59,6 @@ exact h1},
 {intros f v x h2 h3 h4, exact h3}, 
 {intros f v x h2 h3 h4 h5, apply h3, 
 exact h5, apply h4, exact h5}, 
-/-
-{intros f x v h1 h2 h3,
-by_contradiction h4,
-specialize h2 h4, specialize h3 h4, 
-rw ← not_forces_imp at h2, exact h2 h3},-/
 {intros f v x h1 h2 h3, simp [forces] at *, 
 exact and.intro h2 h3},
 {intros f v x h1 h2, exact h2.left},
@@ -143,20 +138,24 @@ begin
 intro h, apply hi, apply h, apply S4_helper
 end
 
-lemma S5_helper : ∀ φ ∈ S5_axioms, F_valid φ ref_trans__euc_class :=
+lemma S5_helper : ∀ φ ∈ S5_axioms, F_valid φ equiv_class :=
 begin
 intros φ h1 f h2 v x,
 cases h2 with h2l h2r, 
-cases h2l with h2l h2lr,
+cases h2r with h2r h2rr,
 cases h1 with h1 h3, 
 {cases h1, apply T_helper, exact h1, 
 exact h2l, cases h1 with ψ h1, subst h1, 
-apply trans_helper, exact h2lr},
+apply trans_helper, exact h2rr},
 {cases h3 with ψ h3, dsimp at h3,
-subst h3, apply euclid_helper, exact h2r}
+subst h3, apply euclid_helper, rw euclid_class,
+rw set.mem_set_of_eq, rw euclidean,
+intros x y z h1 h2,
+rw symmetric at h2r,
+specialize h2r h1, exact h2rr h2r h2}
 end
 
-theorem S5_soundness (φ : form) : prfK (S5_axioms) φ → F_valid φ (ref_trans__euc_class) :=
+theorem S5_soundness (φ : form) : prfK (S5_axioms) φ → F_valid φ (equiv_class) :=
 begin
 intro h, apply hi, apply h, apply S5_helper
 end
