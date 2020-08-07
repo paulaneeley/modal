@@ -2,6 +2,8 @@
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
 import ..language data.set.basic ..semantics.semantics ..semantics.definability
+local attribute [instance] classical.prop_decidable
+
 
 
 ---------------------- Soundness ----------------------
@@ -56,14 +58,22 @@ induction h,
 {intros f v x h, specialize h x, rw forces_ctx at h,
 specialize h h_φ, have h1 := h h_h, 
 exact h1},
+{intros f v x h2 h3, exact h3},
 {intros f v x h2 h3 h4, exact h3}, 
 {intros f v x h2 h3 h4 h5, apply h3, 
 exact h5, apply h4, exact h5}, 
+{intros f x v h1 h2 h3,
+by_contradiction h4,
+specialize h2 h4, specialize h3 h4, 
+rw ← not_forces_imp at h2, exact h2 h3},
 {intros f v x h1 h2 h3, simp [forces] at *, 
 exact and.intro h2 h3},
 {intros f v x h1 h2, exact h2.left},
 {intros f v x h1 h2, exact h2.right},
-{intros f v x h1 h2, apply h2, intro h3, exact h3},
+{intros f v x h1 h2 h3, rw forces at h2,
+rw forces at h2, rw forces at h2, rw forces at h2,
+rw imp_false at h2, rw imp_false at h2, rw not_imp_not at h2,
+exact h2 h3}, 
 {intros f v x h1 h2 h3, simp [forces] at *, 
 intros x' h4, specialize h3 x' h4,
 specialize h2 x' h4 h3, exact h2}, 
@@ -77,26 +87,35 @@ specialize h_ih f v y h1,
 exact h_ih},
 end
 
+theorem soundness3 (Γ : ctx) 
+  (φ : form) : ¬ sem_csq2 Γ φ → ¬ prfK Γ φ :=
+begin
+rw not_imp_not, exact soundness2 Γ φ
+end
+
 
 lemma hi {Γ : ctx} {φ : form} {C : set (frame)} : prfK Γ φ → (∀ ψ ∈ Γ, F_valid ψ C) → F_valid φ C :=
 begin
 intros h1 h2 f h3 v, induction h1,
 {intro x, specialize h2 h1_φ h1_h, rw F_valid at h2, specialize h2 f h3 v x, exact h2},
+{intros x h1, exact h1},
 {intros x h4 h5, exact h4},
 {intros x h4 h5 h6, have h7 := h4 h6, have h8 := h5 h6, exact h7 h8},
-/-{intros x h3 h4, by_contradiction h5, specialize h3 h5, specialize h4 h5, 
-rw ← not_forces_imp at h3, exact h3 h4},-/
+{intros x h3 h4, by_contradiction h5, specialize h3 h5, specialize h4 h5, 
+rw ← not_forces_imp at h3, exact h3 h4},
 {intros x h4 h5, exact and.intro h4 h5}, 
 {intros x h4, exact h4.left}, 
 {intros x h4, exact h4.right}, 
---{intros x h4, exact false.elim h4},
-{intros x h4, apply h4, intro h5, exact h5},
+{intros x h4 h5, rw forces at h4, rw forces at h4,
+rw forces at h4, rw forces at h4, rw imp_false at h4,
+rw imp_false at h4, rw not_imp_not at h4, exact h4 h5},
 {intros x h3 h4, simp [forces] at *, intros x' h5, specialize h3 x' h5,
 specialize h4 x' h5, exact h3 h4},
 {intro x, specialize h1_ih_hp h2 x, specialize h1_ih_hpq h2 x h1_ih_hp, 
 exact h1_ih_hpq},
 {intros x y h3, apply h1_ih, exact h2}
 end
+
 
 lemma inclusion_valid {C C' : set (frame)} : ∀ ψ, C ⊆ C' → F_valid ψ C' → F_valid ψ C :=
 begin

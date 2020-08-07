@@ -27,10 +27,11 @@ begin
     exact (set.mem_insert_of_mem _ h_h) },
   { exact pl1 },
   { exact pl2 },
-  { exact pl3},
+  { exact pl3 },
   { exact pl4 },
   { exact pl5 },
   { exact pl6 },
+  { exact pl7 },
   { exact kdist },
   {exact truth},
   {exact posintro},
@@ -143,7 +144,7 @@ lemma left_and_imp {Γ : ctx agents} {φ ψ χ : formPA agents} :
   prfPA Γ (ψ ⊃ ((φ & ψ) ⊃ χ)) → prfPA Γ ((φ & ψ) ⊃ χ) :=
 begin
 intro h1,
-exact mp double_imp (cut pl5 h1)
+exact mp double_imp (cut pl6 h1)
 end
 
 
@@ -152,19 +153,31 @@ lemma and_right_imp {Γ : ctx agents} {φ ψ χ : formPA agents} :
 begin
 split, 
 {intro h1,
-exact mp (cut2 pl1 pl2) (cut1 pl3 h1)},
+exact mp (cut2 pl1 pl2) (cut1 pl4 h1)},
 intro h1,
-exact left_and_imp (cut2 pl4 h1)
+exact left_and_imp (cut2 pl5 h1)
 end
 
 
+lemma not_and_subst {φ ψ χ : formPA agents} {Γ : ctx agents} : 
+  prfPA Γ (φ ↔ ψ) → (prfPA Γ ~(χ & φ) ↔ prfPA Γ ~(χ & ψ)) :=
+begin
+intro h1, split, 
+{intro h2,
+exact mp (mp pl3 (mp pl1 h2)) (cut pl7 (mp double_imp (cut2 (cut pl6 (mp pl6 h1)) (cut pl5 pl4))))},
+{intro h2,
+exact mp (mp pl3 (mp pl1 h2)) (cut pl7 (mp double_imp (cut2 (cut pl6 (mp pl5 h1)) (cut pl5 pl4))))},
+end
 
 
---TODOs:
-lemma prove_not_imp_not_prove {Γ : ctx agents} {φ : formPA agents} : prfPA Γ (~φ) ↔ ¬prfPA Γ φ := sorry
+lemma not_contra {Γ : ctx agents} {φ : formPA agents} : 
+  prfPA Γ ~(φ & ~φ) :=
+begin
+exact mp (mp pl3 (cut pl7 pl6)) (cut pl7 pl5)
+end
 
-lemma not_contra1 {Γ : ctx agents} {φ : formPA agents} : 
-  ¬ prfPA Γ (φ & ~φ) := sorry
 
-lemma not_contra2 {Γ : ctx agents} {φ : formPA agents} : 
-  prfPA Γ ~(φ & ~φ) := sorry
+lemma phi_and_true {Γ : ctx agents} {φ : formPA agents} : prfPA Γ ((φ&~⊥) ↔ φ) :=
+begin
+exact (mp (mp pl4 pl5) (mp (imp_switch pl4) ax2))
+end

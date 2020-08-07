@@ -3,6 +3,7 @@
 
 import ..languageDEL data.set.basic ..semantics.semanticsDEL
 variables {agents : Type}
+local attribute [instance] classical.prop_decidable
 
 
 
@@ -14,12 +15,19 @@ theorem soundnessPA {Γ : ctx agents} {φ : formPA agents} :
 begin
 intros h1 h2 f h3 v, induction h1,
 {intro x, specialize h2 h1_φ h1_h, rw F_valid at h2, specialize h2 f h3 v x, exact h2},
+{intros x h4, exact h4},
 {intros x h4 h5, exact h4},
 {intros x h4 h5 h6, exact (h4 h6) (h5 h6)},
+{intros x h1 h2,
+by_contradiction h3,
+specialize h2 h3, specialize h1 h3, 
+rw ← not_forces_imp at h1, exact h1 h2},
 {intros x h4 h5, exact and.intro h4 h5}, 
 {intros x h4, exact h4.left}, 
 {intros x h4, exact h4.right}, 
-{intros x h4, apply h4, intro h5, exact h5},
+{intros x h4, rw forces at h4, rw forces at h4,
+rw forces at h4, rw imp_false at h4, rw imp_false at h4,
+rw not_not at h4, exact h4},
 {intros x h3 h4, simp [forces] at *, intros x' h5, 
 exact (h3 x' h5) (h4 x' h5)},
 {intros x h1, apply h1, specialize h3 h1_a, exact h3.left x}, 
@@ -31,7 +39,7 @@ specialize h3 h1_a, cases h3 with h3l h3r, cases h3r with h3r h3rr,
 exact h3rr (h3r h6) h5},
 {intro x, specialize h1_ih_hp h2 x, specialize h1_ih_hpq h2 x h1_ih_hp, 
 exact h1_ih_hpq},
-{intros x y h1, exact h1_ih_hp h2 y}, 
+{intros x y h1, exact h1_ih h2 y}, 
 {intros x, split, repeat {intros h1 h4, apply h1 h4}}, 
 {intros x, split, intros h1 h4 h5, exact (h1 h4) (h5 h4),
 intros h1 h4 h5, apply h1 h4, intro h6, exact h5}, 

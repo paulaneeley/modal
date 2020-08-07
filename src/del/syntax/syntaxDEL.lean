@@ -15,12 +15,14 @@ notation Γ `∪` φ := set.insert φ Γ
 inductive prfPA : ctx agents → formPA agents → Prop 
 | ax {Γ} {φ} 
  (h : φ ∈ Γ)             : prfPA Γ φ
+| ax2 {Γ}                : prfPA Γ (~⊥)
 | pl1 {Γ} {φ ψ}          : prfPA Γ (φ ⊃ (ψ ⊃ φ))
 | pl2 {Γ} {φ ψ χ}        : prfPA Γ ((φ ⊃ (ψ ⊃ χ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ)))
-| pl3 {Γ} {φ ψ}          : prfPA Γ (φ ⊃ (ψ ⊃ (φ & ψ)))
-| pl4 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ φ)
-| pl5 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ ψ)
-| pl6 {Γ} {φ}            : prfPA Γ (~~φ ⊃ φ)
+| pl3 {Γ} {φ ψ}          : prfPA Γ (((~φ) ⊃ (~ψ)) ⊃ (((~φ) ⊃ ψ) ⊃ φ))
+| pl4 {Γ} {φ ψ}          : prfPA Γ (φ ⊃ (ψ ⊃ (φ & ψ)))
+| pl5 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ φ)
+| pl6 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ ψ)
+| pl7 {Γ} {φ}            : prfPA Γ ((~~φ) ⊃ φ)
 | kdist {Γ} {φ ψ} {a}    : prfPA Γ ((K a (φ ⊃ ψ)) ⊃ ((K a φ) ⊃ (K a ψ)))
 | truth {Γ} {φ} {a}      : prfPA Γ ((K a φ) ⊃ φ)
 | posintro {Γ} {φ} {a}   : prfPA Γ ((K a φ) ⊃ (K a (K a φ)))

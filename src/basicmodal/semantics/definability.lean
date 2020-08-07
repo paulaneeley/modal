@@ -41,6 +41,7 @@ intros φ f h v x h1,
 apply h1 x, apply h x
 end
 
+
 theorem ref_def : defines ((□ (p 0)) ⊃ (p 0)) (ref_class) :=
 begin
 intro f,
@@ -60,10 +61,9 @@ specialize h3 x, have h4 := h h2,
 have h5 := h3 h4, exact h5 h1
 end
 
--- TODO:
+
 theorem symm_def : defines ((p 0) ⊃ (□ (◇ (p 0)))) (symm_class) :=
 begin
--- by contradiction:
 simp, rw defines, intro f, split,
 {exact symm_helper (p 0) f},
 {intro h1, by_contradiction h2, rw symm_class at h2,
@@ -77,14 +77,6 @@ specialize h1 h2.right y h2.left,
 apply h1,
 intros y1 h3 h4, exact absurd h3 h4}
 end
--- direct:
-/-intro f,
-split,
-{exact symm_helper (p 0) f},
-{intros h1 x y h2, let v := λ n y, n = 0 ∧ f.rel x y, ??
-dsimp at h1, specialize h1 v y,
-simp [forces, v] at h1, specialize h1 h2 x, sorry}
--/
 
 
 lemma trans_helper : ∀ φ f, f ∈ trans_class → f_valid (□ φ ⊃ □ (□ φ)) f :=

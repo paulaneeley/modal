@@ -8,13 +8,6 @@ local attribute [instance] classical.prop_decidable
 
 ---------------------- Facts about Announcements ----------------------
 
-example : ∃ n : ℕ, 2 + 2 = n :=
-begin
-  existsi 4,
-  -- goal now 2 + 2 = 4
-refl
-end
-
 -- Proposition 4.10, pg. 77
 lemma functional_announce (φ ψ : formPA agents) : 
   F_valid ((~(U φ (~ψ))) ⊃ (U φ ψ)) euclid_class :=
@@ -29,6 +22,7 @@ end
 lemma partial_announce (φ ψ : formPA agents) : 
   ¬ (F_valid ~(U φ ~⊥)) euclid_class :=
 begin
+rw F_valid, by_contradiction h1,
 sorry
 end
 
@@ -37,6 +31,9 @@ lemma public_announce_neg (φ ψ : formPA agents) :
   F_valid ((~U φ ~(~ψ) ⊃ (φ ⊃ ~U (~φ) ~ψ)) & 
   ((φ ⊃ ~U (~φ) ~ψ) ⊃ (~U φ (~ψ)))) euclid_class :=
 begin
+rw F_valid, intros f h1 v x, rw forces,
+split,
+sorry,
 sorry
 end
 

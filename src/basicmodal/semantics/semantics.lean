@@ -41,9 +41,9 @@ def u_valid (φ : form) :=
 def forces_ctx (f : frame) (v : nat → f.states → Prop) 
   (x : f.states) (Γ : ctx) := ∀ φ, (φ ∈ Γ → forces f v x φ)
 
--- φ is a global semantic consequence of Γ
-def sem_csq (Γ : ctx) (φ : form) :=
-  ∀ f v x, (∀ ψ ∈ Γ, m_valid ψ f v) → forces f v x φ
+-- -- φ is a global semantic consequence of Γ
+-- def sem_csq (Γ : ctx) (φ : form) :=
+--   ∀ f v x, (∀ ψ ∈ Γ, m_valid ψ f v) → forces f v x φ
 
 -- I'm not sure which definition to use...
 def sem_csq2 (Γ : ctx) (φ : form) :=

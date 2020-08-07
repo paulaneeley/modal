@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..languageDEL ..syntax.syntaxDEL data.set.basic ..syntax.syntaxlemmasDEL
+import ..languageDEL ..syntax.syntaxDEL data.set.basic ..syntax.syntaxlemmasDEL data.nat.basic
 variables {agents : Type}
 open prfPA
 
@@ -10,7 +10,7 @@ open prfPA
 
 -- Subformulas
 def subformulas : formPA agents → set (formPA agents)
-  | (⊥)      := {⊥}
+  | (formPA.bot)      := {⊥}
   | (p n)    := {(p n)}
   | (~ φ)    := {(~φ)} ∪ (subformulas φ)
   | (φ & ψ)  := {(φ & ψ)} ∪ (subformulas φ) ∪ (subformulas ψ)
@@ -18,16 +18,13 @@ def subformulas : formPA agents → set (formPA agents)
   | (K a φ)  := {(K a φ)} ∪ (subformulas φ)
   | (U φ ψ)  := {(U φ ψ)} ∪ (subformulas φ) ∪ (subformulas ψ)
 
---lemma subform_self (ψ : formPA agents) : ψ ∈ subformulas(ψ) := sorry
---lemma subform_and (φ ψ : formPA agents) : ψ ∈ subformulas(φ & ψ) := or.inr (subform_self ψ)
 
 -- Def 7.21, pg. 187, Complexity function c
-
 @[simp] def complexity : formPA agents → ℕ
-  | (⊥)       := 1
+  | (formPA.bot)       := 1
   | (p n)     := 1
-  | (φ & ψ)   := 1 + complexity(φ) + complexity(ψ) --1 + max((complexity φ), (complexity ψ))
-  | (φ ⊃ ψ)   := 1 + complexity(φ) + complexity(ψ) --1 + max((complexity φ), (complexity ψ))
+  | (φ & ψ)   := 1 + max (complexity φ) (complexity ψ)
+  | (φ ⊃ ψ)   := 1 + max (complexity φ) (complexity ψ)
   | (K a φ)   := 1 + (complexity φ)
   | (U φ ψ)   := (4 + (complexity φ)) * (complexity ψ)
 
@@ -44,6 +41,8 @@ lemma cs_6 : ∀ φ ψ χ : formPA agents, complexity(U (φ & (U φ ψ)) χ) < c
 
 
 -- Lemmas I'd like to erase
+lemma hi : ∀ φ ψ : formPA agents, complexity φ < 1 + max (complexity φ) (complexity ψ) := sorry
+lemma hi1 : ∀ φ ψ : formPA agents, complexity ψ < 1 + max (complexity φ) (complexity ψ) := sorry
 lemma actual_1 : ∀ φ ψ : formPA agents, complexity φ + (1 + (1 + (1 + (complexity φ + 4) * complexity ψ))) < (complexity φ + 4) * (complexity ψ + 2) := sorry
 lemma actual_2 : ∀ φ ψ χ : formPA agents, 1 + ((complexity φ + 4) * complexity ψ + (complexity φ + 4) * complexity χ) < (complexity φ + 4) * (complexity ψ + (complexity χ + 1)) := sorry
 lemma actual_3 : ∀ φ ψ : formPA agents, complexity φ + (1 + (1 + (complexity φ + 4) * complexity ψ)) < (complexity φ + 4) * (complexity ψ + 1) := sorry
@@ -51,12 +50,12 @@ lemma actual_4 : ∀ φ ψ χ : formPA agents, (complexity φ + (1 + (4 + (compl
 
 -- Def 7.20, pg. 186, Translation function t
 @[simp] def translate : formPA agents → formPA agents
-  | (⊥)            := ⊥
+  | (formPA.bot)   := ⊥
   | (p n)          := p n
-  | (φ & ψ)        := (translate φ) & (translate ψ)
+  | (φ & ψ)        := have _, from hi φ ψ, have _, from hi1 φ ψ, (translate φ) & (translate ψ)
   | (φ ⊃ ψ)        := (translate φ) ⊃ (translate ψ)
   | (K a φ)        := K a (translate φ)
-  | (U φ ⊥)        := translate (φ ⊃ ⊥)
+  | (U φ formPA.bot)        := translate (φ ⊃ ⊥)
   | (U φ (p n))    := translate (φ ⊃ (p n))
   | (U φ (~ψ))     := have _, from actual_1 φ ψ, translate (φ ⊃ ~ (U φ ψ))
   | (U φ (ψ & χ))  := have _, from actual_2 φ ψ χ, translate ((U φ ψ) & (U φ χ))
@@ -65,15 +64,12 @@ lemma actual_4 : ∀ φ ψ χ : formPA agents, (complexity φ + (1 + (4 + (compl
   | (U φ (U ψ χ))  := have _, from actual_4 φ ψ χ, translate (U (φ & (U φ ψ)) χ)
   using_well_founded { rel_tac := λ _ _, `[exact ⟨_, measure_wf complexity⟩] }
 
-
+--Need to do induction on complexity of φ
 theorem equiv_translation (Γ : ctx agents) : ∀ φ : formPA agents, prfPA Γ (φ ↔ (translate φ)) :=
 begin
 simp,
 intro φ,
-induction φ, 
-repeat {rw translate},
-exact mp (mp pl3 iden) iden,
-exact mp (mp pl3 iden) iden,
+induction (complexity φ), 
 repeat {sorry},
 end
 
@@ -101,6 +97,9 @@ end
 
 
 /-
+--lemma subform_self (ψ : formPA agents) : ψ ∈ subformulas(ψ) := sorry
+--lemma subform_and (φ ψ : formPA agents) : ψ ∈ subformulas(φ & ψ) := or.inr (subform_self ψ)
+
 subform self:
 begin
 induction ψ,
