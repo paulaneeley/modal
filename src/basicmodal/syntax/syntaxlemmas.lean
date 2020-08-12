@@ -65,16 +65,18 @@ exact mp (weak h) pr
 end
 
 
-lemma thislemma {Γ : ctx} {φ ψ : form} : 
-  prfK Γ (φ ⊃ ((φ ⊃ ψ) ⊃ ψ)) := sorry
-
-
 lemma hs1 {Γ : ctx} {φ ψ χ : form} :
-  prfK Γ ((ψ ⊃ χ) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ))) := sorry
+  prfK Γ ((ψ ⊃ χ) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ))) :=
+begin
+exact (mp (mp pl2 (mp pl1 pl2)) pl1)
+end
 
 
-lemma hs2 {Γ : ctx} {φ ψ χ : form} :
-  prfK Γ ((φ ⊃ ψ) ⊃ ((ψ ⊃ χ) ⊃ (φ ⊃ χ))) := sorry
+lemma likemp {Γ : ctx} {φ ψ : form} : 
+  prfK Γ (φ ⊃ ((φ ⊃ ψ) ⊃ ψ)) :=
+begin
+exact (mp (mp hs1 (mp pl2 iden)) pl1)
+end
 
 
 lemma dne {Γ : ctx} {φ : form} :
@@ -86,7 +88,7 @@ have h3 : prfK Γ (((¬φ) ⊃ ¬(φ ⊃ (φ ⊃ φ))) ⊃ ((φ ⊃ (φ ⊃ φ))
 have h4 : prfK Γ (((¬¬(φ ⊃ (φ ⊃ φ))) ⊃ (¬¬φ)) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from cut h2 h3,
 have h5 : prfK Γ ((¬¬φ) ⊃ ((¬¬(φ ⊃ (φ ⊃ φ))) ⊃ (¬¬φ))), from pl1,
 have h6 : prfK Γ ((¬¬φ) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from cut h5 h4,
-have h7 : prfK Γ ((φ ⊃ (φ ⊃ φ)) ⊃ (((φ ⊃ (φ ⊃ φ)) ⊃ φ) ⊃ φ)), from thislemma,
+have h7 : prfK Γ ((φ ⊃ (φ ⊃ φ)) ⊃ (((φ ⊃ (φ ⊃ φ)) ⊃ φ) ⊃ φ)), from likemp,
 have h8 : prfK Γ (((φ ⊃ (φ ⊃ φ)) ⊃ φ) ⊃ φ), from mp h7 h1,
 have h9 : prfK Γ ((¬¬φ) ⊃ φ), from cut h6 h8,
 exact h9
@@ -126,6 +128,19 @@ intro h1,
 have h2 : prfK Γ (ψ ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ))), from mp pl1 (mp pl2 h1),
 have h3 : prfK Γ ((ψ ⊃ (φ ⊃ ψ)) ⊃ (ψ ⊃ (φ ⊃ χ))), from mp pl2 h2,
 exact mp h3 pl1
+end
+
+
+lemma l2 {Γ : ctx} {φ ψ χ : form} : prfK Γ ((φ ⊃ (ψ ⊃ χ)) ⊃ (ψ ⊃ (φ ⊃ χ))) :=
+begin
+exact (mp (mp pl2 (cut pl2 hs1)) (mp pl1 pl1))
+end
+
+
+lemma hs2 {Γ : ctx} {φ ψ χ : form} :
+  prfK Γ ((φ ⊃ ψ) ⊃ ((ψ ⊃ χ) ⊃ (φ ⊃ χ))) :=
+begin
+exact (mp l2 hs1)
 end
 
 
@@ -225,27 +240,17 @@ end
 lemma contrapos {Γ : ctx} {φ ψ : form} :
   prfK Γ ((¬ψ) ⊃ (¬φ)) ↔ prfK Γ (φ ⊃ ψ) :=
 begin
-simp, split,
+split,
 intro h1,
 exact mp pl8 h1,
 intro h1,
-have h2 : prfK Γ (ψ ⊃ ¬¬ψ), from dni,
-have h3 : prfK Γ ((ψ ⊃ (¬¬ψ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ (¬¬ψ)))), from hs1,
-have h4 : prfK Γ ((φ ⊃ ψ) ⊃ (φ ⊃ (¬¬ψ))), from mp h3 h2,
-have h5 : prfK Γ ((¬¬φ) ⊃ φ), from dne,
-have h6 : prfK Γ (((¬¬φ) ⊃ φ) ⊃ ((φ ⊃ (¬¬ψ)) ⊃ ((¬¬φ) ⊃ (¬¬ψ)))), from hs2,
-have h7 : prfK Γ ((φ ⊃ (¬¬ψ)) ⊃ ((¬¬φ) ⊃ (¬¬ψ))), from mp h6 h5,
-have h8 : prfK Γ ((φ ⊃ ψ) ⊃ ((¬¬φ) ⊃ (¬¬ψ))), from cut h4 h7,
-have h9 : prfK Γ (((¬¬φ) ⊃ (¬¬ψ)) ⊃ ((¬ψ) ⊃ (¬φ))), from pl8,
-have h10 : prfK Γ ((φ ⊃ ψ) ⊃ ((¬ψ) ⊃ (¬φ))), from cut h8 h9,
-exact mp h10 h1,
+exact mp (cut (cut (mp hs1 dni) (mp hs2 dne)) pl8) h1,
 end
 
 
 lemma iff_not {Γ : ctx} {φ ψ : form} :
   prfK Γ (φ ↔ ψ) → prfK Γ (¬ψ ↔ ¬φ) :=
 begin
-simp, 
 intro h1,
 have h2 : prfK Γ (φ ⊃ ψ), from mp pl5 h1,
 have h3 : prfK Γ (ψ ⊃ φ), from mp pl6 h1,

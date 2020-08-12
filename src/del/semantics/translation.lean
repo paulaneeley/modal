@@ -1,131 +1,48 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..languageDEL ..syntax.syntaxDEL data.set.basic ..syntax.syntaxlemmasDEL data.nat.basic
+import ..languageDEL ..syntax.syntaxDEL  ..syntax.syntaxlemmasDEL .translationdefs .translationlemmas
+import data.nat.basic tactic.linarith data.set.basic
 variables {agents : Type}
-open prfPA
-
 
 ---------------------- Completeness by Translation ----------------------
 
--- Subformulas
-def subformulas : formPA agents → set (formPA agents)
-  | (formPA.bot)      := {⊥}
-  | (p n)    := {(p n)}
-  | (~ φ)    := {(~φ)} ∪ (subformulas φ)
-  | (φ & ψ)  := {(φ & ψ)} ∪ (subformulas φ) ∪ (subformulas ψ)
-  | (φ ⊃ ψ)  := {(φ ⊃ ψ)} ∪ (subformulas φ) ∪ (subformulas ψ)
-  | (K a φ)  := {(K a φ)} ∪ (subformulas φ)
-  | (U φ ψ)  := {(U φ ψ)} ∪ (subformulas φ) ∪ (subformulas ψ)
-
-
--- Def 7.21, pg. 187, Complexity function c
-@[simp] def complexity : formPA agents → ℕ
-  | (formPA.bot)       := 1
-  | (p n)     := 1
-  | (φ & ψ)   := 1 + max (complexity φ) (complexity ψ)
-  | (φ ⊃ ψ)   := 1 + max (complexity φ) (complexity ψ)
-  | (K a φ)   := 1 + (complexity φ)
-  | (U φ ψ)   := (4 + (complexity φ)) * (complexity ψ)
-
-
--- Lemma 7.22, pg 188
-lemma cs_1 : ∀ φ ψ : formPA agents, φ ∈ subformulas(ψ) → complexity(φ) ≤ complexity(ψ) := sorry
-lemma cs_2 : ∀ φ : formPA agents, ∀ n : nat, complexity(φ ⊃ p n) < complexity(U φ (p n)) := sorry
-lemma cs_3 : ∀ φ ψ : formPA agents, complexity(φ ⊃ ~(U φ ψ)) < complexity(U φ (~ψ)) := sorry
-lemma cs_4 : ∀ φ ψ χ : formPA agents, complexity((U φ ψ) & (U φ χ)) < complexity(U φ (ψ & χ)) := sorry
-lemma cs_5 : ∀ φ ψ : formPA agents, ∀ a : agents, complexity(φ ⊃ (K a (U φ ψ))) < complexity (U φ (K a ψ)) := sorry
-lemma cs_6 : ∀ φ ψ χ : formPA agents, complexity(U (φ & (U φ ψ)) χ) < complexity (U φ (U ψ χ)) := sorry
-
-
-
-
--- Lemmas I'd like to erase
-lemma hi : ∀ φ ψ : formPA agents, complexity φ < 1 + max (complexity φ) (complexity ψ) := sorry
-lemma hi1 : ∀ φ ψ : formPA agents, complexity ψ < 1 + max (complexity φ) (complexity ψ) := sorry
-lemma actual_1 : ∀ φ ψ : formPA agents, complexity φ + (1 + (1 + (1 + (complexity φ + 4) * complexity ψ))) < (complexity φ + 4) * (complexity ψ + 2) := sorry
-lemma actual_2 : ∀ φ ψ χ : formPA agents, 1 + ((complexity φ + 4) * complexity ψ + (complexity φ + 4) * complexity χ) < (complexity φ + 4) * (complexity ψ + (complexity χ + 1)) := sorry
-lemma actual_3 : ∀ φ ψ : formPA agents, complexity φ + (1 + (1 + (complexity φ + 4) * complexity ψ)) < (complexity φ + 4) * (complexity ψ + 1) := sorry
-lemma actual_4 : ∀ φ ψ χ : formPA agents, (complexity φ + (1 + (4 + (complexity φ + 4) * complexity ψ))) * complexity χ < (complexity φ + 4) * ((complexity ψ + 4) * complexity χ) := sorry
 
 -- Def 7.20, pg. 186, Translation function t
 @[simp] def translate : formPA agents → formPA agents
-  | (formPA.bot)   := ⊥
-  | (p n)          := p n
-  | (φ & ψ)        := have _, from hi φ ψ, have _, from hi1 φ ψ, (translate φ) & (translate ψ)
-  | (φ ⊃ ψ)        := (translate φ) ⊃ (translate ψ)
-  | (K a φ)        := K a (translate φ)
-  | (U φ formPA.bot)        := translate (φ ⊃ ⊥)
-  | (U φ (p n))    := translate (φ ⊃ (p n))
-  | (U φ (~ψ))     := have _, from actual_1 φ ψ, translate (φ ⊃ ~ (U φ ψ))
-  | (U φ (ψ & χ))  := have _, from actual_2 φ ψ χ, translate ((U φ ψ) & (U φ χ))
-  | (U φ (ψ ⊃ χ))  := have _, from actual_2 φ ψ χ, translate ((U φ ψ) ⊃ (U φ χ))
-  | (U φ (K a ψ))  := have _, from actual_3 φ ψ, translate (φ ⊃ (K a (U φ ψ)))
-  | (U φ (U ψ χ))  := have _, from actual_4 φ ψ χ, translate (U (φ & (U φ ψ)) χ)
+  | (formPA.bot)     := ⊥
+  | (p n)            := p n
+  | (φ & ψ)          := have _, from tr1 φ ψ, have _, from tr2 φ ψ, (translate φ) & (translate ψ)
+  | (φ ⊃ ψ)          := have _, from tr1 φ ψ, have _, from tr2 φ ψ, (translate φ) ⊃ (translate ψ)
+  | (K a φ)          := K a (translate φ)
+  | (U φ formPA.bot) := have _, from tr3 φ,     translate (φ ⊃ ⊥)
+  | (U φ (p n))      := have _, from tr3 φ,     translate (φ ⊃ (p n))
+  | (U φ (~ψ))       := have _, from tr4 φ ψ,   translate (φ ⊃ ~ (U φ ψ))
+  | (U φ (ψ & χ))    := have _, from tr5 φ ψ χ, translate ((U φ ψ) & (U φ χ))
+  | (U φ (ψ ⊃ χ))    := have _, from tr5 φ ψ χ, translate ((U φ ψ) ⊃ (U φ χ))
+  | (U φ (K a ψ))    := have _, from tr6 φ ψ,   translate (φ ⊃ (K a (U φ ψ)))
+  | (U φ (U ψ χ))    := have _, from tr7 φ ψ χ, translate (U (φ & (U φ ψ)) χ)
   using_well_founded { rel_tac := λ _ _, `[exact ⟨_, measure_wf complexity⟩] }
 
---Need to do induction on complexity of φ
-theorem equiv_translation (Γ : ctx agents) : ∀ φ : formPA agents, prfPA Γ (φ ↔ (translate φ)) :=
+
+theorem equiv_translation_aux {Γ : ctx agents} : 
+  ∀ n : nat, ∀ φ : formPA agents, complexity φ < n → prfPA Γ (φ ↔ (translate φ)) :=
 begin
-simp,
-intro φ,
-induction (complexity φ), 
+intros n φ h1,
+simp, induction n with n ih,
+linarith,
+induction φ,
+rw complexity at h1, rw translate,
 repeat {sorry},
 end
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/-
---lemma subform_self (ψ : formPA agents) : ψ ∈ subformulas(ψ) := sorry
---lemma subform_and (φ ψ : formPA agents) : ψ ∈ subformulas(φ & ψ) := or.inr (subform_self ψ)
-
-subform self:
+theorem equiv_translation (Γ : ctx agents) : ∀ φ : formPA agents, prfPA Γ (φ ↔ (translate φ)) :=
 begin
-induction ψ,
-repeat {rw subformulas}, repeat {rw set.mem_singleton_iff},
-exact or.inl (or.inl (set.mem_singleton (ψ_φ & ψ_ψ))),
-sorry,
-exact or.inl (set.mem_singleton (K ψ_a ψ_φ)),
-exact or.inl (or.inl (set.mem_singleton (U ψ_φ ψ_ψ))),
-exact or.inl (or.inl (set.mem_singleton (D ψ_φ ψ_ψ))),
+intro φ,
+have h : complexity φ < complexity φ + 1, from nat.lt_succ_self _,
+simp,
+exact equiv_translation_aux (complexity φ + 1) φ h
 end
 
 
-intros φ ψ h1, induction ψ,
-repeat {rw subformulas at h1, rw set.mem_singleton_iff at h1, subst h1},
-repeat {rename ψ_φ ψ, rename ψ_ψ χ, rename ψ_ih_φ ih_φ, rename ψ_ih_ψ ih_χ},
-sorry,
-sorry,
-repeat {rename ψ_a a, rename ψ_φ ψ, rename ψ_ih ih}, 
-repeat {rw subformulas at h1,
-cases h1,
-rw set.mem_singleton_iff at h1, subst h1},
-specialize ih h1, rw complexity, 
-sorry,
-repeat {rw subformulas at h1,
-cases h1, cases h1,
-rw set.mem_singleton_iff at h1, subst h1,
-specialize ih_φ h1, rw complexity, sorry,
-specialize ih_χ h1, rw complexity, sorry}
--/
