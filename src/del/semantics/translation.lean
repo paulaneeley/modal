@@ -1,8 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..languageDEL ..syntax.syntaxDEL  ..syntax.syntaxlemmasDEL .translationdefs .translationlemmas
-import data.nat.basic --data.set.basic --tactic.linarith
+import ..languageDEL ..syntax.syntaxDEL  ..syntax.syntaxlemmasDEL .translationdefs .translationlemmas data.nat.basic data.set.basic tactic.linarith
 variables {agents : Type}
 
 open prfPA
@@ -28,15 +27,18 @@ open prfPA
 
 
 theorem equiv_translation_aux {Γ : ctx agents} : 
-  ∀ n : nat, ∀ φ : formPA agents, complexity φ < n → prfPA Γ (φ ↔ (translate φ))
-| 0     _          _ := by linarith
+  ∀ n : nat, ∀ φ : formPA agents, complexity φ ≤ n → prfPA Γ (φ ↔ (translate φ))
+| 0     φ          _ :=
+  begin
+  have h1 : complexity φ > 0, from comp_gt_zero, linarith,
+  end
 | (n+1) formPA.bot _ := mp (mp pl4 iden) iden
 | (n+1) (p m)      _ := mp (mp pl4 iden) iden
 | (n+1) (φ & ψ)    h :=
   begin
   simp at *, 
-  have h1 : complexity φ < n, sorry,
-  have h2 : complexity ψ < n, sorry,
+  have h1 : complexity φ ≤ n, sorry,
+  have h2 : complexity ψ ≤ n, sorry,
   have h3 := equiv_translation_aux n φ h1,
   have h4 := equiv_translation_aux n ψ h2,
   sorry
@@ -44,8 +46,8 @@ theorem equiv_translation_aux {Γ : ctx agents} :
 | (n+1) (φ ⊃ ψ)    h :=
   begin
   simp at *, 
-  have h1 : complexity φ < n, sorry,
-  have h2 : complexity ψ < n, sorry,
+  have h1 : complexity φ ≤ n, sorry,
+  have h2 : complexity ψ ≤ n, sorry,
   have h3 := equiv_translation_aux n φ h1,
   have h4 := equiv_translation_aux n ψ h2,
   sorry
@@ -59,7 +61,7 @@ theorem equiv_translation_aux {Γ : ctx agents} :
 | (n+1) (U φ ψ)    h :=
   begin
   simp at *, 
-  have h1 : complexity φ < n, sorry,
+  have h1 : complexity φ ≤ n, sorry,
   have h2 := equiv_translation_aux n φ h1,
 
   sorry
