@@ -2,8 +2,10 @@
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
 import ..languageDEL ..syntax.syntaxDEL  ..syntax.syntaxlemmasDEL .translationdefs .translationlemmas
-import data.nat.basic tactic.linarith data.set.basic
+import data.nat.basic --data.set.basic --tactic.linarith
 variables {agents : Type}
+
+open prfPA
 
 ---------------------- Completeness by Translation ----------------------
 
@@ -26,14 +28,42 @@ variables {agents : Type}
 
 
 theorem equiv_translation_aux {Γ : ctx agents} : 
-  ∀ n : nat, ∀ φ : formPA agents, complexity φ < n → prfPA Γ (φ ↔ (translate φ)) :=
-begin
-intros n φ h1,
-simp, induction n with n ih,
-linarith,
-induction φ,
-sorry, sorry,
-end
+  ∀ n : nat, ∀ φ : formPA agents, complexity φ < n → prfPA Γ (φ ↔ (translate φ))
+| 0     _          _ := by linarith
+| (n+1) formPA.bot _ := mp (mp pl4 iden) iden
+| (n+1) (p m)      _ := mp (mp pl4 iden) iden
+| (n+1) (φ & ψ)    h :=
+  begin
+  simp at *, 
+  have h1 : complexity φ < n, sorry,
+  have h2 : complexity ψ < n, sorry,
+  have h3 := equiv_translation_aux n φ h1,
+  have h4 := equiv_translation_aux n ψ h2,
+  sorry
+  end
+| (n+1) (φ ⊃ ψ)    h :=
+  begin
+  simp at *, 
+  have h1 : complexity φ < n, sorry,
+  have h2 : complexity ψ < n, sorry,
+  have h3 := equiv_translation_aux n φ h1,
+  have h4 := equiv_translation_aux n ψ h2,
+  sorry
+  end
+| (n+1) (K a φ)    h :=
+  begin
+  simp at *, 
+  have h1 := equiv_translation_aux n φ h,
+  sorry
+  end
+| (n+1) (U φ ψ)    h :=
+  begin
+  simp at *, 
+  have h1 : complexity φ < n, sorry,
+  have h2 := equiv_translation_aux n φ h1,
+
+  sorry
+  end
 
 
 theorem equiv_translation (Γ : ctx agents) : ∀ φ : formPA agents, prfPA Γ (φ ↔ (translate φ)) :=
@@ -45,3 +75,25 @@ exact equiv_translation_aux (complexity φ + 1) φ h
 end
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- theorem equiv_translation_aux {Γ : ctx agents} : 
+--   ∀ n : nat, ∀ φ : formPA agents, complexity φ < n → prfPA Γ (φ ↔ (translate φ)) :=
+-- begin
+-- intros n φ h1,
+-- simp, induction n with n ih,
+-- linarith,
+-- induction φ,
+-- sorry, sorry,
+-- end
