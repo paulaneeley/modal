@@ -44,8 +44,13 @@ lemma fin_conj_append {Γ : ctx} {L L' : list form} :
   prfK Γ ((fin_conj L' & fin_conj L) ↔ (fin_conj (L' ++ L))) :=
 begin
 induction L', rw fin_conj,
-have h1 : prfK Γ ((fin_conj L &¬⊥) ↔ fin_conj L), from phi_and_true,
-simp at *, sorry, simp at *, sorry
+exact (mp (mp pl4 (cut (mp pl6 and_switch) (mp pl5 phi_and_true))) (cut (mp pl6 phi_and_true) (mp pl5 and_switch))),
+have h1 : prfK Γ (fin_conj L'_tl&fin_conj L ⊃ fin_conj (L'_tl ++ L)), from mp pl5 L'_ih,
+have h2 : prfK Γ (fin_conj (L'_tl ++ L) ⊃ fin_conj L'_tl&fin_conj L), from mp pl6 L'_ih,
+simp at *, 
+rw fin_conj at *, 
+have h3 : prfK Γ ((L'_hd & (fin_conj L'_tl & fin_conj L)) ⊃ (L'_hd & fin_conj (L'_tl ++ L))), from imp_and_imp h1,
+sorry
 end 
 
 
@@ -106,12 +111,12 @@ lemma five (AX : ctx) :
   ∀ Γ : ctx, ∀ φ : form, ¬ ax_consist AX (Γ ∪ φ) → ∃ L',
   (∀ ψ ∈ L', ψ ∈ Γ) ∧ prfK AX (fin_conj L' ⊃ ¬φ) :=
 begin
-intros Γ φ h1, rw ax_consist at h1, dsimp at h1, rw not_forall at h1,
-cases h1 with L h1, rw not_imp at h1, cases h1, dsimp at *, 
+intros Γ φ h1, simp at *, rw ax_consist at h1, rw not_forall at h1,
+cases h1 with L h1, rw not_imp at h1, cases h1, 
 rw fin_ax_consist at h1_right, rw not_not at h1_right,
 existsi (L : list form), split,
 intros ψ h, 
-specialize h1_left ψ h, 
+specialize h1_left ψ h,
 sorry, sorry 
 end
 

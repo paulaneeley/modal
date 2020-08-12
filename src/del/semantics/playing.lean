@@ -83,18 +83,6 @@ theorem f_pos_aux : ∀ n phi, complexity phi < n → f phi > 0
     exact mul_pos (mul_pos (by norm_num) h3) h4
   end
 
-theorem f_pos_aux' {psi : form} : ∀ n phi, complexity phi < n → f phi > 0 :=
-  begin
-    intros n phi h,
-    induction n with n ih,
-    linarith,
-    induction phi,
-    sorry,
-    sorry,
-    rename phi_a phi, rename phi_a_1 psi, rename phi_ih_a ih_phi, rename phi_ih_a_1 ih_psi,
-    have h1 : complexity phi < n, linarith [complexity_lt_left phi psi],
-  end
-
 theorem f_pos (phi : form) : f phi > 0 :=
 have h : complexity phi < complexity phi + 1,
   from nat.lt_succ_self _,

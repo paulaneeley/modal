@@ -273,3 +273,5 @@ begin
 exact (mp (mp pl4 (mp double_imp (cut pl5 (imp_switch (cut pl6 pl4))))) 
 (mp double_imp (cut pl5 (imp_switch (cut pl6 pl4)))))
 end
+
+lemma imp_and_imp {Γ : ctx} {φ ψ χ : form} : prfK Γ (φ ⊃ ψ) → prfK Γ  ((χ & φ) ⊃ (χ & ψ)) := sorry

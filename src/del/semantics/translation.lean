@@ -32,8 +32,7 @@ intros n φ h1,
 simp, induction n with n ih,
 linarith,
 induction φ,
-rw complexity at h1, rw translate,
-repeat {sorry},
+sorry, sorry,
 end
 
 
