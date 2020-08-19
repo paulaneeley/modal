@@ -27,6 +27,7 @@ theorem equiv_translation_aux {Γ : ctx agents} :
   have h2 := compmax2 h,
   have h3 := equiv_translation_aux n φ h1,
   have h4 := equiv_translation_aux n ψ h2,
+  have : n < n + 1 := sorry,
   exact iff_iff_and_iff h3 h4
   end
 | (n+1) (φ ⊃ ψ)    h :=
@@ -62,7 +63,9 @@ theorem equiv_translation_aux {Γ : ctx agents} :
   have h5 := equiv_translation_aux n (U φ ψ) (eq.substr h3 (updatecompand1 h)),
   have h6 := equiv_translation_aux n (U φ χ) (eq.substr h4 (updatecompand2 h)),
   exact update_iff2 h5 h6 h2},
-  {have h2 : prfPA Γ ((U φ (ψ ⊃ χ)) ↔ ((U φ ψ) ⊃ (U φ χ))), from announceimp,
+  {have h' : (translate (U φ (ψ ⊃ χ))) = (translate (U φ ψ) ⊃ translate (U φ χ)), sorry,
+  rw h',
+  have h2 : prfPA Γ ((U φ (ψ ⊃ χ)) ↔ ((U φ ψ) ⊃ (U φ χ))), from announceimp,
   simp at *,
   have h3 := updatecomphelper,
   have h4 := updatecomphelper,

@@ -79,16 +79,25 @@ end
 
 -- Proposition 4.18, pg. 79
 lemma public_announce_know (φ ψ : formPA agents) (f : frame agents) 
-  (v : nat → f.states → Prop) (x : f.states) (a : agents) :
-  forces f v x (U φ (K a ψ)) ↔ forces f v x (φ ⊃ (K a (U φ ψ))) :=
+  (v : nat → f.states → Prop) (s : f.states) (a : agents) :
+  forces f v s (U φ (K a ψ)) ↔ forces f v s (φ ⊃ (K a (U φ ψ))) :=
 begin
 split,
 intro h1,
 rw forces at h1,
 rw forces, intro h2,
-specialize h1 h2, rw forces at h1,
-rw forces, intros y h3, rw forces, intro h4, 
-sorry, sorry,
+--specialize h1 h2, 
+--rw forces at h1,
+rw forces, intros t h3, rw forces, intro h4, 
+specialize h1 h2,
+rw forces at h1,
+specialize h1 ⟨t, h4⟩, dsimp at *,
+convert h1,
+sorry, 
+intro h1, rw forces at h1,
+rw forces, intro h,
+rw forces, specialize h1 h,
+rw forces at h1, sorry,
 end
 
 --prop 4.22
