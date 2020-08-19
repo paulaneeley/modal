@@ -17,6 +17,10 @@ begin
 exact mp (mp (@pl2 _ _ φ (φ ⊃ φ) φ) pl1) pl1
 end
 
+lemma prtrue {Γ : ctx agents} : prfPA Γ ~⊥ :=
+begin
+exact iden
+end
 
 lemma weak {Γ : ctx agents} {φ ψ : formPA agents} :
   prfPA Γ φ → prfPA (Γ ∪ ψ) φ :=
@@ -32,17 +36,20 @@ begin
   { exact pl5 },
   { exact pl6 },
   { exact pl7 },
+  { exact pl8 },
   { exact kdist },
-  {exact truth},
-  {exact posintro},
-  {exact negintro},
+  { exact truth },
+  { exact posintro },
+  { exact negintro },
   { apply mp,
     { exact h_ih_hpq },
     { exact h_ih_hp } },
   { exact nec h_ih },
+  { exact atomicbot },
   { exact atomicperm },
   { exact announceneg },
   { exact announceconj },
+  { exact announceimp },
   { exact announceknow },
   { exact announcecomp }
 end
@@ -70,6 +77,43 @@ lemma conv_deduction {Γ : ctx agents} {φ ψ : formPA agents} :
 begin
 intro h, 
 exact mp (weak h) pr 
+end
+
+
+lemma hs1 {Γ : ctx agents} {φ ψ χ : formPA agents} :
+  prfPA Γ ((ψ ⊃ χ) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ))) :=
+begin
+exact (mp (mp pl2 (mp pl1 pl2)) pl1)
+end
+
+
+lemma likemp {Γ : ctx agents} {φ ψ : formPA agents} : 
+  prfPA Γ (φ ⊃ ((φ ⊃ ψ) ⊃ ψ)) :=
+begin
+exact (mp (mp hs1 (mp pl2 iden)) pl1)
+end
+
+
+lemma dne {Γ : ctx agents} {φ : formPA agents} :
+prfPA Γ ((~~φ) ⊃ φ) :=
+begin
+have h1 : prfPA Γ (φ ⊃ (φ ⊃ φ)), from pl1,
+have h2 : prfPA Γ (((~~(φ ⊃ (φ ⊃ φ))) ⊃ (~~φ)) ⊃ ((~φ) ⊃ ~(φ ⊃ (φ ⊃ φ)))), from pl8,
+have h3 : prfPA Γ (((~φ) ⊃ ~(φ ⊃ (φ ⊃ φ))) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from pl8,
+have h4 : prfPA Γ (((~~(φ ⊃ (φ ⊃ φ))) ⊃ (~~φ)) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from cut h2 h3,
+have h5 : prfPA Γ ((~~φ) ⊃ ((~~(φ ⊃ (φ ⊃ φ))) ⊃ (~~φ))), from pl1,
+have h6 : prfPA Γ ((~~φ) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from cut h5 h4,
+have h7 : prfPA Γ ((φ ⊃ (φ ⊃ φ)) ⊃ (((φ ⊃ (φ ⊃ φ)) ⊃ φ) ⊃ φ)), from likemp,
+have h8 : prfPA Γ (((φ ⊃ (φ ⊃ φ)) ⊃ φ) ⊃ φ), from mp h7 h1,
+have h9 : prfPA Γ ((~~φ) ⊃ φ), from cut h6 h8,
+exact h9
+end
+
+
+lemma dni {Γ : ctx agents} {φ : formPA agents} : prfPA Γ (φ ⊃ ~~φ) :=
+begin
+have h1 : prfPA Γ ((~~(~φ)) ⊃ (~φ)), from dne,
+exact mp pl8 h1
 end
 
 
@@ -102,6 +146,19 @@ exact mp h3 pl1
 end
 
 
+lemma l2 {Γ : ctx agents} {φ ψ χ : formPA agents} : prfPA Γ ((φ ⊃ (ψ ⊃ χ)) ⊃ (ψ ⊃ (φ ⊃ χ))) :=
+begin
+exact (mp (mp pl2 (cut pl2 hs1)) (mp pl1 pl1))
+end
+
+
+lemma hs2 {Γ : ctx agents} {φ ψ χ : formPA agents} :
+  prfPA Γ ((φ ⊃ ψ) ⊃ ((ψ ⊃ χ) ⊃ (φ ⊃ χ))) :=
+begin
+exact (mp l2 hs1)
+end
+
+
 lemma cut2 {Γ : ctx agents} {φ ψ χ θ : formPA agents} :
   prfPA Γ (φ ⊃ ψ) → prfPA Γ (θ ⊃ (ψ ⊃ χ)) → prfPA Γ (θ ⊃ (φ ⊃ χ)) :=
 begin
@@ -113,11 +170,9 @@ end
 lemma double_imp {Γ : ctx agents} {φ ψ : formPA agents} :
   prfPA Γ ((φ ⊃ (φ ⊃ ψ)) ⊃ (φ ⊃ ψ)) :=
 begin
-have h1 : prfPA Γ ((φ ⊃ ((φ ⊃ ψ) ⊃ ψ)) ⊃ ((φ ⊃ (φ ⊃ ψ)) ⊃ (φ ⊃ ψ))), from pl2,
-have h2 : prfPA Γ ((φ ⊃ ψ) ⊃ (φ ⊃ ψ)), from iden,
-have h3 : prfPA Γ ((φ ⊃ ψ) ⊃ (φ ⊃ ψ)) → prfPA Γ (φ ⊃ ((φ ⊃ ψ) ⊃ ψ)), from imp_switch,
-specialize h3 h2,
-exact mp h1 h3
+have h1 : prfPA Γ ((φ ⊃ ψ) ⊃ (φ ⊃ ψ)) → prfPA Γ (φ ⊃ ((φ ⊃ ψ) ⊃ ψ)), from imp_switch,
+specialize h1 iden,
+exact mp pl2 h1
 end
 
 
@@ -159,25 +214,97 @@ exact left_and_imp (cut2 pl5 h1)
 end
 
 
-lemma not_and_subst {φ ψ χ : formPA agents} {Γ : ctx agents} : 
-  prfPA Γ (φ ↔ ψ) → (prfPA Γ ~(χ & φ) ↔ prfPA Γ ~(χ & ψ)) :=
+lemma not_and_subst {φ ψ χ : formPA agents} {Γ : ctx agents} : prfPA Γ (φ ↔ ψ) → (prfPA Γ ~(χ & φ) ↔ prfPA Γ ~(χ & ψ)) :=
 begin
 intro h1, split, 
 {intro h2,
-exact mp (mp pl3 (mp pl1 h2)) (cut pl7 (mp double_imp (cut2 (cut pl6 (mp pl6 h1)) (cut pl5 pl4))))},
+exact mp (mp pl3 (mp pl1 h2)) (cut dne (mp double_imp (cut2 (cut pl6 (mp pl6 h1)) (cut pl5 pl4))))},
 {intro h2,
-exact mp (mp pl3 (mp pl1 h2)) (cut pl7 (mp double_imp (cut2 (cut pl6 (mp pl5 h1)) (cut pl5 pl4))))},
+exact mp (mp pl3 (mp pl1 h2)) (cut dne (mp double_imp (cut2 (cut pl6 (mp pl5 h1)) (cut pl5 pl4))))},
 end
 
 
 lemma not_contra {Γ : ctx agents} {φ : formPA agents} : 
   prfPA Γ ~(φ & ~φ) :=
 begin
-exact mp (mp pl3 (cut pl7 pl6)) (cut pl7 pl5)
+exact mp (mp pl3 (cut dne pl6)) (cut dne pl5)
 end
 
 
 lemma phi_and_true {Γ : ctx agents} {φ : formPA agents} : prfPA Γ ((φ&~⊥) ↔ φ) :=
 begin
-exact (mp (mp pl4 pl5) (mp (imp_switch pl4) ax2))
+exact (mp (mp pl4 pl5) (mp (imp_switch pl4) prtrue))
 end
+
+
+lemma imp_and_and_imp {Γ : ctx agents} {φ ψ χ θ : formPA agents} : 
+  prfPA Γ (((φ ⊃ ψ) & (χ ⊃ θ))) → prfPA Γ (((φ & χ) ⊃ (ψ & θ))) :=
+begin
+intro h,
+exact (mp double_imp (cut (cut pl5 (mp pl5 h)) (cut2 (cut pl6 (mp pl6 h)) pl4)))
+end
+
+
+lemma not_contra_equiv_true {Γ : ctx agents} {φ : formPA agents} : 
+  prfPA Γ (~(φ & ~φ) ↔ ~⊥) :=
+begin
+exact (mp (mp pl4 (mp pl1 prtrue)) (mp pl1 not_contra))
+end
+
+
+lemma contrapos {Γ : ctx agents} {φ ψ : formPA agents} :
+  prfPA Γ ((~ψ) ⊃ (~φ)) ↔ prfPA Γ (φ ⊃ ψ) :=
+begin
+split,
+intro h1,
+exact mp pl8 h1,
+intro h1,
+exact mp (cut (cut (mp hs1 dni) (mp hs2 dne)) pl8) h1,
+end
+
+
+lemma iff_not {Γ : ctx agents} {φ ψ : formPA agents} :
+  prfPA Γ (φ ↔ ψ) → prfPA Γ (~ψ ↔ ~φ) :=
+begin
+intro h1,
+have h2 : prfPA Γ (φ ⊃ ψ), from mp pl5 h1,
+have h3 : prfPA Γ (ψ ⊃ φ), from mp pl6 h1,
+rw ←contrapos at h2,
+rw ←contrapos at h3,
+exact (mp (mp pl4 h2) h3)
+end
+
+
+lemma contra_equiv_false {Γ : ctx agents} {φ : formPA agents} : 
+  prfPA Γ ((φ & ~φ) ↔ ⊥) :=
+begin
+have h1 : prfPA Γ (~~⊥ ↔ ~~(φ & ~φ)), from iff_not not_contra_equiv_true,
+exact (mp (mp pl4 (cut dni (cut (mp pl6 h1) dne))) (cut dni (cut (mp pl5 h1) dne)))
+end
+
+
+lemma and_switch {Γ : ctx agents} {φ ψ : formPA agents} : prfPA Γ ((φ & ψ) ↔ (ψ & φ)) :=
+begin
+exact (mp (mp pl4 (mp double_imp (cut pl5 (imp_switch (cut pl6 pl4))))) 
+(mp double_imp (cut pl5 (imp_switch (cut pl6 pl4)))))
+end
+
+
+lemma imp_and_imp {Γ : ctx agents} {φ ψ χ : formPA agents} : 
+  prfPA Γ (φ ⊃ ψ) → prfPA Γ  ((χ & φ) ⊃ (χ & ψ)) :=
+begin
+intros h1,
+have h2 := imp_and_and_imp,
+specialize h2 (mp (mp pl4 iden) h1), exact h2
+end
+
+
+lemma iff_iff_and_iff {Γ : ctx agents} {φ ψ χ θ : formPA agents} : 
+  prfPA Γ (φ ↔ χ) → prfPA Γ (ψ ↔ θ) → prfPA Γ ((φ & ψ) ↔ (χ & θ)) := 
+begin
+intros h1 h2,
+exact mp (mp pl4 (imp_and_and_imp (mp (mp pl4 (mp pl5 h1)) (mp pl5 h2)))) 
+  (imp_and_and_imp (mp (mp pl4 (mp pl6 h1)) (mp pl6 h2)))
+end
+
+

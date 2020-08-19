@@ -19,7 +19,6 @@ inductive formPA (agents : Type) : Type
   | box  {} (a : agents) 
             (φ : formPA)     : formPA
   | update {} (φ ψ : formPA) : formPA
---  | dual {} (φ ψ : formPA)   : formPA
 
 
 

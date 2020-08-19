@@ -10,7 +10,7 @@ local attribute [instance] classical.prop_decidable
 
 -- Proposition 4.10, pg. 77
 lemma functional_announce (φ ψ : formPA agents) : 
-  F_valid ((~(U φ (~ψ))) ⊃ (U φ ψ)) euclid_class :=
+  F_valid ((~(U φ (~ψ))) ⊃ (U φ ψ)) equiv_class :=
 begin
 rw F_valid, intros f h v x,
 rw forces, intro h1,
@@ -20,21 +20,42 @@ end
 
 -- Proposition 4.11, pg. 77
 lemma partial_announce (φ ψ : formPA agents) : 
-  ¬ (F_valid ~(U φ ~⊥)) euclid_class :=
+  ¬ (F_valid ~(U φ ~⊥)) equiv_class :=
 begin
-rw F_valid, by_contradiction h1,
-sorry
+rw F_valid, rw not_forall, 
+let f : frame agents := { states := nat,
+  h := inhabited.mk 0,
+  rel := λ a, λ x y : nat, x = y }, 
+use f, rw not_imp, split, intro a,
+split, intro x, 
+exact eq.refl x,
+split, intros x y h,
+exact eq.symm h,
+intros x y z h1 h2, 
+exact eq.trans h1 h2,
+rw not_forall,
+let v : nat → f.states → Prop := λ n x, false,
+use v, rw not_forall,
+let x : f.states := 42,
+use x, rw forces, rw not_imp,
+split, intro h, intro h1, exact h1,
+rw forces, trivial
 end
 
 -- Proposition 4.12, pg. 77
 lemma public_announce_neg (φ ψ : formPA agents) : 
-  F_valid ((~U φ ~(~ψ) ⊃ (φ ⊃ ~U (~φ) ~ψ)) & 
-  ((φ ⊃ ~U (~φ) ~ψ) ⊃ (~U φ (~ψ)))) euclid_class :=
+  F_valid (U φ (~ψ) ↔ (φ ⊃ ~(U φ ψ))) equiv_class :=
 begin
-rw F_valid, intros f h1 v x, rw forces,
+rw F_valid, intros f h1 v x,
 split,
-sorry,
-sorry
+intros h1 h2 h3, specialize h1 h2,
+specialize h3 h2, rw ←not_forces_imp at h1,
+exact absurd h3 h1,
+intros h1, rw forces at h1, rw imp_iff_not_or at h1,
+cases h1,
+rw forces, intro h2, exact absurd h2 h1_1,
+rw forces at h1_1, rw forces, intro h, rw forces at h1_1,
+rw forces, intro h1, apply h1_1, intro h2, exact h1
 end
 
 -- Proposition 4.17, pg. 78
@@ -45,12 +66,29 @@ begin
 sorry
 end
 
+
+lemma khelper (φ ψ : formPA agents) (f : frame agents) (v : nat → f.states → Prop) 
+  (x : f.states) (a : agents) : (∀ (y : f.states), f.rel a x y → forces f v x φ → forces f v x (U φ ψ)) 
+  ↔ (∀ (y : f.states), forces f v x φ ∧ f.rel a x y → forces f v x (U φ ψ)) :=
+begin
+split,
+intros h1 y h2, specialize h1 y h2.right h2.left, exact h1,
+intros h1 y h2 h3, specialize h1 y (and.intro h3 h2), exact h1,
+end
+
+
 -- Proposition 4.18, pg. 79
 lemma public_announce_know (φ ψ : formPA agents) (f : frame agents) 
   (v : nat → f.states → Prop) (x : f.states) (a : agents) :
   forces f v x (U φ (K a ψ)) ↔ forces f v x (φ ⊃ (K a (U φ ψ))) :=
 begin
-sorry
+split,
+intro h1,
+rw forces at h1,
+rw forces, intro h2,
+specialize h1 h2, rw forces at h1,
+rw forces, intros y h3, rw forces, intro h4, 
+sorry, sorry,
 end
 
 --prop 4.22

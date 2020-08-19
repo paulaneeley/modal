@@ -16,6 +16,10 @@ begin
 exact mp (mp (@pl2 _ φ (φ ⊃ φ) φ) pl1) pl1
 end
 
+lemma prtrue {Γ : ctx} : prfK Γ ⊤ :=
+begin
+exact iden
+end
 
 lemma weak {Γ : ctx} {φ ψ : form} :
   prfK Γ φ → prfK (Γ ∪ ψ) φ :=
@@ -24,7 +28,6 @@ begin
   induction h,
   { apply ax,
     exact (set.mem_insert_of_mem _ h_h) },
-  { exact ax2 },
   { exact pl1 },
   { exact pl2 },
   { exact pl3 },
@@ -218,7 +221,7 @@ end
 
 lemma phi_and_true {Γ : ctx} {φ : form} : prfK Γ ((φ&¬⊥) ↔ φ) :=
 begin
-exact (mp (mp pl4 pl5) (mp (imp_switch pl4) ax2))
+exact (mp (mp pl4 pl5) (mp (imp_switch pl4) prtrue))
 end
 
 
@@ -233,7 +236,7 @@ end
 lemma not_contra_equiv_true {Γ : ctx} {φ : form} : 
   prfK Γ (¬(φ & ¬φ) ↔ ⊤) :=
 begin
-exact (mp (mp pl4 (mp pl1 ax2)) (mp pl1 not_contra))
+exact (mp (mp pl4 (mp pl1 prtrue)) (mp pl1 not_contra))
 end
 
 
@@ -274,4 +277,10 @@ exact (mp (mp pl4 (mp double_imp (cut pl5 (imp_switch (cut pl6 pl4)))))
 (mp double_imp (cut pl5 (imp_switch (cut pl6 pl4)))))
 end
 
-lemma imp_and_imp {Γ : ctx} {φ ψ χ : form} : prfK Γ (φ ⊃ ψ) → prfK Γ  ((χ & φ) ⊃ (χ & ψ)) := sorry
+lemma imp_and_imp {Γ : ctx} {φ ψ χ : form} : 
+  prfK Γ (φ ⊃ ψ) → prfK Γ ((χ & φ) ⊃ (χ & ψ)) :=
+begin
+intros h1,
+have h2 := imp_and_and_imp,
+specialize h2 (mp (mp pl4 iden) h1), exact h2
+end

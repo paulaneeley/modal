@@ -1,7 +1,8 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..languageDEL ..syntax.syntaxDEL  ..syntax.syntaxlemmasDEL .translationdefs .translationlemmas data.nat.basic data.set.basic tactic.linarith
+import ..languageDEL ..syntax.syntaxDEL ..syntax.syntaxlemmasDEL .translationdefs 
+.complexitylemmas .translationfunction .translationlemmas tactic.linarith
 variables {agents : Type}
 
 open prfPA
@@ -9,21 +10,6 @@ open prfPA
 ---------------------- Completeness by Translation ----------------------
 
 
--- Def 7.20, pg. 186, Translation function t
-@[simp] def translate : formPA agents → formPA agents
-  | (formPA.bot)     := ⊥
-  | (p n)            := p n
-  | (φ & ψ)          := have _, from tr1 φ ψ, have _, from tr2 φ ψ, (translate φ) & (translate ψ)
-  | (φ ⊃ ψ)          := have _, from tr1 φ ψ, have _, from tr2 φ ψ, (translate φ) ⊃ (translate ψ)
-  | (K a φ)          := K a (translate φ)
-  | (U φ formPA.bot) := have _, from tr3 φ,     translate (φ ⊃ ⊥)
-  | (U φ (p n))      := have _, from tr3 φ,     translate (φ ⊃ (p n))
-  | (U φ (~ψ))       := have _, from tr4 φ ψ,   translate (φ ⊃ ~ (U φ ψ))
-  | (U φ (ψ & χ))    := have _, from tr5 φ ψ χ, translate ((U φ ψ) & (U φ χ))
-  | (U φ (ψ ⊃ χ))    := have _, from tr5 φ ψ χ, translate ((U φ ψ) ⊃ (U φ χ))
-  | (U φ (K a ψ))    := have _, from tr6 φ ψ,   translate (φ ⊃ (K a (U φ ψ)))
-  | (U φ (U ψ χ))    := have _, from tr7 φ ψ χ, translate (U (φ & (U φ ψ)) χ)
-  using_well_founded { rel_tac := λ _ _, `[exact ⟨_, measure_wf complexity⟩] }
 
 
 theorem equiv_translation_aux {Γ : ctx agents} : 
@@ -37,44 +23,91 @@ theorem equiv_translation_aux {Γ : ctx agents} :
 | (n+1) (φ & ψ)    h :=
   begin
   simp at *, 
-  have h1 : complexity φ ≤ n, sorry,
-  have h2 : complexity ψ ≤ n, sorry,
+  have h1 := compmax1 h,
+  have h2 := compmax2 h,
   have h3 := equiv_translation_aux n φ h1,
   have h4 := equiv_translation_aux n ψ h2,
-  sorry
+  exact iff_iff_and_iff h3 h4
   end
 | (n+1) (φ ⊃ ψ)    h :=
   begin
   simp at *, 
-  have h1 : complexity φ ≤ n, sorry,
-  have h2 : complexity ψ ≤ n, sorry,
+  have h1 := compmax1 h,
+  have h2 := compmax2 h,
   have h3 := equiv_translation_aux n φ h1,
   have h4 := equiv_translation_aux n ψ h2,
-  sorry
+  exact iff_iff_imp_iff h3 h4
   end
 | (n+1) (K a φ)    h :=
   begin
   simp at *, 
   have h1 := equiv_translation_aux n φ h,
-  sorry
+  exact iff_k_dist h1,
   end
 | (n+1) (U φ ψ)    h :=
   begin
   simp at *, 
-  have h1 : complexity φ ≤ n, sorry,
+  have h1 : complexity φ ≤ n, from updatecomp1 h,
+  cases ψ with m ψ χ ψ χ a ψ φ ψ, 
+  {rw translate, rw translate, rw translate, 
   have h2 := equiv_translation_aux n φ h1,
-
-  sorry
+  have h1 := atomicbot, exact update_iff1 h2 h1},
+  {rw translate, rw translate, rw translate,
+  have h2 := equiv_translation_aux n φ h1,
+  have h1 := atomicperm, exact update_iff1 h2 h1},
+  {rw translate, rw translate,
+  have h2 := announceconj,
+  have h3 := updatecomphelper,
+  have h4 := updatecomphelper,
+  have h5 := equiv_translation_aux n (U φ ψ) (eq.substr h3 (updatecompand1 h)),
+  have h6 := equiv_translation_aux n (U φ χ) (eq.substr h4 (updatecompand2 h)),
+  exact update_iff2 h5 h6 h2},
+  {have h2 : prfPA Γ ((U φ (ψ ⊃ χ)) ↔ ((U φ ψ) ⊃ (U φ χ))), from announceimp,
+  simp at *,
+  have h3 := updatecomphelper,
+  have h4 := updatecomphelper,
+  have h5 := equiv_translation_aux n (U φ ψ) (eq.substr h3 (updatecompimp1 h)),
+  have h6 := equiv_translation_aux n (U φ χ) (eq.substr h4 (updatecompimp2 h)),
+  
+  sorry},
+  {rw translate, rw translate, rw translate, 
+  have h2 := equiv_translation_aux n φ h1,
+  have h3 := announceknow,
+  simp at *,
+  have h4 := equiv_translation_aux n (φ ⊃ K a (U φ ψ)) (updatecompknow h),
+  exact update_iff3 h2 h3 h4}, 
+  {rw translate, sorry} 
   end
 
 
 theorem equiv_translation (Γ : ctx agents) : ∀ φ : formPA agents, prfPA Γ (φ ↔ (translate φ)) :=
 begin
 intro φ,
-have h : complexity φ < complexity φ + 1, from nat.lt_succ_self _,
+have h : complexity φ ≤ complexity φ + 1, linarith,
 simp,
 exact equiv_translation_aux (complexity φ + 1) φ h
 end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -9,7 +9,6 @@ notation Γ `∪` φ := set.insert φ Γ
 -- Proof system, pg. 26
 inductive prfK : ctx → form → Prop 
 | ax {Γ} {φ} (h : φ ∈ Γ) : prfK Γ φ
-| ax2 {Γ}                : prfK Γ ⊤
 | pl1 {Γ} {φ ψ}          : prfK Γ (φ ⊃ (ψ ⊃ φ))
 | pl2 {Γ} {φ ψ χ}        : prfK Γ ((φ ⊃ (ψ ⊃ χ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ)))
 | pl3 {Γ} {φ ψ}          : prfK Γ (((¬φ) ⊃ (¬ψ)) ⊃ (((¬φ) ⊃ ψ) ⊃ φ))

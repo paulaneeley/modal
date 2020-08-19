@@ -49,7 +49,8 @@ have h1 : prfK Γ (fin_conj L'_tl&fin_conj L ⊃ fin_conj (L'_tl ++ L)), from mp
 have h2 : prfK Γ (fin_conj (L'_tl ++ L) ⊃ fin_conj L'_tl&fin_conj L), from mp pl6 L'_ih,
 simp at *, 
 rw fin_conj at *, 
-have h3 : prfK Γ ((L'_hd & (fin_conj L'_tl & fin_conj L)) ⊃ (L'_hd & fin_conj (L'_tl ++ L))), from imp_and_imp h1,
+have h3 : prfK Γ ((L'_hd & (fin_conj L'_tl & fin_conj L)) ⊃ (L'_hd & fin_conj (L'_tl ++ L))), 
+  from imp_and_imp h1,
 sorry
 end 
 

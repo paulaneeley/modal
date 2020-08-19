@@ -71,8 +71,8 @@ def ref_class : set (frame agents) := { f : frame agents | ∀ a : agents, refle
 def symm_class : set (frame agents) := { f : frame agents | ∀ a : agents, symmetric (f.rel a) }
 def trans_class : set (frame agents ) := { f : frame agents | ∀ a : agents, transitive (f.rel a) }
 def euclid_class : set (frame agents ) := { f : frame agents | ∀ a : agents, euclidean (f.rel a) }
-def equiv_class : set (frame agents) := { f : frame agents | ∀ a : agents, equivalence (f.rel a) }
 def ref_trans_class : set (frame agents) := ref_class ∩ trans_class
+def equiv_class : set (frame agents) := { f : frame agents | ∀ a : agents, equivalence (f.rel a) }
 
 end
 

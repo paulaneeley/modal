@@ -13,9 +13,7 @@ notation Γ `∪` φ := set.insert φ Γ
 
 -- Proof system, pg. 26
 inductive prfPA : ctx agents → formPA agents → Prop 
-| ax {Γ} {φ} 
- (h : φ ∈ Γ)             : prfPA Γ φ
-| ax2 {Γ}                : prfPA Γ (~⊥)
+| ax {Γ} {φ} (h : φ ∈ Γ) : prfPA Γ φ
 | pl1 {Γ} {φ ψ}          : prfPA Γ (φ ⊃ (ψ ⊃ φ))
 | pl2 {Γ} {φ ψ χ}        : prfPA Γ ((φ ⊃ (ψ ⊃ χ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ)))
 | pl3 {Γ} {φ ψ}          : prfPA Γ (((~φ) ⊃ (~ψ)) ⊃ (((~φ) ⊃ ψ) ⊃ φ))
@@ -23,6 +21,7 @@ inductive prfPA : ctx agents → formPA agents → Prop
 | pl5 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ φ)
 | pl6 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ ψ)
 | pl7 {Γ} {φ}            : prfPA Γ ((~~φ) ⊃ φ)
+| pl8 {Γ} {φ ψ}          : prfPA Γ (((~φ) ⊃ (~ψ)) ⊃ (ψ ⊃ φ))
 | kdist {Γ} {φ ψ} {a}    : prfPA Γ ((K a (φ ⊃ ψ)) ⊃ ((K a φ) ⊃ (K a ψ)))
 | truth {Γ} {φ} {a}      : prfPA Γ ((K a φ) ⊃ φ)
 | posintro {Γ} {φ} {a}   : prfPA Γ ((K a φ) ⊃ (K a (K a φ)))
@@ -32,11 +31,13 @@ inductive prfPA : ctx agents → formPA agents → Prop
   (hp : prfPA Γ φ)       : prfPA Γ ψ
 | nec {Γ} {φ} {a}
   (hp: prfPA Γ φ)        : prfPA Γ (K a φ)
-| atomicperm {Γ} {φ} 
-  {n}                    : prfPA Γ ((U φ (p n)) ↔ (φ ⊃ (p n)))
+| atomicbot {Γ} {φ}      : prfPA Γ ((U φ ⊥) ↔ (φ ⊃ ⊥))
+| atomicperm {Γ} {φ} {n} : prfPA Γ ((U φ (p n)) ↔ (φ ⊃ (p n)))
 | announceneg {Γ} {φ ψ}  : prfPA Γ ((U φ (~ψ)) ↔ (φ ⊃ ~(U φ ψ)))
 | announceconj {Γ} 
   {φ ψ χ}                : prfPA Γ ((U φ (ψ & χ)) ↔ ((U φ ψ) & (U φ χ)))
+| announceimp {Γ} 
+  {φ ψ χ}                : prfPA Γ ((U φ (ψ ⊃ χ)) ↔ ((U φ ψ) ⊃ (U φ χ)))
 | announceknow {Γ} 
   {φ ψ} {a}              : prfPA Γ ((U φ (K a ψ)) ↔ (φ ⊃ (K a (U φ ψ))))
 | announcecomp {Γ} 
