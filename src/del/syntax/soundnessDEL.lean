@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..languageDEL data.set.basic ..semantics.semanticsDEL ..announcements
+import del.languageDEL data.set.basic del.semantics.semanticsDEL del.announcements
 variables {agents : Type}
 local attribute [instance] classical.prop_decidable
 

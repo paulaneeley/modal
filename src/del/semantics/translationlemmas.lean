@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..syntax.syntaxDEL ..syntax.syntaxlemmasDEL ..semantics.translationfunction
+import del.syntax.syntaxDEL del.syntax.syntaxlemmasDEL del.semantics.translationfunction
 variables {agents : Type}
 
 open prfPA
@@ -55,15 +55,13 @@ end
 
 
 lemma update_iff4 {Γ : ctx agents} {φ ψ : formPA agents} {a : agents} : 
-  prfPA Γ (φ ↔ translate φ) → prfPA Γ ((U φ (K a ψ) ↔ (φ ⊃ K a (U φ ψ)))) → 
+  prfPA Γ ((U φ (K a ψ) ↔ (φ ⊃ K a (U φ ψ)))) → 
   prfPA Γ ((φ ⊃ K a (U φ ψ)) ↔ translate (φ ⊃ K a (U φ ψ))) → 
   prfPA Γ (U φ (K a ψ) ↔ (translate φ ⊃ K a (translate (U φ ψ)))) :=
 begin
 simp at *,
-intros h1 h2 h3, 
-have h4 : prfPA Γ (φ ⊃ translate φ), from mp pl5 h1,
-have h5 : prfPA Γ (translate φ ⊃ φ), from mp pl6 h1,
-sorry
+intros h1 h2, 
+exact mp (mp pl4 (cut (mp pl5 h1) (mp pl5 h2))) (cut (mp pl6 h2) (mp pl6 h1))
 end
 
 
@@ -72,5 +70,7 @@ lemma update_iff5 {Γ : ctx agents} {φ ψ χ : formPA agents} :
   prfPA Γ ((U (φ & U φ ψ) χ) ↔ translate (U (φ & U φ ψ) χ)) → 
   prfPA Γ ((U φ (U ψ χ)) ↔ translate (U (φ & U φ ψ) χ)) :=
 begin
-sorry
+simp at *,
+intros h1 h2,
+exact mp (mp pl4 (cut (mp pl5 h1) (mp pl5 h2))) (cut (mp pl6 h2) (mp pl6 h1))
 end

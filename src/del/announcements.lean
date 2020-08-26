@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import languageDEL semantics.semanticsDEL data.set.basic
+import del.languageDEL del.semantics.semanticsDEL data.set.basic
 variable {agents : Type}
 local attribute [instance] classical.prop_decidable
 
@@ -62,11 +62,17 @@ lemma public_announce_comp (φ ψ χ : formPA agents) (f : frame agents)
   forces f v s (U (φ & U φ ψ) χ) ↔ forces f v s (U φ (U ψ χ)) :=
 begin
 split,
-intros h1 h2 h3,
+intro h1,
+intro h2,
+intro h3,
+dsimp,
 have h4 : forces f v s (φ & U φ ψ),
 {rw forces, split, exact h2, rw forces, exact λ h2, h3},
+rw forces at h4,
+cases h4,
 rw forces at h1,
-specialize h1 ⟨h2, λ h2, h3⟩,
+--specialize h1 h4,
+specialize h1 ⟨h2, λ h2, h3⟩, 
 sorry,
 intros h1 h2, rw forces at h1, 
 cases h2, specialize h1 h2_left,

@@ -1,9 +1,10 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..languageDEL ..syntax.syntaxDEL ..syntax.syntaxlemmasDEL ..semantics.translationdefs 
-..semantics.translationfunction ..semantics.complexitylemmas ..semantics.translationlemmas 
+import del.languageDEL del.syntax.syntaxDEL del.syntax.syntaxlemmasDEL del.semantics.translationdefs 
+del.semantics.translationfunction del.semantics.complexitylemmas del.semantics.translationlemmas 
 tactic.linarith
+
 variables {agents : Type}
 
 open prfPA
@@ -67,7 +68,8 @@ begin
           exact update_iff2 h2 h3 h1,
         },
       case formPA.impl : ψ χ
-        { have h1 : prfPA Γ ((U φ (ψ ⊃ χ)) ↔ ((U φ ψ) ⊃ (U φ χ))), from announceimp,
+        { rw translate,
+          have h1 : prfPA Γ ((U φ (ψ ⊃ χ)) ↔ ((U φ ψ) ⊃ (U φ χ))), from announceimp,
           have h2 := ih (U φ ψ) (updatecompimp1 h),
           have h3 := ih (U φ χ) (updatecompimp2 h),
           simp at *,
@@ -75,10 +77,9 @@ begin
         },
       case formPA.box : a ψ
         { repeat {rw translate}, 
-          have h2 := ih φ (updatecompknow1 h),
-          have h3 := announceknow,
-          have h4 := ih (φ ⊃ K a (U φ ψ)) (updatecompknow2 h),
-          exact update_iff4 h2 h3 h4
+          have h1 := announceknow,
+          have h2 := ih (φ ⊃ K a (U φ ψ)) (updatecompknow2 h),
+          exact update_iff4 h1 h2
         },
       case formPA.update : ψ χ
         { rw translate,

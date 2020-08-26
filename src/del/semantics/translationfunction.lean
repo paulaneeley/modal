@@ -1,4 +1,4 @@
-import ..languageDEL ..semantics.complexitylemmas
+import del.languageDEL del.semantics.complexitylemmas
 variables {agents : Type}
 
 -- Def 7.20, pg. 186, Translation function t
