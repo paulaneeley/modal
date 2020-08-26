@@ -307,4 +307,12 @@ exact mp (mp pl4 (imp_and_and_imp (mp (mp pl4 (mp pl5 h1)) (mp pl5 h2))))
   (imp_and_and_imp (mp (mp pl4 (mp pl6 h1)) (mp pl6 h2)))
 end
 
+lemma and_commute {Γ : ctx agents} {φ ψ χ : formPA agents} : prfPA Γ (((φ & ψ) & χ) ↔ (φ & (ψ & χ))) :=
+begin
+exact mp (mp pl4 (mp double_imp (imp_imp_iff_imp.mp 
+  (cut (cut pl5 pl6) (cut2 pl6 (cut1 pl4 (imp_switch (cut (cut pl5 pl5) pl4)))))))) 
+  (mp double_imp (imp_imp_iff_imp.mp (cut (cut pl6 pl5) 
+  (imp_switch (cut pl5 (cut1 pl4 (cut2 (cut pl6 pl6) pl4)))))))
+end
+
 

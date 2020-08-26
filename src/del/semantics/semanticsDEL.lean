@@ -11,7 +11,7 @@ local attribute [instance] classical.prop_decidable
 
 structure frame (agents : Type) :=
 (states : Type)
-(h : inhabited states)
+(h : nonempty states)
 (rel : agents → states → states → Prop)
 
 

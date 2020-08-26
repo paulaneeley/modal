@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import .translationdefs tactic.linarith
+import ..semantics.translationdefs tactic.linarith
 variables {agents : Type}
 
 ---------------------- Generic helper lemmas ----------------------
@@ -246,18 +246,34 @@ end
 -------------- Helper lemmas for equiv_translation_aux --------------
 
 
-lemma compmax1 {φ ψ : formPA agents} {n : nat} : 1 + max (complexity φ) (complexity ψ) ≤ n + 1 
-→ complexity φ ≤ n :=
+lemma compand1 {φ ψ : formPA agents} {n : nat} : complexity (φ & ψ) ≤ n + 1 → complexity φ ≤ n :=
 begin
   intro h,
+  rw complexity at *,
   have h1 := le_max_left (complexity φ) (complexity ψ),
   linarith
 end
 
-lemma compmax2 {φ ψ : formPA agents} {n : nat} : 1 + max (complexity φ) (complexity ψ) ≤ n + 1 
-→ complexity ψ ≤ n :=
+lemma compand2 {φ ψ : formPA agents} {n : nat} : complexity (φ & ψ) ≤ n + 1 → complexity ψ ≤ n :=
 begin
   intro h,
+  rw complexity at *,
+  have h1 := le_max_right (complexity φ) (complexity ψ),
+  linarith
+end
+
+lemma compimp1 {φ ψ : formPA agents} {n : nat} : complexity (φ ⊃ ψ) ≤ n + 1 → complexity φ ≤ n :=
+begin
+  intro h,
+  rw complexity at *,
+  have h1 := le_max_left (complexity φ) (complexity ψ),
+  linarith
+end
+
+lemma compimp2 {φ ψ : formPA agents} {n : nat} : complexity (φ ⊃ ψ) ≤ n + 1 → complexity ψ ≤ n :=
+begin
+  intro h,
+  rw complexity at *,
   have h1 := le_max_right (complexity φ) (complexity ψ),
   linarith
 end
@@ -271,104 +287,159 @@ have h2 : (4 + complexity φ) * complexity ψ = (4 + complexity φ) * complexity
 exact (eq.subst h1 h2),
 end
 
-lemma updatecomp1 {φ ψ : formPA agents} {n : nat} : 
-  (complexity φ + 4) * complexity ψ ≤ n + 1 → complexity φ ≤ n :=
-begin
-intro h1,
-have h2 : complexity φ > 0, from comp_gt_zero,
-have h3 : complexity ψ ≥ 1, from comp_ge_one,
-have h4 := add_mul (complexity φ) 4 (complexity ψ),
-have h5 : complexity φ * complexity ψ + 4 * complexity ψ ≤ n + 1, from eq.subst h4 h1,
-have h6 : 4 * complexity ψ > 1, linarith,
-have h7 : (complexity φ) * (complexity ψ) ≤ n, linarith,
-have h8 := (le_mul_iff_one_le_right h2).mpr h3,
-linarith
-end
 
 lemma updatecompand1 {φ ψ χ : formPA agents} {n : nat} : 
-  (complexity φ + 4) * complexity (ψ & χ) ≤ n + 1 → (complexity φ + 4) * complexity ψ ≤ n :=
+  complexity (U φ (ψ & χ)) ≤ n + 1 → complexity (U φ ψ) ≤ n :=
 begin
 intro h1,
-rw complexity at h1,
+rw complexity at *,
 have h2 := add_le_add_left' (le_max_left (complexity ψ) (complexity χ)),
 have h3 := comp_ge_one,
 have h4 : complexity φ + 4 ≥ 1, from le_add_right h3,
-have h5 := le_trans (nat.mul_le_mul_left ((complexity φ + 4)) h2) h1,
-have h6 := mul_add (complexity φ + 4) 1 (complexity ψ),
-have h7 : (complexity φ + 4) * (complexity ψ) < (complexity φ + 4) + (complexity φ + 4) * (complexity ψ), linarith,
+have h5 := le_trans (nat.mul_le_mul_left ((4 + complexity φ)) h2) h1,
+have h6 := mul_add (4 + complexity φ) 1 (complexity ψ),
+have h7 : (4 + complexity φ) * (complexity ψ) < 
+  (4 + complexity φ) + (4 + complexity φ) * (complexity ψ), linarith,
 linarith
 end
 
 lemma updatecompand2 {φ ψ χ : formPA agents} {n : nat} : 
-  (complexity φ + 4) * complexity (ψ & χ) ≤ n + 1 → (complexity φ + 4) * complexity χ ≤ n :=
+  complexity (U φ (ψ & χ)) ≤ n + 1 → complexity (U φ χ) ≤ n :=
 begin
 intro h1,
 rw complexity at h1,
 have h2 := add_le_add_left' (le_max_right (complexity ψ) (complexity χ)),
 have h3 := comp_ge_one,
 have h4 : complexity φ + 4 ≥ 1, from le_add_right h3,
-have h5 := le_trans (nat.mul_le_mul_left ((complexity φ + 4)) h2) h1,
-have h6 := mul_add (complexity φ + 4) 1 (complexity χ),
-have h7 : (complexity φ + 4) * (complexity ψ) < (complexity φ + 4) + (complexity φ + 4) * (complexity ψ), linarith,
+have h5 := le_trans (nat.mul_le_mul_left ((4 + complexity φ)) h2) h1,
+have h6 := mul_add (4 + complexity φ) 1 (complexity χ),
+have h7 : (4 + complexity φ) * (complexity ψ) < 
+  (4 + complexity φ) + (4 + complexity φ) * (complexity ψ), linarith,
 linarith
 end
 
 lemma updatecompimp1 {φ ψ χ : formPA agents} {n : nat} : 
-  (complexity φ + 4) * (1 + max (complexity ψ) (complexity χ)) ≤ n + 1 → (complexity φ + 4) * complexity ψ ≤ n :=
+  complexity (U φ (ψ ⊃ χ)) ≤ n + 1 → complexity (U φ ψ) ≤ n :=
 begin
 intro h1,
-sorry
+rw complexity at *,
+have h2 := add_le_add_left' (le_max_left (complexity ψ) (complexity χ)),
+have h3 := comp_ge_one,
+have h4 : complexity φ + 4 ≥ 1, from le_add_right h3,
+have h5 := le_trans (nat.mul_le_mul_left ((4 + complexity φ)) h2) h1,
+have h6 := mul_add (4 + complexity φ) 1 (complexity ψ),
+have h7 : (4 + complexity φ) * (complexity ψ) < 
+  (4 + complexity φ) + (4 + complexity φ) * (complexity ψ), linarith,
+linarith
 end
 
 lemma updatecompimp2 {φ ψ χ : formPA agents} {n : nat} : 
-  (complexity φ + 4) * (1 + max (complexity ψ) (complexity χ)) ≤ n + 1 → (complexity φ + 4) * complexity χ ≤ n :=
+  complexity (U φ (ψ ⊃ χ)) ≤ n + 1 → complexity (U φ χ) ≤ n :=
 begin
-sorry
+intro h1,
+rw complexity at h1,
+have h2 := add_le_add_left' (le_max_right (complexity ψ) (complexity χ)),
+have h3 := comp_ge_one,
+have h4 : complexity φ + 4 ≥ 1, from le_add_right h3,
+have h5 := le_trans (nat.mul_le_mul_left ((4 + complexity φ)) h2) h1,
+have h6 := mul_add (4 + complexity φ) 1 (complexity χ),
+have h7 : (4 + complexity φ) * (complexity ψ) < 
+  (4 + complexity φ) + (4 + complexity φ) * (complexity ψ), linarith,
+linarith
 end
 
-lemma updatecompknow1 {φ ψ : formPA agents} {n : nat} : (complexity φ + 4) * (complexity ψ + 1) ≤ n + 1 → 1 + complexity φ ≤ n :=
+lemma updatecompknow1' (φ ψ : formPA agents) {n : nat} {a : agents} : complexity (U φ (K a ψ)) ≤ n + 1 
+  → 1 + complexity φ ≤ n :=
 begin
 intro h1,
 have h2 : complexity φ > 0, from comp_gt_zero,
 have h3 : complexity ψ ≥ 1, from comp_ge_one,
-have h4 := add_mul (complexity φ) 4 (complexity ψ + 1),
-have h5 := mul_add (complexity φ) (complexity ψ) 1,
-have h6 := mul_add 4 (complexity ψ) 1,
-have h8 : (complexity φ + 4) * (complexity ψ + 1) = complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 4 * 1, from eq.subst h6 (eq.subst h5 h4),
-have h9 : complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 4 * 1 ≤ n + 1, from eq.subst h8 h1,
+have h4 := add_mul 4 (complexity φ) (1 + complexity ψ),
+have h5 := mul_add (complexity φ) 1 (complexity ψ),
+have h6 := mul_add 4 1 (complexity ψ),
+have h7 : 4 * (1 + complexity ψ) + complexity φ * (1 + complexity ψ) = 
+  4 * (1 + complexity ψ) + complexity φ * 1 + complexity φ * complexity ψ, linarith,
+have h8 : (4 + complexity φ) * (1 + complexity ψ) = 
+  4 * 1 + 4 * complexity ψ + complexity φ * 1 + complexity φ * complexity ψ, linarith,
+have h9 : complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 4 * 1 ≤ n + 1, linarith,
 have h10 : complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ ≤ n, linarith,
-have h11 : 1 + complexity φ ≤ complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ, linarith,
+have h11 : 1 + complexity φ ≤ 
+  complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ, linarith,
 exact le_trans h11 h10
 end 
 
-lemma updatecompknow2 {φ ψ : formPA agents} {n : nat} : (complexity φ + 4) * (complexity ψ + 1) ≤ n + 1 → 1 + (1 + (4 + complexity φ) * complexity ψ) ≤ n :=
+lemma updatecompknow2' {φ ψ : formPA agents} {n : nat} : (4 + complexity φ) * (1 + complexity ψ) ≤ n + 1 
+  → 1 + (1 + (4 + complexity φ) * complexity ψ) ≤ n :=
 begin
 intro h1,
 have h2 : complexity φ ≥ 1, from comp_ge_one,
 have h3 : complexity ψ ≥ 1, from comp_ge_one,
-have h4 := add_mul (complexity φ) 4 (complexity ψ + 1),
-have h5 := mul_add (complexity φ) (complexity ψ) 1,
+have h4 := add_mul 4 (complexity φ) (1 + complexity ψ),
+have h5 := mul_add (complexity φ) 1 (complexity ψ),
 have h6 := mul_add 4 (complexity ψ) 1,
-have h8 : (complexity φ + 4) * (complexity ψ + 1) = complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 4 * 1, from eq.subst h6 (eq.subst h5 h4),
-have h9 : complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 4 ≤ n + 1, from eq.subst h8 h1,
+have h7 : (4 + complexity φ) * (1 + complexity ψ) = 
+  4 * (1 + complexity ψ) + complexity φ * 1 + complexity φ * complexity ψ, linarith, 
+have h8 : (4 + complexity φ) * (1 + complexity ψ) = 
+  complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 4 * 1, linarith,
+have h9 : complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 4 ≤ n + 1, 
+  from eq.subst h8 h1,
 have h10 : complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 3 ≤ n, linarith,
-have h11 : (4 + complexity φ) * complexity ψ = 4 * complexity ψ + complexity φ * complexity ψ, from add_mul 4 (complexity φ) (complexity ψ),
-have h12 : 1 + (4 + complexity φ) * complexity ψ = 1 + (4 * complexity ψ + complexity φ * complexity ψ), linarith,
-have h13 : 1 + (1 + (4 + complexity φ) * complexity ψ) = 1 + (1 + (4 * complexity ψ + complexity φ * complexity ψ)), linarith,
-have h14 : 1 + (1 + (4 * complexity ψ + complexity φ * complexity ψ)) = 2 + 4 * complexity ψ + complexity φ * complexity ψ, linarith,
-have h15 : 2 + 4 * complexity ψ + complexity φ * complexity ψ ≤ complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 3, linarith,
-have h16 : 1 + (1 + (4 * complexity ψ + complexity φ * complexity ψ)) ≤ complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 3, from eq.substr h14 h15,
-have h17 : 1 + (1 + (4 + complexity φ) * complexity ψ) ≤ complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 3, from eq.substr h12 h16,
+have h11 : (4 + complexity φ) * complexity ψ = 4 * complexity ψ + complexity φ * complexity ψ, 
+  from add_mul 4 (complexity φ) (complexity ψ),
+have h12 : 1 + (4 + complexity φ) * complexity ψ = 
+  1 + (4 * complexity ψ + complexity φ * complexity ψ), linarith,
+have h13 : 1 + (1 + (4 + complexity φ) * complexity ψ) = 
+  1 + (1 + (4 * complexity ψ + complexity φ * complexity ψ)), linarith,
+have h14 : 1 + (1 + (4 * complexity ψ + complexity φ * complexity ψ)) = 
+  2 + 4 * complexity ψ + complexity φ * complexity ψ, linarith,
+have h15 : 2 + 4 * complexity ψ + complexity φ * complexity ψ ≤ 
+  complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 3, linarith,
+have h16 : 1 + (1 + (4 * complexity ψ + complexity φ * complexity ψ)) ≤ 
+  complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 3, from eq.substr h14 h15,
+have h17 : 1 + (1 + (4 + complexity φ) * complexity ψ) ≤ 
+  complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 3, from eq.substr h12 h16,
 exact le_trans h17 h10
 end
 
-lemma updatecompknow {a : agents} {φ ψ : formPA agents} {n : nat} : 
-  (complexity φ + 4) * (complexity ψ + 1) ≤ n + 1 → complexity (φ ⊃ K a (U φ ψ)) ≤ n :=
+lemma updatecompknow1 {a : agents} {φ ψ : formPA agents} {n : nat} : 
+  complexity (U φ (K a ψ)) ≤ n + 1 → complexity φ ≤ n :=
 begin
-intro h1, rw complexity, rw complexity, rw complexity,
-have h2 : 1 + complexity φ ≤ n, from updatecompknow1 h1,
-have h3 : 1 + (1 + (4 + complexity φ) * complexity ψ) ≤ n, from updatecompknow2 h1,
+intro h1,
+have h2 : 1 + complexity φ ≤ n, from updatecompknow1' φ ψ h1,
+linarith
+end
+
+lemma updatecompknow2 {a : agents} {φ ψ : formPA agents} {n : nat} : 
+  complexity (U φ (K a ψ)) ≤ n + 1 → complexity (φ ⊃ K a (U φ ψ)) ≤ n :=
+begin
+intro h1,
+have h2 : 1 + complexity φ ≤ n, from updatecompknow1' φ ψ h1,
+have h3 : 1 + (1 + (4 + complexity φ) * complexity ψ) ≤ n, from updatecompknow2' h1,
 have h4 : 1 + max (complexity φ) (1 + (4 + complexity φ) * complexity ψ) ≤ n, from le_maxhelper h2 h3,
 exact h4
 end
  
+lemma updatecompupdate {φ ψ χ : formPA agents} {n : nat} : 
+  complexity (U φ (U ψ χ)) ≤ n + 1 → complexity (U (φ & U φ ψ) χ) ≤ n :=
+begin
+intro h1, repeat {rw complexity at *},
+have h2 := tr7 φ ψ χ,
+have h3 := add_left_comm 1 4 (max (complexity φ) ((complexity φ + 4) * complexity ψ)),
+have h5 : (1 + (4 + max (complexity φ) ((complexity φ + 4) * complexity ψ))) = 
+  (4 + (1 + max (complexity φ) ((4 + complexity φ) * complexity ψ))), 
+  from eq.subst (add_comm (complexity φ) 4) h3,
+have h6 : (1 + (4 + max (complexity φ) ((complexity φ + 4) * complexity ψ))) * complexity χ = 
+  (1 + (4 + max (complexity φ) ((complexity φ + 4) * complexity ψ))) * complexity χ, refl,
+have h7 : (1 + (4 + max (complexity φ) ((complexity φ + 4) * complexity ψ))) * complexity χ =
+  (4 + (1 + max (complexity φ) ((4 + complexity φ) * complexity ψ))) * complexity χ, 
+  from eq.subst h5 h6,
+have h8 := add_comm 4 (complexity φ),
+have h9 := updatecomphelper,
+have h11 : (4 + complexity φ) * ((4 + complexity ψ) * complexity χ) = 
+  (complexity φ + 4) * ((complexity ψ + 4) * complexity χ), 
+  from eq.subst h8 (congr_arg (has_mul.mul (4 + complexity φ)) h9),
+have h13 : (4 + (1 + max (complexity φ) ((4 + complexity φ) * complexity ψ))) * complexity χ <
+    (4 + complexity φ) * ((4 + complexity ψ) * complexity χ), from eq.subst h7 (eq.substr h11 h2),
+have h14 := lt_of_lt_of_le h13 h1,
+linarith,
+end

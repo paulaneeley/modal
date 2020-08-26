@@ -20,7 +20,8 @@ def fin_conj : list form → form
 lemma fin_conj_simp : ∀ Γ, ∀ ψ : form, prfK Γ (¬fin_conj [ψ, ¬ψ]) :=
 begin
 intros Γ ψ, simp, rw fin_conj, rw fin_conj, rw fin_conj, simp,
-have h2 : (prfK Γ (((¬ψ)&⊤) ↔ (¬ψ)) → (prfK Γ (¬(ψ & ((¬ψ)&⊤))) ↔ prfK Γ (¬(ψ & (¬ψ))))), from not_and_subst,
+have h2 : (prfK Γ (((¬ψ)&⊤) ↔ (¬ψ)) → (prfK Γ (¬(ψ & ((¬ψ)&⊤))) ↔ prfK Γ (¬(ψ & (¬ψ))))), 
+  from not_and_subst,
 simp at h2,
 specialize h2 phi_and_true, cases h2,
 exact h2_mpr not_contra
@@ -44,14 +45,10 @@ lemma fin_conj_append {Γ : ctx} {L L' : list form} :
   prfK Γ ((fin_conj L' & fin_conj L) ↔ (fin_conj (L' ++ L))) :=
 begin
 induction L', rw fin_conj,
-exact (mp (mp pl4 (cut (mp pl6 and_switch) (mp pl5 phi_and_true))) (cut (mp pl6 phi_and_true) (mp pl5 and_switch))),
-have h1 : prfK Γ (fin_conj L'_tl&fin_conj L ⊃ fin_conj (L'_tl ++ L)), from mp pl5 L'_ih,
-have h2 : prfK Γ (fin_conj (L'_tl ++ L) ⊃ fin_conj L'_tl&fin_conj L), from mp pl6 L'_ih,
-simp at *, 
-rw fin_conj at *, 
-have h3 : prfK Γ ((L'_hd & (fin_conj L'_tl & fin_conj L)) ⊃ (L'_hd & fin_conj (L'_tl ++ L))), 
-  from imp_and_imp h1,
-sorry
+exact (mp (mp pl4 (cut (mp pl6 and_switch) (mp pl5 phi_and_true))) 
+  (cut (mp pl6 phi_and_true) (mp pl5 and_switch))),
+exact mp (mp pl4 (cut (mp pl5 and_commute) (imp_and_imp (mp pl5 L'_ih)))) 
+  (cut iden (cut (imp_and_imp (mp pl6 L'_ih)) (mp pl6 and_commute)))
 end 
 
 
