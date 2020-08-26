@@ -55,9 +55,10 @@ have h2 := add_comm _ _,
 exact (eq.subst h2 (lt_of_le_of_lt (le_max_right (complexity φ) (complexity ψ)) h1))
 end
 
-lemma tr3 : ∀ φ : formPA agents, 1 + max (complexity φ) 1 < complexity φ + 4 :=
+lemma tr3 : ∀ φ : formPA agents, 1 + max (complexity φ) 1 < 4 + complexity φ :=
 begin
 intro φ,
+rw add_comm 4,
 have h1 : complexity φ < complexity φ + 1, from lt_add_one _,
 have h2 : 0 < 2 ↔ 2 ≠ 0, from zero_lt_iff_ne_zero,
 cases h2, 
@@ -76,7 +77,7 @@ have h5 : 1 + max (complexity ψ) 1 ≥ 1 + 1, linarith,
 have h6 : 0 ≤ 2, linarith,
 have h7 : 0 ≤ complexity φ + 4, linarith,
 have h8 := mul_le_mul h2 h5 h6 h7,
-exact (gt_from_lt ((complexity φ + 4) * (1 + max (complexity ψ) 1)) 9).mp h8
+exact h8,
 end
 
 lemma tr4helper1 {n m : nat} : n ≥ 4 → m ≥ 1 → 2 + n * m < n * (1 + m) :=
@@ -101,10 +102,11 @@ from congr_arg (has_mul.mul (complexity φ + 4)) (congr_arg (has_add.add 1) (eq.
 exact (eq.subst h3 tr4helper2)
 end
 
-lemma tr4 : ∀ φ ψ : formPA agents, 1 + max (complexity φ) (1 + max ((complexity φ + 4) 
-  * complexity ψ) 1) < (complexity φ + 4) * (1 + max (complexity ψ) 1) :=
+lemma tr4 : ∀ φ ψ : formPA agents, 1 + max (complexity φ) (1 + max ((4 + complexity φ) 
+  * complexity ψ) 1) < (4 + complexity φ) * (1 + max (complexity ψ) 1) :=
 begin
 intros φ ψ,
+rw add_comm 4,
 have h1 : 1 ≤ 1 + max (complexity ψ) 1, linarith,
 have h2 : 1 + complexity φ < (complexity φ + 4), linarith, 
 have h3 : 1 > 0, linarith,
@@ -149,10 +151,11 @@ have h5 : 1 + (complexity φ + 4) * complexity χ ≤ 1 + (complexity φ + 4) * 
 exact (lt_of_le_of_lt h5 tr5helper)
 end
 
-lemma tr5 : ∀ φ ψ χ : formPA agents, 1 + max ((complexity φ + 4) * complexity ψ) 
-  ((complexity φ + 4) * complexity χ) < (complexity φ + 4) * (1 + max (complexity ψ) (complexity χ)) :=
+lemma tr5 : ∀ φ ψ χ : formPA agents, 1 + max ((4 + complexity φ) * complexity ψ) 
+  ((4 + complexity φ) * complexity χ) < (4 + complexity φ) * (1 + max (complexity ψ) (complexity χ)) :=
 begin
 intros φ ψ χ,
+rw add_comm 4,
 cases max_choice (complexity ψ) (complexity χ),
 cases max_choice ((complexity φ + 4) * complexity ψ) ((complexity φ + 4) * complexity χ),
 exact (eq.substr h_1 (eq.substr h (tr5helper))),
@@ -177,6 +180,14 @@ have h8 : 1 + complexity ψ = complexity ψ + 1, linarith,
 exact (maxhelper h6 (eq.subst h8 (eq.subst h7 tr4helper2)))
 end
 
+lemma tr6' : ∀ φ ψ : formPA agents, 1 + max (complexity φ) (1 + (4 + complexity φ) 
+  * complexity ψ) < (4 + complexity φ) * (1 + complexity ψ) :=
+begin
+  intros φ ψ,
+  rw add_comm 4, rw add_comm 1 (complexity ψ),
+  apply tr6
+end
+
 lemma tr7helper1 {φ ψ : formPA agents} : (complexity φ + 4) * (complexity ψ + 4) 
   = (complexity φ) * (complexity ψ) + 4 * (complexity ψ) + 4 * (complexity φ) + 4 * 4 :=
 begin
@@ -190,7 +201,8 @@ lemma tr7helper2 {φ ψ : formPA agents} : 5 + (complexity φ) < (complexity φ)
 begin
 have h1 : complexity φ ≥ 1, from comp_ge_one,
 have h2 : complexity ψ ≥ 1, from comp_ge_one,
-linarith
+have : complexity φ * complexity ψ ≥ 0, apply nat.zero_le,
+linarith 
 end
 
 lemma tr7helper3 {φ ψ : formPA agents} : 5 + (complexity φ) < (complexity φ + 4) * (complexity ψ + 4) :=
@@ -242,6 +254,22 @@ have h3 : (1 + 4 + max (complexity φ) ((complexity φ + 4) * complexity ψ))
 exact (eq.subst h1 (mul_lt_mul_of_pos_right (eq.subst h3 (maxhelper tr7helper3 tr7helper6)) comp_gt_zero))
 end
 
+lemma tr7' : ∀ φ ψ χ : formPA agents, (4 + (1 + max (complexity φ) ((4 + complexity φ) 
+  * complexity ψ))) * complexity χ < (4 + complexity φ) * ((4 + complexity ψ) * complexity χ) :=
+begin
+  intros φ ψ χ,
+  rw [add_left_comm 4, add_comm 4 (complexity φ), add_comm 4 (complexity ψ)],
+  apply tr7
+end
+
+/-
+
+  (1 + (4 + max (complexity φ) ((complexity φ + 4) * complexity ψ))) * complexity χ <
+    (complexity φ + 4) * ((complexity ψ + 4) * complexity χ)
+⊢ (4 + (1 + max (complexity φ) ((4 + complexity φ) * complexity ψ))) * complexity χ <
+    (4 + complexity φ) * ((4 + complexity ψ) * complexity χ)
+
+-/
 
 -------------- Helper lemmas for equiv_translation_aux --------------
 
@@ -292,8 +320,8 @@ lemma updatecompand1 {φ ψ χ : formPA agents} {n : nat} :
   complexity (U φ (ψ & χ)) ≤ n + 1 → complexity (U φ ψ) ≤ n :=
 begin
 intro h1,
-rw complexity at *,
-have h2 := add_le_add_left' (le_max_left (complexity ψ) (complexity χ)),
+simp only [complexity] at *,
+have h2 := add_le_add_left (le_max_left (complexity ψ) (complexity χ)) 1,
 have h3 := comp_ge_one,
 have h4 : complexity φ + 4 ≥ 1, from le_add_right h3,
 have h5 := le_trans (nat.mul_le_mul_left ((4 + complexity φ)) h2) h1,
@@ -307,8 +335,8 @@ lemma updatecompand2 {φ ψ χ : formPA agents} {n : nat} :
   complexity (U φ (ψ & χ)) ≤ n + 1 → complexity (U φ χ) ≤ n :=
 begin
 intro h1,
-rw complexity at h1,
-have h2 := add_le_add_left' (le_max_right (complexity ψ) (complexity χ)),
+simp only [complexity] at *,
+have h2 := add_le_add_left (le_max_right (complexity ψ) (complexity χ)) 1,
 have h3 := comp_ge_one,
 have h4 : complexity φ + 4 ≥ 1, from le_add_right h3,
 have h5 := le_trans (nat.mul_le_mul_left ((4 + complexity φ)) h2) h1,
@@ -323,7 +351,7 @@ lemma updatecompimp1 {φ ψ χ : formPA agents} {n : nat} :
 begin
 intro h1,
 rw complexity at *,
-have h2 := add_le_add_left' (le_max_left (complexity ψ) (complexity χ)),
+have h2 := add_le_add_left (le_max_left (complexity ψ) (complexity χ)) 1,
 have h3 := comp_ge_one,
 have h4 : complexity φ + 4 ≥ 1, from le_add_right h3,
 have h5 := le_trans (nat.mul_le_mul_left ((4 + complexity φ)) h2) h1,
@@ -337,8 +365,8 @@ lemma updatecompimp2 {φ ψ χ : formPA agents} {n : nat} :
   complexity (U φ (ψ ⊃ χ)) ≤ n + 1 → complexity (U φ χ) ≤ n :=
 begin
 intro h1,
-rw complexity at h1,
-have h2 := add_le_add_left' (le_max_right (complexity ψ) (complexity χ)),
+simp only [complexity] at *,
+have h2 := add_le_add_left (le_max_right (complexity ψ) (complexity χ)) 1,
 have h3 := comp_ge_one,
 have h4 : complexity φ + 4 ≥ 1, from le_add_right h3,
 have h5 := le_trans (nat.mul_le_mul_left ((4 + complexity φ)) h2) h1,
@@ -352,6 +380,7 @@ lemma updatecompknow1' (φ ψ : formPA agents) {n : nat} {a : agents} : complexi
   → 1 + complexity φ ≤ n :=
 begin
 intro h1,
+simp only [complexity] at h1,
 have h2 : complexity φ > 0, from comp_gt_zero,
 have h3 : complexity ψ ≥ 1, from comp_ge_one,
 have h4 := add_mul 4 (complexity φ) (1 + complexity ψ),
@@ -363,6 +392,7 @@ have h8 : (4 + complexity φ) * (1 + complexity ψ) =
   4 * 1 + 4 * complexity ψ + complexity φ * 1 + complexity φ * complexity ψ, linarith,
 have h9 : complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ + 4 * 1 ≤ n + 1, linarith,
 have h10 : complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ ≤ n, linarith,
+have : complexity φ * complexity ψ ≥ 0, apply nat.zero_le,
 have h11 : 1 + complexity φ ≤ 
   complexity φ * complexity ψ + complexity φ * 1 + 4 * complexity ψ, linarith,
 exact le_trans h11 h10
