@@ -1,4 +1,4 @@
-import ..language
+import basicmodal.language
 
 ---------------------- Proof System ----------------------
 

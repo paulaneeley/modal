@@ -1,9 +1,10 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import del.languageDEL del.syntax.syntaxDEL del.syntax.syntaxlemmasDEL del.semantics.translationdefs 
-del.semantics.translationfunction del.semantics.complexitylemmas del.semantics.translationlemmas 
-tactic.linarith
+import del.languageDEL del.syntax.syntaxDEL del.syntax.syntaxlemmasDEL 
+import del.semantics.translationdefs 
+import del.semantics.translationfunction del.semantics.complexitylemmas del.semantics.translationlemmas 
+import tactic.linarith
 
 variables {agents : Type}
 
@@ -36,7 +37,7 @@ begin
     },
   case formPA.box : a φ 
     { simp at *,
-      have h1 : complexity φ ≤ n, {exact nat.lt_succ_iff.mp h},
+      have h1 : complexity φ ≤ n, {rw add_comm 1 at h, exact nat.lt_succ_iff.mp h},
       have h2 := ih φ h1,
       exact iff_k_dist h2, 
     },

@@ -1,7 +1,9 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import language syntax.syntax semantics.semantics syntax.syntaxlemmas order.zorn data.set.basic
+import basicmodal.language basicmodal.syntax.syntax 
+import basicmodal.semantics.semantics 
+import basicmodal.syntax.syntaxlemmas order.zorn data.set.basic
 local attribute [instance] classical.prop_decidable
 
 open prfK
@@ -129,14 +131,14 @@ cases h2 with h2l h2r, rw max_ax_consist at h1,
 cases h1 with h1l h1r, clear h, 
 have h2 := h1r (Γ ∪ φ), simp at h2, have h3 := h1r (Γ ∪ ¬φ),
 simp at h3, have h4 : ¬ax_consist AX (Γ ∪ ¬φ), 
-{simp at *, apply h3, rw set.ssubset_iff_subset_not_subset, 
+{simp at *, apply h3, rw set.ssubset_def, 
 split, 
 rw set.subset_def, intros x h4, exact or.inr h4,
 rw set.not_subset, existsi (¬φ : form), simp, split, 
 apply set.mem_union_left, rw set.mem_def, exact h2r},
 have h5 : ¬ax_consist AX (Γ ∪ φ), 
 {simp at *, apply h2,
-rw set.ssubset_iff_subset_not_subset, 
+rw set.ssubset_def, 
 split, 
 rw set.subset_def, intros x h4, exact or.inr h4,
 rw set.not_subset, existsi (φ : form), split, 
@@ -158,7 +160,7 @@ specialize h1l h13, exact absurd h12 h1l,
 exact h4,
 exact h5},
 {intro h1, dsimp at h1, rw max_ax_consist, split, exact h,
-intro Γ', intro h2, rw set.ssubset_iff_subset_not_subset at h2, cases h2,
+intro Γ', intro h2, rw set.ssubset_def at h2, cases h2,
 rw set.not_subset at h2_right,
 apply (exists.elim h2_right), simp, intros ψ h3 h4,
 specialize h1 ψ, cases h1, apply absurd h1 h4,
@@ -179,14 +181,13 @@ split,
 {intro h1, split, rw max_ax_consist at h1, exact h1.left, 
 intros Γ' h2 h3, rw set.subset.antisymm_iff, split, exact h3,
 by_contradiction h4, rw max_ax_consist at h1, cases h1, 
-have h5 := and.intro h3 h4, rw ←set.ssubset_iff_subset_not_subset at h5,
+have h5 := and.intro h3 h4, rw ←set.ssubset_def at h5,
 specialize h1_right Γ' h5, exact h1_right h2}, 
 intro h1, cases h1, rw max_ax_consist, split, exact h1_left,
 intros Γ' h2, by_contradiction h3, specialize h1_right Γ' h3,
-rw set.ssubset_def at h2, cases h2, exact h2_right (h1_right h2_left)
+rw set.ssubset_def at h2, cases h2, apply h2_right, rw h1_right h2_left
 end
 
-#check zorn.zorn_subset
 open zorn
 lemma lindenbaum (AX Γ : ctx) (hax : ax_consist AX Γ) : ∃ Γ', max_ax_consist AX Γ' ∧ Γ ⊆ Γ' :=
 begin

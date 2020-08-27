@@ -1,5 +1,5 @@
 
-import language syntax.syntax
+import basicmodal.language basicmodal.syntax.syntax
 
 open form
 
