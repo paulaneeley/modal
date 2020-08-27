@@ -70,15 +70,14 @@ have h4 : forces f v s (φ & U φ ψ),
 {rw forces, split, exact h2, rw forces, exact λ h2, h3},
 rw forces at h4,
 cases h4,
-rw forces at h1,
---specialize h1 h4,
-specialize h1 ⟨h2, λ h2, h3⟩, 
+rw forces at h4_right,
+specialize h4_right h2,
+exact h4_right
 sorry,
 intros h1 h2, rw forces at h1, 
 cases h2, specialize h1 h2_left,
 sorry
 end
-
 
 -- Proposition 4.18, pg. 79
 lemma public_announce_know (φ ψ : formPA agents) (f : frame agents) 

@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..semantics.translationdefs tactic.linarith
+import del.semantics.translationdefs tactic.linarith
 variables {agents : Type}
 
 ---------------------- Generic helper lemmas ----------------------

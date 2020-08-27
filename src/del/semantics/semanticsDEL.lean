@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..languageDEL ..syntax.syntaxDEL data.set.basic
+import del.languageDEL del.syntax.syntaxDEL data.set.basic
 variable {agents : Type}
 open formPA
 local attribute [instance] classical.prop_decidable
