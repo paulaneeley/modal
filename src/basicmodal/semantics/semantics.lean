@@ -42,5 +42,5 @@ def forces_ctx (f : frame) (v : nat → f.states → Prop)
   (x : f.states) (Γ : ctx) := ∀ φ, (φ ∈ Γ → forces f v x φ)
 
 -- I'm not sure which definition to use...
-def sem_csq2 (Γ : ctx) (φ : form) :=
+def sem_csq (Γ : ctx) (φ : form) :=
   ∀ f v x, (∀ y, forces_ctx f v y Γ) → forces f v x φ

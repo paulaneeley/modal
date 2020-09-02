@@ -315,4 +315,3 @@ exact mp (mp pl4 (mp double_imp (imp_imp_iff_imp.mp
   (imp_switch (cut pl5 (cut1 pl4 (cut2 (cut pl6 pl6) pl4)))))))
 end
 
-

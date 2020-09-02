@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..language ..syntax.syntax data.set.basic
+import basicmodal.language basicmodal.syntax.syntax data.set.basic
 
 open prfK
 local attribute [instance] classical.prop_decidable
@@ -20,6 +20,7 @@ lemma prtrue {Γ : ctx} : prfK Γ ⊤ :=
 begin
 exact iden
 end
+
 
 lemma weak {Γ : ctx} {φ ψ : form} :
   prfK Γ φ → prfK (Γ ∪ ψ) φ :=

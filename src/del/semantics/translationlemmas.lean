@@ -47,10 +47,12 @@ lemma update_iff3 {Γ : ctx agents} {φ ψ χ : formPA agents} :
   prfPA Γ (U φ ψ ↔ translate (U φ ψ)) →
   prfPA Γ (U φ χ ↔ translate (U φ χ)) →
   prfPA Γ (U φ (ψ ⊃ χ) ↔ (U φ ψ ⊃ U φ χ)) → 
-  prfPA Γ ((U φ (ψ ⊃ χ)) ↔ translate (U φ (ψ ⊃ χ))) :=
+  prfPA Γ
+    (U φ (ψ ⊃ χ) ↔ (translate (U φ ψ) ⊃ translate (U φ χ))) :=
 begin
-simp at *, intros h1 h2 h3, 
-sorry
+intros h1 h2 h3, 
+exact mp (mp pl4 (cut2 (mp pl6 h1) (cut1 (mp pl5 h3) (mp pl5 h2)))) 
+  (cut (cut2 (mp pl5 h1) (mp hs1 (mp pl6 h2))) (mp pl6 h3))
 end
 
 

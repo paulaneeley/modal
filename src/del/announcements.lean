@@ -64,18 +64,17 @@ begin
 split,
 intro h1,
 intro h2,
-intro h3,
-dsimp,
-have h4 : forces f v s (φ & U φ ψ),
-{rw forces, split, exact h2, rw forces, exact λ h2, h3},
-rw forces at h4,
-cases h4,
-rw forces at h4_right,
-specialize h4_right h2,
-exact h4_right
+-- rw forces,
+-- intro h3,
+-- have h4 : forces f v s (φ & U φ ψ),
+-- {rw forces, split, exact h2, rw forces, exact λ h2, h3},
+-- specialize h1 ⟨h2, λ h2, h3⟩,
+-- exact ⟨s, ⟨⟨s, h2⟩, h3⟩⟩,
 sorry,
-intros h1 h2, rw forces at h1, 
-cases h2, specialize h1 h2_left,
+intro h1,
+intro h2, 
+rw forces at h1, 
+cases h2,
 sorry
 end
 
@@ -86,8 +85,17 @@ lemma public_announce_know (φ ψ : formPA agents) (f : frame agents)
 begin
 split,
 intros h1 h2 t hrel h3,
-exact h1 h2 ⟨t, h3⟩ hrel,
-rintros h1 h2 ⟨t, h3⟩ hrel,
+rw forces at h1,
+specialize h1 h2,
+rw forces at h1,
+specialize h1 ⟨t, h3⟩,
+specialize h1 hrel,
+exact h1,
+intro h1,
+intro h2,
+rw forces,
+rintro ⟨t, h3⟩,
+intro hrel,
 exact h1 h2 t hrel h3,
 end
 

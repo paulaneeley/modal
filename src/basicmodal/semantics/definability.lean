@@ -1,7 +1,9 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import ..language basicmodal.syntax.syntax basicmodal.semantics.semantics data.set.basic basicmodal.paths
+import basicmodal.language basicmodal.syntax.syntax 
+import basicmodal.semantics.semantics basicmodal.paths
+import data.set.basic
 
 open form
 local attribute [instance] classical.prop_decidable

@@ -1,7 +1,8 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import basicmodal.language data.set.basic basicmodal.semantics.semantics basicmodal.semantics.definability
+import basicmodal.language data.set.basic basicmodal.semantics.semantics 
+import basicmodal.semantics.definability basicmodal.syntax.syntaxlemmas
 local attribute [instance] classical.prop_decidable
 
 
@@ -17,41 +18,7 @@ intros f v x φ, split,
 {intros h1 h2, specialize h1 h2, exact h1}
 end
 
--- theorem soundness (Γ : ctx) 
---   (φ : form) : prfK Γ φ → sem_csq Γ φ :=
--- begin
--- intro h,
--- induction h,
--- {intros f v x h, specialize h h_φ, have h1 := h h_h, 
--- rw m_valid at h1, specialize h1 x, exact h1},
--- {intros f v x h2 h3 h4, exact h3}, 
--- {intros f v x h2 h3 h4 h5, apply h3, 
--- exact h5, apply h4, exact h5}, 
--- /-
--- {intros f x v h1 h2 h3,
--- by_contradiction h4,
--- specialize h2 h4, specialize h3 h4, 
--- rw ← not_forces_imp at h2, exact h2 h3},-/
--- {intros f v x h1 h2 h3, simp [forces] at *, 
--- exact and.intro h2 h3},
--- {intros f v x h1 h2, exact h2.left},
--- {intros f v x h1 h2, exact h2.right},
--- {intros f v x h1 h2, apply h2, intro h3, exact h3},
--- {intros f v x h1 h2 h3, simp [forces] at *, 
--- intros x' h4, specialize h3 x' h4,
--- specialize h2 x' h4 h3, exact h2}, 
--- {intros f v x h, 
--- specialize h_ih_hpq f v x h,
--- specialize h_ih_hp f v x h,
--- exact h_ih_hpq h_ih_hp}, 
--- {intros f v x h1 y h2,
--- rw sem_csq at h_ih,
--- specialize h_ih f v y h1, 
--- exact h_ih},
--- end
-
-theorem soundness2 (Γ : ctx) 
-  (φ : form) : prfK Γ φ → sem_csq2 Γ φ :=
+theorem soundness (Γ : ctx) (φ : form) : prfK Γ φ → sem_csq Γ φ :=
 begin
 intro h,
 induction h,
@@ -81,15 +48,14 @@ specialize h_ih_hpq f v x h,
 specialize h_ih_hp f v x h,
 exact h_ih_hpq h_ih_hp}, 
 {intros f v x h1 y h2,
-rw sem_csq2 at h_ih,
+rw sem_csq at h_ih,
 specialize h_ih f v y h1, 
 exact h_ih},
 end
 
-theorem soundness3 (Γ : ctx) 
-  (φ : form) : ¬ sem_csq2 Γ φ → ¬ prfK Γ φ :=
+theorem soundness2 (Γ : ctx) (φ : form) : ¬ sem_csq Γ φ → ¬ prfK Γ φ :=
 begin
-rw not_imp_not, exact soundness2 Γ φ
+rw not_imp_not, exact soundness Γ φ
 end
 
 

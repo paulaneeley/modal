@@ -2,7 +2,7 @@
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
 import del.languageDEL del.syntax.syntaxDEL del.syntax.syntaxlemmasDEL 
-import del.semantics.translationdefs 
+import del.semantics.translationdefs  del.semantics.semanticsDEL
 import del.semantics.translationfunction del.semantics.complexitylemmas del.semantics.translationlemmas 
 import tactic.linarith
 
@@ -37,7 +37,7 @@ begin
     },
   case formPA.box : a φ 
     { simp at *,
-      have h1 : complexity φ ≤ n, {rw add_comm 1 at h, exact nat.lt_succ_iff.mp h},
+      have h1 : complexity φ ≤ n, {exact nat.lt_succ_iff.mp h},
       have h2 := ih φ h1,
       exact iff_k_dist h2, 
     },
@@ -69,7 +69,7 @@ begin
           exact update_iff2 h2 h3 h1,
         },
       case formPA.impl : ψ χ
-        { rw translate,
+        { repeat {rw translate},
           have h1 : prfPA Γ ((U φ (ψ ⊃ χ)) ↔ ((U φ ψ) ⊃ (U φ χ))), from announceimp,
           have h2 := ih (U φ ψ) (updatecompimp1 h),
           have h3 := ih (U φ χ) (updatecompimp2 h),
@@ -98,4 +98,12 @@ intro φ,
 have h : complexity φ ≤ complexity φ + 1, linarith,
 simp,
 exact equiv_translation_aux' (complexity φ + 1) φ h
+end
+
+theorem completenessPA {Γ : ctx agents} {φ : formPA agents} : 
+   (∀ ψ ∈ Γ, F_valid ψ equiv_class) → F_valid φ equiv_class → prfPA Γ φ :=
+begin
+intros h1 h2,
+have h3 : (∀ ψ ∈ Γ, F_valid ψ equiv_class) → F_valid (translate φ) equiv_class,
+{intros h3, rw F_valid, intros f h4 v x, sorry}, sorry
 end
