@@ -18,7 +18,7 @@ intros f v x φ, split,
 {intros h1 h2, specialize h1 h2, exact h1}
 end
 
-theorem soundness (Γ : ctx) (φ : form) : prfK Γ φ → sem_csq Γ φ :=
+theorem soundness (K : ctx) (φ : form) : prfK K φ → sem_csq K φ :=
 begin
 intro h,
 induction h,
@@ -51,11 +51,6 @@ exact h_ih_hpq h_ih_hp},
 rw sem_csq at h_ih,
 specialize h_ih f v y h1, 
 exact h_ih},
-end
-
-theorem soundness2 (Γ : ctx) (φ : form) : ¬ sem_csq Γ φ → ¬ prfK Γ φ :=
-begin
-rw not_imp_not, exact soundness Γ φ
 end
 
 

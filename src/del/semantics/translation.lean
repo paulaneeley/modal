@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import del.languageDEL del.syntax.syntaxDEL del.syntax.syntaxlemmasDEL 
+import del.languageDEL del.syntax.syntaxDEL del.syntax.syntaxlemmasDEL del.syntax.soundnessDEL
 import del.semantics.translationdefs  del.semantics.semanticsDEL
 import del.semantics.translationfunction del.semantics.complexitylemmas del.semantics.translationlemmas 
 import tactic.linarith
@@ -100,10 +100,16 @@ simp,
 exact equiv_translation_aux' (complexity φ + 1) φ h
 end
 
+
 theorem completenessPA {Γ : ctx agents} {φ : formPA agents} : 
    (∀ ψ ∈ Γ, F_valid ψ equiv_class) → F_valid φ equiv_class → prfPA Γ φ :=
 begin
 intros h1 h2,
-have h3 : (∀ ψ ∈ Γ, F_valid ψ equiv_class) → F_valid (translate φ) equiv_class,
-{intros h3, rw F_valid, intros f h4 v x, sorry}, sorry
+have h3 : prfPA Γ (φ ⊃ translate φ), from mp pl5 (equiv_translation Γ φ),
+have h4 : prfPA Γ (φ ⊃ translate φ) → (∀ ψ ∈ Γ, F_valid ψ equiv_class) → 
+  F_valid (φ ⊃ translate φ) equiv_class, from soundnessPA,
+specialize h4 h3 h1,
+have h5 : F_valid (translate φ) equiv_class, {rw F_valid, intros f h v x,
+specialize h2 f h v x, specialize h4 f h v x h2, exact h4},
+
 end
