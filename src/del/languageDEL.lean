@@ -21,8 +21,6 @@ inductive formPA (agents : Type) : Type
   | update {} (φ ψ : formPA) : formPA
 
 
-
-
 -- Notation
 --local notation `⊥`:80   := formPA.bot
 --local prefix `p`:80     := formPA.var
