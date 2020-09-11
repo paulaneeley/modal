@@ -211,6 +211,15 @@ subst h7, exact h6, rw fin_ax_consist, rw not_not,
 exact fin_conj_simp ψ}
 end
 
+-- lemma 6 from class notes
+lemma six' (AX Γ Γ' : ctx) (h : ax_consist AX Γ) :
+max_ax_consist AX Γ ↔ ∀ φ : form, xor (φ ∈ Γ) ((¬φ) ∈ Γ) :=
+begin simp at *,
+split,
+{intros h1 φ, rw xor, rw or_iff_not_and_not, by_contradiction h2,
+cases h2 with h2 h3, rw not_and at h2, rw not}
+end
+
 
 -- Γ is maximally AX-consistent iff it is AX-consistent and for 
 -- every AX-consistent set Γ', if Γ ⊆ Γ', then Γ = Γ'
@@ -232,31 +241,36 @@ end
 open zorn
 
 
---Lemma: if c is a chain of sets, L is a list of elements such that 
---every element in L is in Union(c), then there is an element s in c such that every element of L is in s.
+
+
+-- Lemma: if c is a chain of sets, L is a list of elements such that 
+-- every element in L is in Union(c), then there is an element s in c such that every 
+-- element of L is in s.
 -- by induction on L.
 -- S := collection of max cons sets
 -- m := Γ'
-
 lemma lindenhelper (c : set ctx) (h : chain (⊆) c) (L : list form) :
-(∀ φ : form, φ ∈ L → φ ∈ ⋃₀(c)) → ∃ ub ∈ c, ∀ ψ : form, ψ ∈ L → ψ ∈ ub :=
+(∀ φ : form, φ ∈ L → φ ∈ ⋃₀(c)) → ∃ m ∈ c, ∀ ψ : form, ψ ∈ L → ψ ∈ m :=
 begin
-intro h, sorry
+intro h1, induction L, rw chain_closure_empty,
+sorry,
+sorry
 end
+#check chain has_subset.subset
 
 lemma lindenbaum (AX Γ : ctx) (hax : ax_consist AX Γ) : ∃ Γ', max_ax_consist AX Γ' ∧ Γ ⊆ Γ' :=
 begin
 let S := { Γ'' | Γ'' ⊇ Γ ∧ ax_consist AX Γ''},
 have h : ∀ c ⊆ S, chain (⊆) c → ∃ub ∈ S, ∀ s ∈ c, s ⊆ ub, 
-{intros c h1 h2, 
-have h1 := lindenhelper c h2,
-sorry},
+{intros c h1 h2, use ⋃₀(c), split, rw set.sUnion,
+have h3 := lindenhelper c h2,
+sorry,
+intros s h3, exact set.subset_sUnion_of_mem h3},
 cases zorn_subset S h with Γ' h1, cases h1 with h1 h2,
 use Γ', split, rw max_equiv, split, apply h1.2, 
 intros m h3 h4, symmetry, apply h2 m, split, apply set.subset.trans h1.1 h4,
 exact h3, exact h4, apply h1.1
 end
-
 
 
 -- Corollary 8
@@ -274,38 +288,47 @@ end
 
 
 
-
+def sem_cons (AX : ctx) := ¬ sem_csq AX ⊥ 
+attribute [class] sem_cons
 
 
 namespace canonical
 
-def canonical (AX : ctx) (hax : ¬ sem_csq AX ⊥) : frame := 
+def canonical (AX : ctx) [hax : sem_cons AX] : frame := 
 { 
-  states := {x : ctx // max_ax_consist AX x},
+  states := {xΓ : ctx // max_ax_consist AX xΓ},
   h := begin have h1 := max_ax_exists AX hax, choose Γ h1 using h1, exact ⟨⟨Γ, h1⟩⟩ end,
-  rel := λ x y, ∀ φ : form, □φ ∈ x → φ ∈ y
+  rel := λ xΓ yΔ, ∀ φ : form, □φ ∈ xΓ.val → φ ∈ yΔ.val
 }
 #check canonical
 
-def val_canonical (AX : ctx) (hax : ¬ sem_csq AX ⊥) : nat → (canonical AX hax).states → Prop :=
-λ n, λ x : (canonical AX hax).states, (p n) ∈ x
+def val_canonical (AX : ctx) [hax : sem_cons AX] : nat → (canonical AX).states → Prop :=
+  λ n, λ xΓ : (canonical AX).states, (p n) ∈ xΓ.val
 
-def form_hat (AX : ctx) (hax : ¬ sem_csq AX ⊥) : form → (canonical AX hax).states → Prop :=
-λ φ, λ x : (canonical AX hax).states, φ ∈ x
+lemma existence (AX : ctx) (hax : sem_cons AX) (xΓ : (canonical AX).states) :
+  ∀ φ, ◇φ ∈ xΓ.val → ∃ yΔ : (canonical AX).states, φ ∈ yΔ.val ∧ (canonical AX).rel xΓ yΔ := sorry
 
-lemma existence (AX : ctx) (hax : ¬ sem_csq AX ⊥) (Γ : (canonical AX hax).states) :
-  ∀ φ, ◇φ ∈ Γ → ∃ Δ : (canonical AX hax).states, φ ∈ Δ ∧ (canonical AX hax).rel Γ Δ := sorry
-
-lemma truth (AX : ctx) (hax : ¬ sem_csq AX ⊥) 
-  (v : nat → (canonical AX hax).states → Prop) (x : (canonical AX hax).states) : 
-  ∀ φ, forces (canonical AX hax) v x φ = form_hat AX hax φ x := sorry
+lemma truth (AX : ctx) (hax : sem_cons AX) (xΓ : (canonical AX).states) : 
+  ∀ φ, forces (canonical AX) (val_canonical AX) xΓ φ ↔ (φ ∈ xΓ.val) :=
+begin
+intro φ, induction φ with n φ ψ ih_φ ih_ψ φ ψ ih_φ ih_ψ φ ih_φ,
+split, intro h1, exact false.elim h1,
+intro h1, 
+have h2 : (¬form.bot) ∉ xΓ.val, 
+sorry,
+repeat {rw forces, rw val_canonical},
+split, intro h1, cases h1 with h1 h2, cases ih_φ,
+specialize ih_φ_mp h1, cases ih_ψ,
+specialize ih_ψ_mp h2, sorry,
+intro h1, split, 
+end
 
 theorem completeness (K : ctx) (φ : form) : sem_csq K φ → prfK K φ :=
 begin
 rw ←not_imp_not, intro h1,
 have h2 : ax_consist K {¬φ}, 
 {simp at *, rw ax_consist, intros L h2, rw fin_ax_consist,
-have h3 : L = [¬φ], sorry,
+have h3 : L = [¬φ], simp at *, sorry,
 subst h3, simp at *, rw fin_conj, rw fin_conj, simp at *, 
 have h4 : prfK K ((¬(¬φ)) ⊃ (¬(¬φ)&¬⊥)), sorry,
 have h6 : prfK K (φ ⊃ (¬(¬φ)&¬⊥)), simp at *,
