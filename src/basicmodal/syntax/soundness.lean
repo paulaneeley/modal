@@ -9,16 +9,7 @@ local attribute [instance] classical.prop_decidable
 
 ---------------------- Soundness ----------------------
 
-
-lemma not_forces_imp :  ∀ f v x φ, 
-  (¬(forces f v x φ)) ↔ (forces f v x (¬φ)) :=
-begin
-intros f v x φ, split, 
-{intros h1 h2, exact h1 h2},
-{intros h1 h2, specialize h1 h2, exact h1}
-end
-
-theorem soundness (K : ctx) (φ : form) : prfK K φ → sem_csq K φ :=
+theorem soundness (K : ctx) (φ : form) : prfK K φ → global_sem_csq K φ :=
 begin
 intro h,
 induction h,
@@ -48,13 +39,14 @@ specialize h_ih_hpq f v x h,
 specialize h_ih_hp f v x h,
 exact h_ih_hpq h_ih_hp}, 
 {intros f v x h1 y h2,
-rw sem_csq at h_ih,
+rw global_sem_csq at h_ih,
 specialize h_ih f v y h1, 
 exact h_ih},
 end
 
 
-lemma hi {Γ : ctx} {φ : form} {C : set (frame)} : prfK Γ φ → (∀ ψ ∈ Γ, F_valid ψ C) → F_valid φ C :=
+lemma soundnesshelper {Γ : ctx} {φ : form} {C : set (frame)} : 
+  prfK Γ φ → (∀ ψ ∈ Γ, F_valid ψ C) → F_valid φ C :=
 begin
 intros h1 h2 f h3 v, induction h1,
 {intro x, specialize h2 h1_φ h1_h, rw F_valid at h2, specialize h2 f h3 v x, exact h2},
@@ -98,7 +90,7 @@ end
 
 theorem T_soundness (φ : form) : prfK T_axioms φ → F_valid φ ref_class :=
 begin
-intro h, apply hi, apply h, apply T_helper 
+intro h, apply soundnesshelper, apply h, apply T_helper 
 end
 
 lemma S4_helper : ∀ φ ∈ S4_axioms, F_valid φ ref_trans_class :=
@@ -113,7 +105,7 @@ end
 
 theorem S4_soundness (φ : form) : prfK S4_axioms φ → F_valid φ ref_trans_class :=
 begin
-intro h, apply hi, apply h, apply S4_helper
+intro h, apply soundnesshelper, apply h, apply S4_helper
 end
 
 lemma S5_helper : ∀ φ ∈ S5_axioms, F_valid φ equiv_class :=
@@ -133,7 +125,7 @@ rw symmetric at h2r,
 specialize h2r h1, exact h2rr h2r h2}
 end
 
-theorem S5_soundness (φ : form) : prfK (S5_axioms) φ → F_valid φ (equiv_class) :=
+theorem S5_soundness (φ : form) : prfK S5_axioms φ → F_valid φ equiv_class :=
 begin
-intro h, apply hi, apply h, apply S5_helper
+intro h, apply soundnesshelper, apply h, apply S5_helper
 end

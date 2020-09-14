@@ -203,13 +203,16 @@ exact left_and_imp (cut2 pl5 h1)
 end
 
 
-lemma not_and_subst {φ ψ χ : form} {Γ : ctx} : prfK Γ (φ ↔ ψ) → (prfK Γ ¬(χ & φ) ↔ prfK Γ ¬(χ & ψ)) :=
+lemma not_and_subst {φ ψ χ : form} {Γ : ctx} : 
+  prfK Γ (φ ↔ ψ) → (prfK Γ ¬(χ & φ) ↔ prfK Γ ¬(χ & ψ)) :=
 begin
 intro h1, split, 
 {intro h2,
-exact mp (mp pl3 (mp pl1 h2)) (cut dne (mp double_imp (cut2 (cut pl6 (mp pl6 h1)) (cut pl5 pl4))))},
+exact mp (mp pl3 (mp pl1 h2)) (cut dne (mp double_imp (cut2 (cut pl6 (mp pl6 h1)) 
+  (cut pl5 pl4))))},
 {intro h2,
-exact mp (mp pl3 (mp pl1 h2)) (cut dne (mp double_imp (cut2 (cut pl6 (mp pl5 h1)) (cut pl5 pl4))))},
+exact mp (mp pl3 (mp pl1 h2)) (cut dne (mp double_imp (cut2 (cut pl6 (mp pl5 h1)) 
+  (cut pl5 pl4))))},
 end
 
 
@@ -295,3 +298,5 @@ intros h1,
 have h2 := imp_and_and_imp,
 specialize h2 (mp (mp pl4 iden) h1), exact h2
 end
+
+lemma demorgans {Γ : ctx} {φ ψ : form} : prfK Γ ((¬(φ & ψ)) ↔ (φ ⊃ ¬ψ)) := sorry

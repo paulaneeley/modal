@@ -10,15 +10,42 @@ open prfK
 
 ---------------------- Consistency ----------------------
 
-def sem_cons (AX : ctx) := ¬ sem_csq AX ⊥ 
+def sem_cons (AX : ctx) := ¬ global_sem_csq AX ⊥ 
 attribute [class] sem_cons
+
+lemma sem_consK : sem_cons ∅ :=
+begin
+rw sem_cons,
+rw global_sem_csq, rw not_forall,
+let f : frame := 
+{ states := ℕ,
+  h := ⟨0⟩,
+  rel := λ x y, x = y },
+use f,
+rw not_forall,
+let v := λ n x, true,
+use v, rw not_forall,
+let x := 42, use x,
+rw not_forall, simp, split,
+intro y, rw forces_ctx, intros φ h1,
+have h2 : φ ∉ ∅, {exact set.not_mem_empty φ},
+exact absurd h1 h2, rw forces, trivial 
+end
+
+-- Any axiom system that is consistent does not prove false
+lemma nprfalse (AX : ctx) (hax : sem_cons AX) : ¬ prfK AX ⊥ :=
+begin
+have h1 : ¬ global_sem_csq AX ⊥ → ¬ prfK AX ⊥, 
+{have h2 : prfK AX ⊥ → global_sem_csq AX ⊥, from soundness AX ⊥, 
+rw ←not_imp_not at h2, exact h2},
+apply h1, exact hax
+end
 
 
 -- finite conjunction of formulas
 def fin_conj : list form → form
   | []  := ⊤
   | (φ::φs) := φ & (fin_conj φs)
-
 
 -- a few helper lemmas about finite conjunctions
 lemma fin_conj_simp {Γ : ctx} : ∀ ψ : form, prfK Γ (¬fin_conj [ψ, ¬ψ]) :=
@@ -55,15 +82,6 @@ exact (mp (mp pl4 (cut (mp pl6 and_switch) (mp pl5 phi_and_true)))
 exact mp (mp pl4 (cut (mp pl5 and_commute) (imp_and_imp (mp pl5 L'_ih)))) 
   (cut iden (cut (imp_and_imp (mp pl6 L'_ih)) (mp pl6 and_commute)))
 end 
-
-
-lemma nprfalse (AX : ctx) (hax : sem_cons AX) : ¬ prfK AX ⊥ :=
-begin
-have h1 : ¬ sem_csq AX ⊥ → ¬ prfK AX ⊥, 
-{have h2 : prfK AX ⊥ → sem_csq AX ⊥, from soundness AX ⊥, rw ←not_imp_not at h2, exact h2},
-apply h1, exact hax
-end
-
 
 lemma fin_conj_empty {AX : ctx} {L : list form} (hax : sem_cons AX) :
   L = [] → ¬ prfK AX (fin_conj L ⊃ ⊥) :=
@@ -153,7 +171,6 @@ cases ih, existsi (L' : list form), split,
 exact ih_left, exact imp_imp_iff_imp.mp ih_right}
 end
 
-
 -- Lemma 5 from class notes
 lemma five (AX : ctx) : 
   ∀ Γ : ctx, ∀ φ : form, ¬ ax_consist AX (Γ ∪ φ) → ∃ L',
@@ -170,13 +187,11 @@ specialize h2 h3, apply h2, rw fin_ax_consist at h1_right, rw not_not at h1_righ
 exact h1_right,
 end
 
--- THIS IS WRONG, SEE SIX' BELOW
--- lemma 6 from class notes
-lemma six (AX Γ Γ' : ctx) (h : ax_consist AX Γ) :
-max_ax_consist AX Γ ↔ ∀ φ : form, φ ∈ Γ ∨ (¬φ) ∈ Γ :=
+
+lemma six_helper (AX Γ Γ' : ctx) (h : ax_consist AX Γ) :
+max_ax_consist AX Γ → ∀ φ : form, φ ∈ Γ ∨ (¬φ) ∈ Γ :=
 begin
-split,
-{intros h1 φ, simp, rw or_iff_not_and_not, by_contradiction h2,
+intros h1 φ, simp, rw or_iff_not_and_not, by_contradiction h2,
 cases h2 with h2l h2r, rw max_ax_consist at h1,
 cases h1 with h1l h1r, clear h, 
 have h2 := h1r (Γ ∪ φ), simp at h2, have h3 := h1r (Γ ∪ ¬φ),
@@ -199,28 +214,39 @@ intro ψ, specialize h6l ψ, specialize h7l ψ, intro h13,
 rw list.mem_append at h13, cases h13, exact h6l h13, exact h7l h13,
 specialize h1l h13, exact absurd h12 h1l,
 exact h4,
-exact h5},
-{intro h1, dsimp at h1, rw max_ax_consist, split, exact h,
-intro Γ', intro h2,
+exact h5,
+end
+
+-- lemma 6 from class notes
+lemma six (AX Γ Γ' : ctx) (h : ax_consist AX Γ) :
+max_ax_consist AX Γ ↔ ∀ φ, (φ ∈ Γ ∨ (¬φ) ∈ Γ) ∧ ¬(φ ∈ Γ ∧ (¬φ) ∈ Γ) :=
+begin 
+simp, split, 
+intro h1, intro φ, 
+split, exact six_helper AX Γ Γ' h h1 φ,
+{rw ←not_and, by_contradiction h2,
+cases h2 with h2 h3,
+rw ax_consist at h,
+specialize h ([φ, ¬φ]), simp at *,
+have h4 : (∀ (ψ : form), ψ = φ ∨ ψ = ¬φ → ψ ∈ Γ), 
+{intros ψ h4, simp at *, cases h4, subst h4, exact h2, subst h4, exact h3},
+specialize h h4, rw fin_ax_consist at h, 
+have h5 : prfK AX (¬fin_conj [φ, ¬φ]), from fin_conj_simp φ, 
+exact absurd h5 h},
+intro h1, rw max_ax_consist, split, exact h,
+intros Γ' h2,
 have h3 : Γ ⊆ Γ' ∧ ¬ Γ' ⊆ Γ, from h2,
 cases h3,
 rw set.not_subset at h3_right,
 apply (exists.elim h3_right), simp, intros ψ h4 h5,
-specialize h1 ψ, cases h1, apply absurd h1 h5,
-have h6 : (¬ψ) ∈ Γ', from set.mem_of_subset_of_mem h3_left h1,
+specialize h1 ψ, cases h1,
+cases h1_left,
+apply absurd h1_left h5,
+have h6 : (¬ψ) ∈ Γ', from set.mem_of_subset_of_mem h3_left h1_left,
 rw ax_consist, rw not_forall, existsi ([ψ,¬ψ] : list form),
 simp, split, intros φ h7, cases h7, subst h7, exact h4, 
 subst h7, exact h6, rw fin_ax_consist, rw not_not,
-exact fin_conj_simp ψ}
-end
-
--- lemma 6 from class notes
-lemma six' (AX Γ Γ' : ctx) (h : ax_consist AX Γ) :
-max_ax_consist AX Γ ↔ ∀ φ : form, xor (φ ∈ Γ) ((¬φ) ∈ Γ) :=
-begin simp at *,
-split,
-{intros h1 φ, rw xor, rw or_iff_not_and_not, by_contradiction h2,
-cases h2 with h2 h3, rw not_and at h2, sorry}, sorry
+exact fin_conj_simp ψ
 end
 
 
@@ -261,7 +287,8 @@ sorry
 end
 #check chain has_subset.subset
 
-lemma lindenbaum (AX Γ : ctx) (hax : ax_consist AX Γ) : ∃ Γ', max_ax_consist AX Γ' ∧ Γ ⊆ Γ' :=
+lemma lindenbaum (AX Γ : ctx) (hax : ax_consist AX Γ) : 
+  ∃ Γ', max_ax_consist AX Γ' ∧ Γ ⊆ Γ' :=
 begin
 let S := { Γ'' | Γ'' ⊇ Γ ∧ ax_consist AX Γ''},
 have h : ∀ c ⊆ S, chain (⊆) c → ∃ub ∈ S, ∀ s ∈ c, s ⊆ ub, 

@@ -28,7 +28,7 @@ def m_valid (φ : form) (f : frame)
 def f_valid (φ : form) (f : frame) := 
   ∀ v x, forces f v x φ
 
--- φ is valid in a class of frames F = set f
+-- φ is valid in a class of frames F
 def F_valid (φ : form) (F : set (frame)) := 
   ∀ f ∈ F, ∀ v x, forces f v x φ
 
@@ -41,6 +41,20 @@ def u_valid (φ : form) :=
 def forces_ctx (f : frame) (v : nat → f.states → Prop) 
   (x : f.states) (Γ : ctx) := ∀ φ, (φ ∈ Γ → forces f v x φ)
 
--- I'm not sure which definition to use...
-def sem_csq (Γ : ctx) (φ : form) :=
+-- Local semantic consequence
+def local_sem_csq (Γ : ctx) (φ : form) :=
+  ∀ f v x, forces_ctx f v x Γ → forces f v x φ
+
+-- Global semantic consequence
+def global_sem_csq (Γ : ctx) (φ : form) :=
   ∀ f v x, (∀ y, forces_ctx f v y Γ) → forces f v x φ
+
+
+
+lemma not_forces_imp :  ∀ f v x φ, 
+  (¬(forces f v x φ)) ↔ (forces f v x (¬φ)) :=
+begin
+intros f v x φ, split, 
+{intros h1 h2, exact h1 h2},
+{intros h1 h2, specialize h1 h2, exact h1}
+end
