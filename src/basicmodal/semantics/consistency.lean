@@ -41,6 +41,13 @@ rw ←not_imp_not at h2, exact h2},
 apply h1, exact hax
 end
 
+lemma prnot_to_notpr (φ : form) (AX : ctx) (hax : sem_cons AX) : prfK AX (¬φ) → ¬ prfK AX φ :=
+begin
+intro h1, by_contradiction h2,
+have h3 : prfK AX ⊥, from mp (mp pl5 contra_equiv_false) (mp (mp pl4 h2) h1),
+have h4 : ¬ prfK AX ⊥, from nprfalse AX hax,
+exact absurd h3 h4
+end 
 
 -- finite conjunction of formulas
 def fin_conj : list form → form
@@ -279,20 +286,26 @@ open zorn
 -- S := collection of max cons sets
 -- m := Γ'
 lemma lindenhelper (c : set ctx) (h : chain (⊆) c) (L : list form) :
-(∀ φ : form, φ ∈ L → φ ∈ ⋃₀(c)) → ∃ m ∈ c, ∀ ψ : form, ψ ∈ L → ψ ∈ m :=
+∀ φ : form, (φ ∈ L → φ ∈ ⋃₀(c)) → ∃ m ∈ c, ∀ ψ : form, ψ ∈ L → ψ ∈ m :=
 begin
-intro h1, induction L, 
+intros φ h1, induction L, 
 sorry,
+have h1a : φ = L_hd → φ ∈ ⋃₀(c), 
+intro h2, apply h1, {exact set.mem_union_left (λ (L_hd : form), list.mem φ L_tl) h2},
+have h1b : φ ∈ L_tl → φ ∈ ⋃₀(c), 
+intro h2, apply h1, {exact set.mem_union_right (eq φ) h2},
+specialize L_ih h1b, cases L_ih with m ih, cases ih with h2 ih,
+existsi (m : ctx), existsi (h2 : m ∈ c), intros ψ h3, cases h3,
+subst h3,
 sorry
 end
-#check chain has_subset.subset
 
 lemma lindenbaum (AX Γ : ctx) (hax : ax_consist AX Γ) : 
   ∃ Γ', max_ax_consist AX Γ' ∧ Γ ⊆ Γ' :=
 begin
 let S := { Γ'' | Γ'' ⊇ Γ ∧ ax_consist AX Γ''},
 have h : ∀ c ⊆ S, chain (⊆) c → ∃ub ∈ S, ∀ s ∈ c, s ⊆ ub, 
-{intros c h1 h2, use ⋃₀(c), split, rw set.sUnion,
+{intros c h1 h2, use ⋃₀(c), split,
 have h3 := lindenhelper c h2,
 sorry,
 intros s h3, exact set.subset_sUnion_of_mem h3},

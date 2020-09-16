@@ -38,14 +38,17 @@ begin
 intro φ, induction φ with n φ ψ ih_φ ih_ψ φ ψ ih_φ ih_ψ φ ih_φ,
 split, intro h1, exact false.elim h1,
 intro h1, 
-have h2 : (¬form.bot) ∉ xΓ.val, 
+rw forces, 
 sorry,
-repeat {rw forces, rw val_canonical}, sorry,
+repeat {rw forces, rw val_canonical}, 
 split, intro h1, cases h1 with h1 h2, cases ih_φ,
 specialize ih_φ_mp h1, cases ih_ψ,
-specialize ih_ψ_mp h2, sorry,
+specialize ih_ψ_mp h2, 
+sorry,
 intro h1, split, repeat {sorry}
 end
+
+
 
 lemma comphelper (AX : ctx) (φ : form) (hax : sem_cons AX) : 
   ¬ prfK AX φ → ax_consist AX {¬φ} :=
