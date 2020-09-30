@@ -39,17 +39,15 @@ def u_valid (φ : form) :=
 -- A context is true at a world in a model if each 
 -- formula of the context is true at that world in that model
 def forces_ctx (f : frame) (v : nat → f.states → Prop) 
-  (x : f.states) (Γ : ctx) := ∀ φ, (φ ∈ Γ → forces f v x φ)
+  (Γ : ctx) := ∀ φ, ∀ x, φ ∈ Γ → forces f v x φ
 
 -- Local semantic consequence
 def local_sem_csq (Γ : ctx) (φ : form) :=
-  ∀ f v x, forces_ctx f v x Γ → forces f v x φ
+  ∀ f v x, forces_ctx f v Γ → forces f v x φ
 
 -- Global semantic consequence
 def global_sem_csq (Γ : ctx) (φ : form) :=
-  ∀ f v x, (∀ y, forces_ctx f v y Γ) → forces f v x φ
-
-
+  ∀ f v x, forces_ctx f v Γ → forces f v x φ
 
 lemma not_forces_imp :  ∀ f v x φ, 
   (¬(forces f v x φ)) ↔ (forces f v x (¬φ)) :=

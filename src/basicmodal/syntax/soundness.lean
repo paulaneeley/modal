@@ -9,12 +9,12 @@ local attribute [instance] classical.prop_decidable
 
 ---------------------- Soundness ----------------------
 
-theorem soundness (K : ctx) (φ : form) : prfK K φ → global_sem_csq K φ :=
+theorem soundness (AX : ctx) (φ : form) : prfK AX φ → global_sem_csq AX φ :=
 begin
 intro h,
 induction h,
-{intros f v x h, specialize h x, rw forces_ctx at h,
-specialize h h_φ, have h1 := h h_h, 
+{intros f v x h, rw forces_ctx at h,
+specialize h h_φ x, have h1 := h h_h, 
 exact h1},
 {intros f v x h2 h3 h4, exact h3}, 
 {intros f v x h2 h3 h4 h5, apply h3, 

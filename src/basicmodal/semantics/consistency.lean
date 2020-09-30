@@ -27,9 +27,8 @@ let v := λ n x, true,
 use v, rw not_forall,
 let x := 42, use x,
 rw not_forall, simp, split,
-intro y, rw forces_ctx, intros φ h1,
-have h2 : φ ∉ ∅, {exact set.not_mem_empty φ},
-exact absurd h1 h2, rw forces, trivial 
+intros φ y h1, exact false.elim h1,
+rw forces, trivial 
 end
 
 -- Any axiom system that is consistent does not prove false
@@ -41,13 +40,22 @@ rw ←not_imp_not at h2, exact h2},
 apply h1, exact hax
 end
 
-lemma prnot_to_notpr (φ : form) (AX : ctx) (hax : sem_cons AX) : prfK AX (¬φ) → ¬ prfK AX φ :=
+lemma prnot_to_notpr (φ : form) (AX : ctx) (hax : sem_cons AX) : 
+  prfK AX (¬φ) → ¬ prfK AX φ :=
 begin
 intro h1, by_contradiction h2,
 have h3 : prfK AX ⊥, from mp (mp pl5 contra_equiv_false) (mp (mp pl4 h2) h1),
 have h4 : ¬ prfK AX ⊥, from nprfalse AX hax,
 exact absurd h3 h4
 end 
+
+lemma pr_to_notprnot (φ : form) (AX : ctx) (hax : sem_cons AX) : 
+  prfK AX φ → ¬ prfK AX (¬φ) :=
+begin
+have h1 : prfK AX (¬φ) → ¬ prfK AX φ, from prnot_to_notpr φ AX hax,
+simp at *, rw ←not_imp_not at h1, intro h2, apply h1, rw not_not, exact h2
+end 
+
 
 -- finite conjunction of formulas
 def fin_conj : list form → form
@@ -101,6 +109,33 @@ have h4 : ¬ prfK AX ⊥, from nprfalse AX hax,
 exact absurd h3 h4
 end 
 
+lemma fin_conj_repeat {AX : ctx} {φ : form} {L : list form} :
+  ∀ ψ ∈ L, ψ = ¬φ → prfK AX (¬fin_conj L) → prfK AX φ :=
+begin
+intros ψ h1 h2 h3, simp at *, induction L,
+exact false.elim h1, subst h2, 
+rw fin_conj at h3, simp at *,
+sorry,
+end
+
+lemma fin_conj_box2 {AX : ctx} {φ ψ : form} : prfK AX ((□φ & □ψ) ⊃ □(φ & ψ)) :=
+begin
+exact (mp double_imp (cut2 pl6 (cut pl5 (cut (mp kdist (nec pl4)) kdist))))
+end
+
+lemma fin_conj_boxn {AX : ctx} {L : list form} : 
+  prfK AX ((fin_conj (list.map □ L)) ⊃ (□(fin_conj L))) :=
+begin
+induction L,
+rw fin_conj, simp at *, rw fin_conj,
+exact (mp pl1 (nec prtrue)),
+rw list.map, repeat {rw fin_conj},
+have h1 := imp_and_imp,
+specialize h1 L_ih,
+exact (cut h1 fin_conj_box2)
+end
+
+
 lemma listempty {Γ : ctx} {L : list form} :
   (∀ φ ∈ L, φ ∈ Γ) → Γ = ∅ → L = [] := 
 begin
@@ -128,6 +163,12 @@ def ax_consist (AX Γ : ctx) :=
 -- Γ is maximally ax-consistent
 def max_ax_consist (AX Γ : ctx) := 
   ax_consist AX Γ ∧ (∀ Γ', Γ ⊂ Γ' → ¬ ax_consist AX Γ')
+
+
+lemma max_imp_ax {AX Γ : ctx} : max_ax_consist AX Γ → ax_consist AX Γ :=
+begin
+intro h1, rw max_ax_consist at h1, cases h1, exact h1_left
+end
 
 
 /-Lemma: for every Gamma, phi, for every list L, for every formula b, 
@@ -180,7 +221,7 @@ end
 
 -- Lemma 5 from class notes
 lemma five (AX : ctx) : 
-  ∀ Γ : ctx, ∀ φ : form, ¬ ax_consist AX (Γ ∪ φ) → ∃ L',
+  ∀ Γ : ctx, ∀ φ : form, ¬ ax_consist AX (Γ un φ) → ∃ L',
   (∀ ψ ∈ L', ψ ∈ Γ) ∧ prfK AX (fin_conj L' ⊃ ¬φ) :=
 begin
 intro Γ, intro φ, intro h1, simp at *, rw ax_consist at h1, rw not_forall at h1,
@@ -195,16 +236,16 @@ exact h1_right,
 end
 
 
-lemma six_helper (AX Γ Γ' : ctx) (h : ax_consist AX Γ) :
+lemma six_helper (AX Γ : ctx) (h : ax_consist AX Γ) :
 max_ax_consist AX Γ → ∀ φ : form, φ ∈ Γ ∨ (¬φ) ∈ Γ :=
 begin
 intros h1 φ, simp, rw or_iff_not_and_not, by_contradiction h2,
 cases h2 with h2l h2r, rw max_ax_consist at h1,
 cases h1 with h1l h1r, clear h, 
-have h2 := h1r (Γ ∪ φ), simp at h2, have h3 := h1r (Γ ∪ ¬φ),
-simp at h3, have h4 : ¬ax_consist AX (Γ ∪ ¬φ), 
+have h2 := h1r (Γ un φ), have h3 := h1r (Γ un ¬φ),
+simp at h3, have h4 : ¬ax_consist AX (Γ un ¬φ), 
 {apply h3, from set.ssubset_insert h2r},
-have h5 : ¬ax_consist AX (Γ ∪ φ), 
+have h5 : ¬ax_consist AX (Γ un φ), 
 {simp at *, apply h2, from set.ssubset_insert h2l}, 
 clear h2 h3, simp at *, have h6 := five AX Γ φ _, have h7 := five AX Γ (¬φ) _, 
 cases h6 with L' h6, cases h7 with L h7, dsimp at *, cases h6 with h6l h6r,
@@ -225,12 +266,12 @@ exact h5,
 end
 
 -- lemma 6 from class notes
-lemma six (AX Γ Γ' : ctx) (h : ax_consist AX Γ) :
+lemma six (AX Γ : ctx) (h : ax_consist AX Γ) :
 max_ax_consist AX Γ ↔ ∀ φ, (φ ∈ Γ ∨ (¬φ) ∈ Γ) ∧ ¬(φ ∈ Γ ∧ (¬φ) ∈ Γ) :=
 begin 
 simp, split, 
 intro h1, intro φ, 
-split, exact six_helper AX Γ Γ' h h1 φ,
+split, exact six_helper AX Γ h h1 φ,
 {rw ←not_and, by_contradiction h2,
 cases h2 with h2 h3,
 rw ax_consist at h,
@@ -257,6 +298,118 @@ exact fin_conj_simp ψ
 end
 
 
+lemma exercise1 {AX Γ : ctx} {φ : form} {L : list form} :
+  max_ax_consist AX Γ → (∀ ψ ∈ L, ψ ∈ Γ) → prfK AX (fin_conj L ⊃ φ) → φ ∈ Γ :=
+begin
+intros h1 h2 h3, by_contradiction h4, rw max_ax_consist at h1,
+cases h1 with h1 h5, rw ax_consist at h1, 
+specialize h5 (Γ ∪ {φ}), simp at h5,
+specialize h5 (set.ssubset_insert h4), 
+rw ax_consist at h5,
+rw not_forall at h5, 
+cases h5 with L' h5,
+rw not_forall at h5, cases h5 with h5 h6,
+rw fin_ax_consist at h6, rw not_not at h6,
+apply h1 L h2, clear h1,
+
+have h6 : prfK AX (fin_conj (φ::L) ⊃ ⊥), sorry,
+rw fin_conj at h6,
+have h7 : prfK AX (fin_conj L ⊃ (φ ⊃ ⊥)), from and_right_imp.mp h6,
+have h8 : prfK AX (fin_conj L ⊃ (fin_conj L ⊃ ⊥)), from cut2 h3 h7,
+have h9 : prfK AX (fin_conj L ⊃ ⊥), from mp double_imp h8,
+exact h9
+end
+
+
+lemma max_imp_1 {AX Γ : ctx} {φ ψ : form} : 
+  max_ax_consist AX Γ → (φ ∈ Γ → ψ ∈ Γ) → (φ ⊃ ψ) ∈ Γ :=
+begin
+  sorry
+-- intros h1 h2 h3,
+-- have h4 : (∀ χ ∈ [ψ], χ ∈ Γ) → prfK AX (fin_conj [ψ] ⊃ (φ ⊃ ψ)) → (φ ⊃ ψ) ∈ Γ, from exercise1 h1,
+-- simp at *, specialize h4 h3, repeat {rw fin_conj at *},
+-- have h5 : prfK AX (fin_conj [ψ]⊃(φ⊃ψ)), exact (cut (mp pl5 phi_and_true) pl1),
+-- apply h4, exact h5
+end
+
+
+lemma max_imp_2 {AX Γ : ctx} {φ ψ : form} : 
+  max_ax_consist AX Γ → (φ ⊃ ψ) ∈ Γ → φ ∈ Γ → ψ ∈ Γ :=
+begin
+intros h1 h2 h3,
+have h4 : (∀ χ ∈ [φ, (φ ⊃ ψ)], χ ∈ Γ) → prfK AX (fin_conj [φ, (φ ⊃ ψ)] ⊃ ψ) → ψ ∈ Γ, from exercise1 h1,
+simp at *, apply h4, intros χ h5, cases h5, subst h5, exact h3, subst h5, exact h2,
+repeat {rw fin_conj}, simp at *,
+exact and_right_imp.mpr (mp pl5 phi_and_true)
+end
+
+lemma max_conj_1 {AX Γ : ctx} {φ ψ : form} : 
+  max_ax_consist AX Γ → (φ ∈ Γ ∧ ψ ∈ Γ) → (φ & ψ) ∈ Γ :=
+begin
+intros h1 h2, cases h2,
+have h3 : (∀ χ ∈ [φ], χ ∈ Γ) → prfK AX (fin_conj [φ] ⊃ (ψ ⊃ (φ & ψ))) → (ψ ⊃ (φ & ψ)) ∈ Γ, 
+  from exercise1 h1,
+simp at *, specialize h3 h2_left,
+repeat {rw fin_conj at *},
+have h5 : prfK AX ((φ&¬⊥)⊃(ψ⊃φ&ψ)),
+exact (cut (mp pl5 phi_and_true) pl4), 
+specialize h3 h5,
+have h6 : (ψ ⊃ (φ & ψ)) ∈ Γ → ψ ∈ Γ → (φ & ψ) ∈ Γ, from max_imp_2 h1,
+apply h6, exact h3, exact h2_right
+end
+
+lemma max_conj_2 {AX Γ : ctx} {φ ψ : form} : 
+  max_ax_consist AX Γ → (φ & ψ) ∈ Γ → φ ∈ Γ :=
+begin
+intros h1 h2,
+have h3 : (∀ χ ∈ [(φ & ψ)], χ ∈ Γ) → prfK AX (fin_conj [(φ & ψ)] ⊃ φ) → φ ∈ Γ, 
+  from exercise1 h1,
+simp at *, apply h3, exact h2, repeat {rw fin_conj},
+exact (cut (mp pl5 phi_and_true) pl5)
+end
+
+lemma max_conj_3 {AX Γ : ctx} {φ ψ : form} : 
+  max_ax_consist AX Γ → (φ & ψ) ∈ Γ → ψ ∈ Γ :=
+begin
+intros h1 h2,
+have h3 : (∀ χ ∈ [(φ & ψ)], χ ∈ Γ) → prfK AX (fin_conj [(φ & ψ)] ⊃ ψ) → ψ ∈ Γ, 
+  from exercise1 h1,
+simp at *, apply h3, exact h2, repeat {rw fin_conj},
+exact (cut (mp pl5 phi_and_true) pl6)
+end
+
+lemma max_dn (AX Γ : ctx) (h : max_ax_consist AX Γ) (φ : form) :
+  φ ∈ Γ ↔ (¬¬φ) ∈ Γ :=
+begin
+split, intro h1, 
+have h2 : (∀ ψ ∈ [φ], ψ ∈ Γ) → prfK AX (fin_conj [φ] ⊃ (¬¬φ)) → (¬¬φ) ∈ Γ, from exercise1 h,
+simp at *, apply h2, exact h1,
+repeat {rw fin_conj},
+exact (cut (mp pl5 phi_and_true) dni), 
+intro h1,
+have h2 : (∀ ψ ∈ [¬¬φ], ψ ∈ Γ) → prfK AX (fin_conj [¬¬φ] ⊃ φ) → φ ∈ Γ, from exercise1 h,
+simp at *, apply h2, exact h1,
+repeat {rw fin_conj},
+exact (cut (mp pl5 phi_and_true) dne), 
+end
+
+lemma max_notiff (AX Γ : ctx) (h : max_ax_consist AX Γ) (φ : form) :
+  φ ∉ Γ ↔ (¬φ) ∈ Γ :=
+begin
+split, intro h1,
+have h2 : ax_consist AX Γ, from max_imp_ax h, 
+have h3 : ∀ φ : form, φ ∈ Γ ∨ (¬φ) ∈ Γ, from six_helper AX Γ h2 h,
+specialize h3 φ, cases h3, exact absurd h3 h1, exact h3,
+intro h1,
+have h2 : ax_consist AX Γ, from max_imp_ax h, 
+have h3 : max_ax_consist AX Γ ↔ ∀ φ, (φ ∈ Γ ∨ (¬φ) ∈ Γ) ∧ ¬(φ ∈ Γ ∧ (¬φ) ∈ Γ), 
+  from six AX Γ h2,
+cases h3, specialize h3_mp h (¬φ), simp at *,
+cases h3_mp with mp1 mp2, specialize mp2 h1,
+have h4 : φ ∈ Γ ↔ (¬¬φ) ∈ Γ, from max_dn AX Γ h φ,
+rw ←not_iff_not at h4, cases h4, apply h4_mpr, exact mp2
+end
+
 -- Γ is maximally AX-consistent iff it is AX-consistent and for 
 -- every AX-consistent set Γ', if Γ ⊆ Γ', then Γ = Γ'
 lemma max_equiv (AX Γ : ctx) : max_ax_consist AX Γ ↔ ax_consist AX Γ ∧ 
@@ -274,11 +427,10 @@ intros Γ' h2, by_contradiction h3, specialize h1_right Γ' h3,
 rw set.ssubset_def at h2, cases h2, apply h2_right, rw h1_right h2_left
 end
 
+
+
+
 open zorn
-
-
-
-
 -- Lemma: if c is a chain of sets, L is a list of elements such that 
 -- every element in L is in Union(c), then there is an element s in c such that every 
 -- element of L is in s.
@@ -297,7 +449,7 @@ intro h2, apply h1, {exact set.mem_union_right (eq φ) h2},
 specialize L_ih h1b, cases L_ih with m ih, cases ih with h2 ih,
 existsi (m : ctx), existsi (h2 : m ∈ c), intros ψ h3, cases h3,
 subst h3,
-sorry
+sorry, sorry
 end
 
 lemma lindenbaum (AX Γ : ctx) (hax : ax_consist AX Γ) : 

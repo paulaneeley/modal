@@ -23,9 +23,9 @@ end
 
 
 lemma weak {Γ : ctx} {φ ψ : form} :
-  prfK Γ φ → prfK (Γ ∪ ψ) φ :=
+  prfK Γ φ → prfK (Γ un ψ) φ :=
 begin
-  intro h, dsimp,
+  intro h,
   induction h,
   { apply ax,
     exact (set.mem_insert_of_mem _ h_h) },
@@ -45,7 +45,7 @@ end
 
 
 lemma pr {Γ : ctx} {φ : form} :
-  prfK (Γ ∪ φ) φ :=
+  prfK (Γ un φ) φ :=
 begin
 apply ax;
 apply or.intro_left;
@@ -62,7 +62,7 @@ end
 
 
 lemma conv_deduction {Γ : ctx} {φ ψ : form} :
-  prfK Γ (φ ⊃ ψ) → prfK (Γ ∪ φ) ψ :=
+  prfK Γ (φ ⊃ ψ) → prfK (Γ un φ) ψ :=
 begin
 intro h, 
 exact mp (weak h) pr 

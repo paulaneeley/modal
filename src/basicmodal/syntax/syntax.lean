@@ -4,7 +4,7 @@ import basicmodal.language
 
 -- Define a context
 @[reducible] def ctx : Type := set (form)
-notation Γ `∪` φ := set.insert φ Γ
+notation Γ `un` φ := set.insert φ Γ
 
 -- Proof system, pg. 26
 inductive prfK : ctx → form → Prop 
