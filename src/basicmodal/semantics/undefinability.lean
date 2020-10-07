@@ -170,9 +170,11 @@ def is_surjbddmorphism {f1 f2 : frame} (g : f1.states → f2.states)
 theorem pull_back {f1 f2 : frame} (g : f1.states → f2.states) (h : is_surjbddmorphism g) :
   ∀ φ, ¬ f_valid φ f2 → ¬ f_valid φ f1 :=
 begin
-intros φ h1, rw f_valid at *, rw not_forall at *, cases h1 with v2 h1,
-rw not_forall at h1, cases h1 with y h1,
-let v1 := (λ n x, v2 n (g x)), use v1, rw not_forall,
+intros φ h1, rw f_valid at *, 
+push_neg at h1, push_neg,
+cases h1 with v2 h1,
+cases h1 with y h1,
+let v1 := (λ n x, v2 n (g x)), use v1,
 cases h with hl hr, specialize hl y, cases hl with x hl, 
 existsi (x : f1.states), have h3 := invariance_bisim v1 v2 (λ x y, g x = y),
 have h4 : is_bisimulation v1 v2 (λ (x : f1.states) (y : f2.states), g x = y), 

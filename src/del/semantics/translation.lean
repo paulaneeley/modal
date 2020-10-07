@@ -37,7 +37,7 @@ begin
     },
   case formPA.box : a φ 
     { simp at *,
-      have h1 : complexity φ ≤ n, {exact nat.lt_succ_iff.mp h},
+      have h1 : complexity φ ≤ n, sorry, --{exact nat.lt_succ_iff.mp h},
       have h2 := ih φ h1,
       exact iff_k_dist h2, 
     },
@@ -111,5 +111,5 @@ have h4 : prfPA Γ (φ ⊃ translate φ) → (∀ ψ ∈ Γ, F_valid ψ equiv_cl
 specialize h4 h3 h1,
 have h5 : F_valid (translate φ) equiv_class, {rw F_valid, intros f h v x,
 specialize h2 f h v x, specialize h4 f h v x h2, exact h4},
-
+sorry,
 end

@@ -74,14 +74,11 @@ apply ih_φ_mpr, exact max_conj_2 xΓ.2 h1,
 specialize ih_ψ xΓ, cases ih_ψ, 
 apply ih_ψ_mpr, exact max_conj_3 xΓ.2 h1,
 split, 
-
 intro h1, specialize ih_φ xΓ,
 specialize ih_ψ xΓ, cases ih_φ, cases ih_ψ,
 apply max_imp_1 xΓ.2,
 intro h2, specialize ih_φ_mpr h2,
-specialize h1 ih_φ_mpr, specialize ih_ψ_mp h1,
-
-exact ih_ψ_mp, 
+specialize h1 ih_φ_mpr, exact ih_ψ_mp h1,
 intros h1 h2,
 specialize ih_φ xΓ, cases ih_φ,
 specialize ih_ψ xΓ, cases ih_ψ,
@@ -92,8 +89,7 @@ by_contradiction h2,
 have h4 : ◇(¬φ) ∈ xΓ.val → ∃ yΔ : (canonical AX).states, 
   (¬φ) ∈ yΔ.val ∧ (canonical AX).rel xΓ yΔ,
 from existence AX hax xΓ (¬φ),
-have h5 : (¬□(¬¬φ)) ∈ ↑xΓ, 
-{sorry},
+have h5 := max_boxdn AX xΓ.1 xΓ.2 φ ((max_notiff AX xΓ.1 xΓ.2 φ.box).mp h2),
 simp at *,
 specialize h4 h5, cases h4 with xΔ h4, cases h4 with h4 h6,
 have h7 := max_notiff AX xΔ.1 xΔ.2 φ,
@@ -115,11 +111,13 @@ intro h1, rw ax_consist, intros L h2,
 rw fin_ax_consist, induction L, rw fin_conj, 
 by_contradiction h3,
 exact absurd (mp dne h3) (nprfalse AX hax), 
-have h4 : ∀ ψ ∈ L_hd::L_tl, ψ = ¬φ → prfK AX (¬fin_conj (L_hd::L_tl)) → prfK AX φ, 
-from fin_conj_repeat,
+have h4 : (∀ ψ ∈ L_hd::L_tl, ψ = ¬φ) → prfK AX (¬fin_conj (L_hd::L_tl)) → prfK AX φ, 
+from fin_conj_repeat hax,
 simp at *, 
-cases h4 with h4 h5, cases h2 with h2 h3,
-specialize h4 h2, intro h6, apply h1, apply h4, exact h6
+cases h2 with h2 h3,
+specialize h4 h2, intro h6, apply h1, apply h4, 
+exact h3,
+exact h6
 end 
 
 
@@ -131,12 +129,12 @@ have h2 : ax_consist AX {¬φ}, from comphelper AX φ hax h1,
 have h3 : ∃ Γ', max_ax_consist AX Γ' ∧ {¬φ} ⊆ Γ', from lindenbaum AX {¬φ} h2,
 cases h3 with Γ' h3, cases h3 with h3 h4,
 rw global_sem_csq, 
-rw not_forall, let f := canonical, use f AX,
-rw not_forall, let v := val_canonical, use v AX, rw not_forall,
+push_neg,
+let f := canonical, use f AX,
+let v := val_canonical, use v AX,
 let xΓ' : (f AX).states := ⟨Γ', h3⟩, use xΓ',
-rw not_imp,
 split,
-intros y ψ h5,
+intros y ψ h5, simp at *,
 sorry,
 have h5 : forces (f AX) (v AX) xΓ' (¬φ) ↔ ((¬φ) ∈ xΓ'.val), 
   from truth AX hax xΓ' ¬φ,
@@ -146,10 +144,48 @@ have h7 : ¬forces (f AX) (v AX) xΓ' φ ↔ forces (f AX) (v AX) xΓ' ¬φ,
 cases h7 with h7 h8, apply h8, apply h6, simp at *, exact h4
 end
 
-end canonical
 
-theorem T_completeness (φ : form) : F_valid φ ref_class → prfK T_axioms φ := sorry
+theorem T_completeness (φ : form) : F_valid φ ref_class → prfK T_axioms φ :=
+begin
+intros h1,
+have h2 : global_sem_csq T_axioms φ → prfK T_axioms φ, 
+  from completeness T_axioms sem_consT φ,
+apply h2, clear h2,
+rw global_sem_csq, intros f v x h3,
+rw F_valid at h1,
+apply h1, 
+sorry
+end
+
 
 theorem S4_completeness (φ : form) : F_valid φ ref_trans_class → prfK S4_axioms φ := sorry
 
 theorem S5_completeness (φ : form) : F_valid φ equiv_class → prfK S5_axioms φ := sorry
+
+end canonical
+
+
+
+
+
+
+
+
+
+
+
+-- lemma completenesshelper {AX : ctx} {φ : form} {C : set (frame)} (hax : sem_cons AX) : 
+--   F_valid φ C → (∀ ψ ∈ AX, F_valid ψ C) → prfK AX φ :=
+-- begin
+-- intros h1 h2,
+-- have h3 : global_sem_csq AX φ → prfK AX φ, from completeness AX hax φ,
+-- apply h3, clear h3,
+-- end
+
+-- intros h1,
+-- have h2 : (∀ ψ ∈ T_axioms, F_valid ψ ref_class) → prfK T_axioms φ,
+-- from completenesshelper sem_consT h1,
+-- apply h2, clear h2,
+-- intros ψ h2,
+-- apply T_helper,
+-- exact h2,

@@ -16,19 +16,32 @@ attribute [class] sem_cons
 lemma sem_consK : sem_cons ∅ :=
 begin
 rw sem_cons,
-rw global_sem_csq, rw not_forall,
+rw global_sem_csq, 
+push_neg, 
 let f : frame := 
 { states := ℕ,
   h := ⟨0⟩,
   rel := λ x y, x = y },
-use f,
-rw not_forall,
-let v := λ n x, true,
-use v, rw not_forall,
-let x := 42, use x,
-rw not_forall, simp, split,
-intros φ y h1, exact false.elim h1,
-rw forces, trivial 
+use f, let v := λ n x, true,
+use v, let x := 42, use x,
+split, intros φ y h1, 
+exact false.elim h1, rw forces, 
+trivial 
+end
+
+lemma sem_consT : sem_cons T_axioms :=
+begin
+rw sem_cons, rw global_sem_csq,
+push_neg,
+let f : frame := 
+{ states := ℕ,
+  h := ⟨0⟩,
+  rel := λ x y, x = y },
+use f, let v := λ n x, true,
+use v, let x := 42, use x,
+split, intros φ y h1, 
+rw T_axioms at h1, simp at *,
+sorry, sorry
 end
 
 -- Any axiom system that is consistent does not prove false
@@ -43,18 +56,35 @@ end
 lemma prnot_to_notpr (φ : form) (AX : ctx) (hax : sem_cons AX) : 
   prfK AX (¬φ) → ¬ prfK AX φ :=
 begin
-intro h1, by_contradiction h2,
+intro h1, by_contradiction h2, simp at *,
 have h3 : prfK AX ⊥, from mp (mp pl5 contra_equiv_false) (mp (mp pl4 h2) h1),
 have h4 : ¬ prfK AX ⊥, from nprfalse AX hax,
 exact absurd h3 h4
+end 
+
+lemma notpr_to_prnot (φ : form) (AX : ctx) (hax : sem_cons AX) : 
+  ¬ prfK AX φ → prfK AX (¬φ) :=
+begin
+intro h1,
+simp at *, 
+sorry
 end 
 
 lemma pr_to_notprnot (φ : form) (AX : ctx) (hax : sem_cons AX) : 
   prfK AX φ → ¬ prfK AX (¬φ) :=
 begin
 have h1 : prfK AX (¬φ) → ¬ prfK AX φ, from prnot_to_notpr φ AX hax,
-simp at *, rw ←not_imp_not at h1, intro h2, apply h1, rw not_not, exact h2
+rw ←not_imp_not at h1, intro h2, apply h1, rw not_not, exact h2,
 end 
+
+lemma notprnot_to_pr (φ : form) (AX : ctx) (hax : sem_cons AX) : 
+  ¬ prfK AX (¬φ) → prfK AX φ :=
+begin
+intro h1,
+apply mp dne,
+simp at *,
+sorry
+end
 
 
 -- finite conjunction of formulas
@@ -109,13 +139,25 @@ have h4 : ¬ prfK AX ⊥, from nprfalse AX hax,
 exact absurd h3 h4
 end 
 
-lemma fin_conj_repeat {AX : ctx} {φ : form} {L : list form} :
-  ∀ ψ ∈ L, ψ = ¬φ → prfK AX (¬fin_conj L) → prfK AX φ :=
+
+lemma fin_conj_repeat {AX : ctx} {φ : form} {L : list form} (hax : sem_cons AX) :
+  (∀ ψ ∈ L, ψ = ¬φ) → prfK AX (¬fin_conj L) → prfK AX φ :=
 begin
-intros ψ h1 h2 h3, simp at *, induction L,
-exact false.elim h1, subst h2, 
-rw fin_conj at h3, simp at *,
+intros h1 h2, induction L,
+rw fin_conj at h2,
+have h3 := mp dne h2,
+have h4 := nprfalse AX hax,
+exact absurd h3 h4,
+repeat {rw fin_conj at *}, simp at *,
+cases h1 with h1 h3, subst h1,
+specialize L_ih h3, 
+rw imp_iff_not_or at L_ih,
+cases L_ih,
+have h4 : prfK AX ((¬φ) ⊃ (¬fin_conj L_tl)), from mp (mp pl5 demorgans) h2,
+simp at *,
+
 sorry,
+exact L_ih
 end
 
 lemma fin_conj_box2 {AX : ctx} {φ ψ : form} : prfK AX ((□φ & □ψ) ⊃ □(φ & ψ)) :=
@@ -224,8 +266,9 @@ lemma five (AX : ctx) :
   ∀ Γ : ctx, ∀ φ : form, ¬ ax_consist AX (Γ un φ) → ∃ L',
   (∀ ψ ∈ L', ψ ∈ Γ) ∧ prfK AX (fin_conj L' ⊃ ¬φ) :=
 begin
-intro Γ, intro φ, intro h1, simp at *, rw ax_consist at h1, rw not_forall at h1,
-cases h1 with L h1, rw not_imp at h1,
+intro Γ, intro φ, intro h1, simp at *, rw ax_consist at h1, 
+push_neg at h1,
+cases h1 with L h1,
 have h2 : (∀ ψ ∈ L, ψ ∈ Γ ∨ ψ = φ) → prfK AX (fin_conj L ⊃ ⊥) → ∃ L',
   (∀ ψ ∈ L', ψ ∈ Γ) ∧ prfK AX (fin_conj L' ⊃ (φ ⊃ ⊥)), from five_helper AX Γ φ L ⊥,
 cases h1,
@@ -291,45 +334,132 @@ specialize h1 ψ, cases h1,
 cases h1_left,
 apply absurd h1_left h5,
 have h6 : (¬ψ) ∈ Γ', from set.mem_of_subset_of_mem h3_left h1_left,
-rw ax_consist, rw not_forall, existsi ([ψ,¬ψ] : list form),
+rw ax_consist, 
+push_neg,
+existsi ([ψ,¬ψ] : list form),
 simp, split, intros φ h7, cases h7, subst h7, exact h4, 
 subst h7, exact h6, rw fin_ax_consist, rw not_not,
 exact fin_conj_simp ψ
 end
 
+-- Suppose L subset Gamma, and |-AX /\ L -> chi. Then for every L' and theta, 
+-- if L' subset Gamma U {chi} and |-AX /\ L' -> theta, then there is a list L'' 
+-- subset Gamma such that |-AX /\ L'' -> theta
+-- Fix L, chi. Use induction on L'.
+-- OR
+-- Lemma: suppose L subset Gamma, |-AX /\ L -> chi. Suppose L' subset Gamma U 
+-- {chi}. 
+-- -- Then |-AX /\L -> /\ L'.
+-- Then there is an L'' subset Gamma such that |-AX /\ L'' -> /\ L'.
+lemma ex1help1 {AX Γ : ctx} {φ : form} {L L' : list form} :
+  (∀ ψ ∈ L, ψ ∈ Γ) → prfK AX (fin_conj L ⊃ φ) → (∀ ψ ∈ L', ψ ∈ (insert φ Γ)) 
+  → ∃ L'' : list form, (∀ ψ ∈ L'', ψ ∈ Γ) ∧ prfK AX (fin_conj L'' ⊃ fin_conj L) := sorry
+
+lemma ex1help2 {AX : ctx} {L L'' : list form} : L ⊆ L'' → prfK AX ((fin_conj L'') ⊃ (fin_conj L)) := sorry 
+
+lemma ex1help3 {L L' : list form} : L ⊆ (L ++ L') := sorry 
+
+lemma ex1help4 {AX : ctx} {L L' : list form} : 
+  ∀ ψ ∈ L', prfK AX (fin_conj L ⊃ ψ) → prfK AX (fin_conj L ⊃ fin_conj L') := sorry
+
+lemma ex1help5 {AX : ctx} {L L' : list form} {φ : form} : 
+  prfK AX (fin_conj L ⊃ φ) → L ⊆ L' → prfK AX (fin_conj L' ⊃ φ) := sorry
 
 lemma exercise1 {AX Γ : ctx} {φ : form} {L : list form} :
   max_ax_consist AX Γ → (∀ ψ ∈ L, ψ ∈ Γ) → prfK AX (fin_conj L ⊃ φ) → φ ∈ Γ :=
 begin
-intros h1 h2 h3, by_contradiction h4, rw max_ax_consist at h1,
-cases h1 with h1 h5, rw ax_consist at h1, 
-specialize h5 (Γ ∪ {φ}), simp at h5,
+intros h1 h2 h3, 
+by_contradiction h4, 
+rw max_ax_consist at h1,
+cases h1 with h1 h5, 
+specialize h5 (Γ ∪ {φ}), 
+simp at h5,
 specialize h5 (set.ssubset_insert h4), 
 rw ax_consist at h5,
-rw not_forall at h5, 
+push_neg at h5,
 cases h5 with L' h5,
-rw not_forall at h5, cases h5 with h5 h6,
-rw fin_ax_consist at h6, rw not_not at h6,
+cases h5 with h5 h6,
+rw fin_ax_consist at h6, 
+rw not_not at h6,
+rw ax_consist at h1, 
 apply h1 L h2, clear h1,
+have h6 := ex1help1 h2 h3 h5,
+cases h6 with L'' h6, 
+cases h6 with h6 h7,
+simp at *,
+have h8' : L ⊆ L', sorry,
+have h8 : prfK AX (fin_conj L' ⊃ φ), from ex1help5 h3 h8',
 
-have h6 : prfK AX (fin_conj (φ::L) ⊃ ⊥), sorry,
-rw fin_conj at h6,
-have h7 : prfK AX (fin_conj L ⊃ (φ ⊃ ⊥)), from and_right_imp.mp h6,
-have h8 : prfK AX (fin_conj L ⊃ (fin_conj L ⊃ ⊥)), from cut2 h3 h7,
-have h9 : prfK AX (fin_conj L ⊃ ⊥), from mp double_imp h8,
-exact h9
+sorry,
+
+
+-- have h6 : prfK AX (fin_conj (φ::L) ⊃ ⊥), sorry,
+-- rw fin_conj at h6,
+-- have h7 : prfK AX (fin_conj L ⊃ (φ ⊃ ⊥)), from and_right_imp.mp h6,
+-- have h8 : prfK AX (fin_conj L ⊃ (fin_conj L ⊃ ⊥)), from cut2 h3 h7,
+-- have h9 : prfK AX (fin_conj L ⊃ ⊥), from mp double_imp h8,
+-- exact h9
 end
 
+lemma max_dn (AX Γ : ctx) (h : max_ax_consist AX Γ) (φ : form) :
+  φ ∈ Γ ↔ (¬¬φ) ∈ Γ :=
+begin
+split, intro h1, 
+have h2 : (∀ ψ ∈ [φ], ψ ∈ Γ) → prfK AX (fin_conj [φ] ⊃ (¬¬φ)) → (¬¬φ) ∈ Γ, from exercise1 h,
+simp at *, apply h2, exact h1,
+repeat {rw fin_conj},
+exact (cut (mp pl5 phi_and_true) dni), 
+intro h1,
+have h2 : (∀ ψ ∈ [¬¬φ], ψ ∈ Γ) → prfK AX (fin_conj [¬¬φ] ⊃ φ) → φ ∈ Γ, from exercise1 h,
+simp at *, apply h2, exact h1,
+repeat {rw fin_conj},
+exact (cut (mp pl5 phi_and_true) dne), 
+end
+
+lemma max_boxdn (AX Γ : ctx) (h : max_ax_consist AX Γ) (φ : form) :
+  (¬□φ) ∈ Γ → (¬□(¬¬φ)) ∈ Γ :=
+begin
+intro h1,
+have h2 : (∀ ψ ∈ [(¬□φ)], ψ ∈ Γ) → prfK AX (fin_conj [(¬□φ)] ⊃ (¬□(¬¬φ))) → (¬□(¬¬φ)) ∈ Γ, 
+  from exercise1 h,
+simp at *, apply h2, exact h1, clear h2,
+repeat {rw fin_conj at *},
+exact (cut (mp pl5 phi_and_true) box_dne), 
+end
+
+lemma max_notiff (AX Γ : ctx) (h : max_ax_consist AX Γ) (φ : form) :
+  φ ∉ Γ ↔ (¬φ) ∈ Γ :=
+begin
+split, intro h1,
+have h2 : ax_consist AX Γ, from max_imp_ax h, 
+have h3 : ∀ φ : form, φ ∈ Γ ∨ (¬φ) ∈ Γ, from six_helper AX Γ h2 h,
+specialize h3 φ, cases h3, exact absurd h3 h1, exact h3,
+intro h1,
+have h2 : ax_consist AX Γ, from max_imp_ax h, 
+have h3 : max_ax_consist AX Γ ↔ ∀ φ, (φ ∈ Γ ∨ (¬φ) ∈ Γ) ∧ ¬(φ ∈ Γ ∧ (¬φ) ∈ Γ), 
+  from six AX Γ h2,
+cases h3, specialize h3_mp h (¬φ), simp at *,
+cases h3_mp with mp1 mp2, specialize mp2 h1,
+have h4 : φ ∈ Γ ↔ (¬¬φ) ∈ Γ, from max_dn AX Γ h φ,
+rw ←not_iff_not at h4, cases h4, apply h4_mpr, exact mp2
+end
 
 lemma max_imp_1 {AX Γ : ctx} {φ ψ : form} : 
   max_ax_consist AX Γ → (φ ∈ Γ → ψ ∈ Γ) → (φ ⊃ ψ) ∈ Γ :=
 begin
-  sorry
--- intros h1 h2 h3,
--- have h4 : (∀ χ ∈ [ψ], χ ∈ Γ) → prfK AX (fin_conj [ψ] ⊃ (φ ⊃ ψ)) → (φ ⊃ ψ) ∈ Γ, from exercise1 h1,
--- simp at *, specialize h4 h3, repeat {rw fin_conj at *},
--- have h5 : prfK AX (fin_conj [ψ]⊃(φ⊃ψ)), exact (cut (mp pl5 phi_and_true) pl1),
--- apply h4, exact h5
+intros h1 h2, rw imp_iff_not_or at h2,
+cases h2,
+have h3 : (∀ χ ∈ [¬φ], χ ∈ Γ) → prfK AX (fin_conj [¬φ] ⊃ (φ ⊃ ψ)) → (φ ⊃ ψ) ∈ Γ, from exercise1 h1,
+simp at *, apply h3, 
+exact (max_notiff AX Γ h1 φ).mp h2,
+repeat {rw fin_conj at *},
+simp at *,
+have h4 : prfK AX ((¬φ) ⊃ (φ ⊃ ψ)), from and_right_imp.mp exfalso,
+simp at *,
+exact cut (mp pl5 phi_and_true) h4,
+have h3 : (∀ χ ∈ [ψ], χ ∈ Γ) → prfK AX (fin_conj [ψ] ⊃ (φ ⊃ ψ)) → (φ ⊃ ψ) ∈ Γ, from exercise1 h1,
+simp at *, 
+apply h3, exact h2, exact (cut (mp pl5 phi_and_true) pl1),
 end
 
 
@@ -376,38 +506,6 @@ have h3 : (∀ χ ∈ [(φ & ψ)], χ ∈ Γ) → prfK AX (fin_conj [(φ & ψ)] 
   from exercise1 h1,
 simp at *, apply h3, exact h2, repeat {rw fin_conj},
 exact (cut (mp pl5 phi_and_true) pl6)
-end
-
-lemma max_dn (AX Γ : ctx) (h : max_ax_consist AX Γ) (φ : form) :
-  φ ∈ Γ ↔ (¬¬φ) ∈ Γ :=
-begin
-split, intro h1, 
-have h2 : (∀ ψ ∈ [φ], ψ ∈ Γ) → prfK AX (fin_conj [φ] ⊃ (¬¬φ)) → (¬¬φ) ∈ Γ, from exercise1 h,
-simp at *, apply h2, exact h1,
-repeat {rw fin_conj},
-exact (cut (mp pl5 phi_and_true) dni), 
-intro h1,
-have h2 : (∀ ψ ∈ [¬¬φ], ψ ∈ Γ) → prfK AX (fin_conj [¬¬φ] ⊃ φ) → φ ∈ Γ, from exercise1 h,
-simp at *, apply h2, exact h1,
-repeat {rw fin_conj},
-exact (cut (mp pl5 phi_and_true) dne), 
-end
-
-lemma max_notiff (AX Γ : ctx) (h : max_ax_consist AX Γ) (φ : form) :
-  φ ∉ Γ ↔ (¬φ) ∈ Γ :=
-begin
-split, intro h1,
-have h2 : ax_consist AX Γ, from max_imp_ax h, 
-have h3 : ∀ φ : form, φ ∈ Γ ∨ (¬φ) ∈ Γ, from six_helper AX Γ h2 h,
-specialize h3 φ, cases h3, exact absurd h3 h1, exact h3,
-intro h1,
-have h2 : ax_consist AX Γ, from max_imp_ax h, 
-have h3 : max_ax_consist AX Γ ↔ ∀ φ, (φ ∈ Γ ∨ (¬φ) ∈ Γ) ∧ ¬(φ ∈ Γ ∧ (¬φ) ∈ Γ), 
-  from six AX Γ h2,
-cases h3, specialize h3_mp h (¬φ), simp at *,
-cases h3_mp with mp1 mp2, specialize mp2 h1,
-have h4 : φ ∈ Γ ↔ (¬¬φ) ∈ Γ, from max_dn AX Γ h φ,
-rw ←not_iff_not at h4, cases h4, apply h4_mpr, exact mp2
 end
 
 -- Γ is maximally AX-consistent iff it is AX-consistent and for 

@@ -4,21 +4,21 @@ import basicmodal.language
 
 -- Define a context
 @[reducible] def ctx : Type := set (form)
-notation Γ `un` φ := set.insert φ Γ
+notation AX `un` φ := set.insert φ AX
 
 -- Proof system, pg. 26
 inductive prfK : ctx → form → Prop 
-| ax {Γ} {φ} (h : φ ∈ Γ) : prfK Γ φ
-| pl1 {Γ} {φ ψ}          : prfK Γ (φ ⊃ (ψ ⊃ φ))
-| pl2 {Γ} {φ ψ χ}        : prfK Γ ((φ ⊃ (ψ ⊃ χ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ)))
-| pl3 {Γ} {φ ψ}          : prfK Γ (((¬φ) ⊃ (¬ψ)) ⊃ (((¬φ) ⊃ ψ) ⊃ φ))
-| pl4 {Γ} {φ ψ}          : prfK Γ (φ ⊃ (ψ ⊃ (φ & ψ)))
-| pl5 {Γ} {φ ψ}          : prfK Γ ((φ & ψ) ⊃ φ)
-| pl6 {Γ} {φ ψ}          : prfK Γ ((φ & ψ) ⊃ ψ)
-| pl8 {Γ} {φ ψ}          : prfK Γ (((¬φ) ⊃ (¬ψ)) ⊃ (ψ ⊃ φ))
-| kdist {Γ} {φ ψ}        : prfK Γ ((□ (φ ⊃ ψ)) ⊃ ((□ φ) ⊃ (□ ψ)))
-| mp {Γ} {φ ψ} 
-  (hpq: prfK Γ (φ ⊃ ψ)) 
-  (hp : prfK Γ φ)      : prfK Γ ψ
-| nec {Γ} {φ} 
-  (hp: prfK Γ φ)       : prfK Γ (□ φ)
+| ax {AX} {φ} (h : φ ∈ AX) : prfK AX φ
+| pl1 {AX} {φ ψ}          : prfK AX (φ ⊃ (ψ ⊃ φ))
+| pl2 {AX} {φ ψ χ}        : prfK AX ((φ ⊃ (ψ ⊃ χ)) ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ)))
+| pl3 {AX} {φ ψ}          : prfK AX (((¬φ) ⊃ (¬ψ)) ⊃ (((¬φ) ⊃ ψ) ⊃ φ))
+| pl4 {AX} {φ ψ}          : prfK AX (φ ⊃ (ψ ⊃ (φ & ψ)))
+| pl5 {AX} {φ ψ}          : prfK AX ((φ & ψ) ⊃ φ)
+| pl6 {AX} {φ ψ}          : prfK AX ((φ & ψ) ⊃ ψ)
+| pl8 {AX} {φ ψ}          : prfK AX (((¬φ) ⊃ (¬ψ)) ⊃ (ψ ⊃ φ))
+| kdist {AX} {φ ψ}        : prfK AX ((□ (φ ⊃ ψ)) ⊃ ((□ φ) ⊃ (□ ψ)))
+| mp {AX} {φ ψ} 
+  (hpq: prfK AX (φ ⊃ ψ)) 
+  (hp : prfK AX φ)      : prfK AX ψ
+| nec {AX} {φ} 
+  (hp: prfK AX φ)       : prfK AX (□ φ)

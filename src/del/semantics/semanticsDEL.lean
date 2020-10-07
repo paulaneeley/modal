@@ -94,11 +94,13 @@ begin
 split,
 {intro h1, rw forces at h1, rw forces at h1,
 rw forces at h1, rw imp_false at h1,
-rw not_forall at h1, cases h1 with Ph1 h1, 
+push_neg at h1,
+cases h1 with Ph1 h1, 
 existsi (Ph1 : forces f v x φ), rw not_forces_imp at h1, 
 rw forces at h1, rw forces at h1,
 rw forces at h1, rw imp_false at h1, 
-rw not_forall at h1, cases h1 with Ph2 h2, exact Ph2},
+push_neg at h1,
+cases h1 with Ph2 h2, exact Ph2},
 {intro h1, cases h1 with Ph1 h1, 
 intro h2, apply h2, exact h1}
 end

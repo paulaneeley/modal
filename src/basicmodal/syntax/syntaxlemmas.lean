@@ -299,4 +299,24 @@ have h2 := imp_and_and_imp,
 specialize h2 (mp (mp pl4 iden) h1), exact h2
 end
 
+lemma not_nphi_imp_phi {Γ : ctx} {φ : form} : prfK Γ (¬((¬φ) ⊃ φ)) := sorry
+
 lemma demorgans {Γ : ctx} {φ ψ : form} : prfK Γ ((¬(φ & ψ)) ↔ (φ ⊃ ¬ψ)) := sorry
+
+-- lemma imp_and {Γ : ctx} {φ ψ : form} : prfK Γ ((¬(φ ⊃ ψ)) ↔ (φ & ¬ψ)) := sorry
+
+lemma explosion {Γ : ctx} {ψ : form} : prfK Γ (⊥ ⊃ ψ) :=
+begin
+apply contrapos.mp, exact (mp pl1 iden)
+end
+
+lemma exfalso {Γ : ctx} {φ ψ : form} : prfK Γ ((φ & ¬φ) ⊃ ψ) :=
+begin
+exact cut not_contra explosion
+end
+
+lemma box_dne {Γ : ctx} {φ : form} : prfK Γ ((¬□φ) ⊃ ¬(□(¬¬φ))) :=
+begin
+exact (contrapos.mpr (mp kdist (nec dne)))
+end
+
