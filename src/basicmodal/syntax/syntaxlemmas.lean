@@ -299,11 +299,14 @@ have h2 := imp_and_and_imp,
 specialize h2 (mp (mp pl4 iden) h1), exact h2
 end
 
-lemma not_nphi_imp_phi {Γ : ctx} {φ : form} : prfK Γ (¬((¬φ) ⊃ φ)) := sorry
-
-lemma demorgans {Γ : ctx} {φ ψ : form} : prfK Γ ((¬(φ & ψ)) ↔ (φ ⊃ ¬ψ)) := sorry
-
--- lemma imp_and {Γ : ctx} {φ ψ : form} : prfK Γ ((¬(φ ⊃ ψ)) ↔ (φ & ¬ψ)) := sorry
+lemma demorgans {Γ : ctx} {φ ψ : form} : prfK Γ (¬(φ & ψ)) ↔ prfK Γ (φ ⊃ ¬ψ) :=
+begin
+split,
+intro h1,
+exact (and_right_imp.mp (mp (contrapos.mpr (mp pl5 and_switch)) h1)),
+intro h1,
+exact (mp (contrapos.mpr (mp pl5 and_switch)) (and_right_imp.mpr h1))
+end
 
 lemma explosion {Γ : ctx} {ψ : form} : prfK Γ (⊥ ⊃ ψ) :=
 begin

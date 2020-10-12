@@ -21,7 +21,7 @@ push_neg,
 let f : frame := 
 { states := ℕ,
   h := ⟨0⟩,
-  rel := λ x y, x = y },
+  rel := λ x y, x = y},
 use f, let v := λ n x, true,
 use v, let x := 42, use x,
 split, intros φ y h1, 
@@ -36,12 +36,14 @@ push_neg,
 let f : frame := 
 { states := ℕ,
   h := ⟨0⟩,
-  rel := λ x y, x = y },
+  rel := λ x y, x = x},
 use f, let v := λ n x, true,
 use v, let x := 42, use x,
 split, intros φ y h1, 
-rw T_axioms at h1, simp at *,
-sorry, sorry
+cases h1 with ψ h1, subst h1,
+intro h1, apply h1 y,
+exact rfl,
+rw forces, trivial
 end
 
 -- Any axiom system that is consistent does not prove false
@@ -62,30 +64,12 @@ have h4 : ¬ prfK AX ⊥, from nprfalse AX hax,
 exact absurd h3 h4
 end 
 
-lemma notpr_to_prnot (φ : form) (AX : ctx) (hax : sem_cons AX) : 
-  ¬ prfK AX φ → prfK AX (¬φ) :=
-begin
-intro h1,
-simp at *, 
-sorry
-end 
-
 lemma pr_to_notprnot (φ : form) (AX : ctx) (hax : sem_cons AX) : 
   prfK AX φ → ¬ prfK AX (¬φ) :=
 begin
 have h1 : prfK AX (¬φ) → ¬ prfK AX φ, from prnot_to_notpr φ AX hax,
 rw ←not_imp_not at h1, intro h2, apply h1, rw not_not, exact h2,
 end 
-
-lemma notprnot_to_pr (φ : form) (AX : ctx) (hax : sem_cons AX) : 
-  ¬ prfK AX (¬φ) → prfK AX φ :=
-begin
-intro h1,
-apply mp dne,
-simp at *,
-sorry
-end
-
 
 -- finite conjunction of formulas
 def fin_conj : list form → form
@@ -139,6 +123,16 @@ have h4 : ¬ prfK AX ⊥, from nprfalse AX hax,
 exact absurd h3 h4
 end 
 
+lemma fin_conj_repeat_helper {AX : ctx} {θ : form} {L : list form} (hax : sem_cons AX) :
+  (∀ ψ ∈ L, ψ = θ) → prfK AX (θ ⊃ fin_conj L) :=
+begin
+intros h1, induction L,
+exact mp pl1 iden,
+rw fin_conj, simp at *,
+cases h1 with h1 h2,
+specialize L_ih h2, subst h1,
+exact cut (mp double_imp pl4) (imp_and_and_imp (mp (mp pl4 iden) L_ih)),
+end
 
 lemma fin_conj_repeat {AX : ctx} {φ : form} {L : list form} (hax : sem_cons AX) :
   (∀ ψ ∈ L, ψ = ¬φ) → prfK AX (¬fin_conj L) → prfK AX φ :=
@@ -149,15 +143,11 @@ have h3 := mp dne h2,
 have h4 := nprfalse AX hax,
 exact absurd h3 h4,
 repeat {rw fin_conj at *}, simp at *,
-cases h1 with h1 h3, subst h1,
-specialize L_ih h3, 
-rw imp_iff_not_or at L_ih,
-cases L_ih,
-have h4 : prfK AX ((¬φ) ⊃ (¬fin_conj L_tl)), from mp (mp pl5 demorgans) h2,
-simp at *,
-
-sorry,
-exact L_ih
+cases h1 with h1 h3, 
+have h5 : prfK AX ((¬fin_conj L_tl) ⊃ ¬(¬φ)), from contrapos.mpr (fin_conj_repeat_helper hax h3),
+subst h1,
+exact (mp (mp pl3 (contrapos.mpr (cut h5 dne))) 
+  (contrapos.mpr (cut ((demorgans.mp) (mp (mp pl6 (iff_not and_switch)) h2)) dne)))
 end
 
 lemma fin_conj_box2 {AX : ctx} {φ ψ : form} : prfK AX ((□φ & □ψ) ⊃ □(φ & ψ)) :=
@@ -342,28 +332,32 @@ subst h7, exact h6, rw fin_ax_consist, rw not_not,
 exact fin_conj_simp ψ
 end
 
--- Suppose L subset Gamma, and |-AX /\ L -> chi. Then for every L' and theta, 
--- if L' subset Gamma U {chi} and |-AX /\ L' -> theta, then there is a list L'' 
--- subset Gamma such that |-AX /\ L'' -> theta
--- Fix L, chi. Use induction on L'.
--- OR
--- Lemma: suppose L subset Gamma, |-AX /\ L -> chi. Suppose L' subset Gamma U 
--- {chi}. 
--- -- Then |-AX /\L -> /\ L'.
--- Then there is an L'' subset Gamma such that |-AX /\ L'' -> /\ L'.
-lemma ex1help1 {AX Γ : ctx} {φ : form} {L L' : list form} :
+lemma ex1help {AX Γ : ctx} {φ : form} {L L' : list form} :
   (∀ ψ ∈ L, ψ ∈ Γ) → prfK AX (fin_conj L ⊃ φ) → (∀ ψ ∈ L', ψ ∈ (insert φ Γ)) 
-  → ∃ L'' : list form, (∀ ψ ∈ L'', ψ ∈ Γ) ∧ prfK AX (fin_conj L'' ⊃ fin_conj L) := sorry
-
-lemma ex1help2 {AX : ctx} {L L'' : list form} : L ⊆ L'' → prfK AX ((fin_conj L'') ⊃ (fin_conj L)) := sorry 
-
-lemma ex1help3 {L L' : list form} : L ⊆ (L ++ L') := sorry 
-
-lemma ex1help4 {AX : ctx} {L L' : list form} : 
-  ∀ ψ ∈ L', prfK AX (fin_conj L ⊃ ψ) → prfK AX (fin_conj L ⊃ fin_conj L') := sorry
-
-lemma ex1help5 {AX : ctx} {L L' : list form} {φ : form} : 
-  prfK AX (fin_conj L ⊃ φ) → L ⊆ L' → prfK AX (fin_conj L' ⊃ φ) := sorry
+  → ∃ L'' : list form, (∀ ψ ∈ L'', ψ ∈ Γ) ∧ prfK AX (fin_conj L'' ⊃ fin_conj L') :=
+begin
+intros h1 h2 h3, induction L',
+existsi ([] : list form),
+split,
+intros ψ h4, exact false.elim h4,
+exact iden,
+simp at *, cases h3 with h3 h4,
+specialize L'_ih h4,
+cases L'_ih with L'' L'_ih,
+cases L'_ih with ih1 ih2,
+cases h3, 
+existsi (L''++L : list form),
+split,
+simp at *, intros ψ h2,
+cases h2 with h2 h5,
+exact ih1 ψ h2,
+exact h1 ψ h5,
+subst h3, 
+exact (cut (mp pl6 fin_conj_append) (cut (mp pl5 and_switch) (imp_and_and_imp (mp (mp pl4 h2) ih2)))),
+existsi (L'_hd::L'' : list form),
+split, simp at *, split, exact h3, exact ih1,
+exact imp_and_imp ih2
+end
 
 lemma exercise1 {AX Γ : ctx} {φ : form} {L : list form} :
   max_ax_consist AX Γ → (∀ ψ ∈ L, ψ ∈ Γ) → prfK AX (fin_conj L ⊃ φ) → φ ∈ Γ :=
@@ -382,23 +376,11 @@ cases h5 with h5 h6,
 rw fin_ax_consist at h6, 
 rw not_not at h6,
 rw ax_consist at h1, 
-apply h1 L h2, clear h1,
-have h6 := ex1help1 h2 h3 h5,
-cases h6 with L'' h6, 
-cases h6 with h6 h7,
-simp at *,
-have h8' : L ⊆ L', sorry,
-have h8 : prfK AX (fin_conj L' ⊃ φ), from ex1help5 h3 h8',
-
-sorry,
-
-
--- have h6 : prfK AX (fin_conj (φ::L) ⊃ ⊥), sorry,
--- rw fin_conj at h6,
--- have h7 : prfK AX (fin_conj L ⊃ (φ ⊃ ⊥)), from and_right_imp.mp h6,
--- have h8 : prfK AX (fin_conj L ⊃ (fin_conj L ⊃ ⊥)), from cut2 h3 h7,
--- have h9 : prfK AX (fin_conj L ⊃ ⊥), from mp double_imp h8,
--- exact h9
+have h7 := ex1help h2 h3 h5,
+cases h7 with L'' h7,
+cases h7 with h7 h8,
+specialize h1 L'' h7, apply h1,
+exact cut h8 h6
 end
 
 lemma max_dn (AX Γ : ctx) (h : max_ax_consist AX Γ) (φ : form) :
@@ -461,7 +443,6 @@ have h3 : (∀ χ ∈ [ψ], χ ∈ Γ) → prfK AX (fin_conj [ψ] ⊃ (φ ⊃ ψ
 simp at *, 
 apply h3, exact h2, exact (cut (mp pl5 phi_and_true) pl1),
 end
-
 
 lemma max_imp_2 {AX Γ : ctx} {φ ψ : form} : 
   max_ax_consist AX Γ → (φ ⊃ ψ) ∈ Γ → φ ∈ Γ → ψ ∈ Γ :=
@@ -527,27 +508,33 @@ end
 
 
 
-
 open zorn
 -- Lemma: if c is a chain of sets, L is a list of elements such that 
--- every element in L is in Union(c), then there is an element s in c such that every 
--- element of L is in s.
+-- every element in L is in Union(c), then there is an element m in c such that every 
+-- element of L is in m.
 -- by induction on L.
 -- S := collection of max cons sets
 -- m := Γ'
 lemma lindenhelper (c : set ctx) (h : chain (⊆) c) (L : list form) :
-∀ φ : form, (φ ∈ L → φ ∈ ⋃₀(c)) → ∃ m ∈ c, ∀ ψ : form, ψ ∈ L → ψ ∈ m :=
+(∀ φ ∈ L, φ ∈ ⋃₀(c)) → ∃ m ∈ c, (∀ ψ ∈ L, ψ ∈ m) :=
 begin
-intros φ h1, induction L, 
-sorry,
-have h1a : φ = L_hd → φ ∈ ⋃₀(c), 
-intro h2, apply h1, {exact set.mem_union_left (λ (L_hd : form), list.mem φ L_tl) h2},
-have h1b : φ ∈ L_tl → φ ∈ ⋃₀(c), 
-intro h2, apply h1, {exact set.mem_union_right (eq φ) h2},
-specialize L_ih h1b, cases L_ih with m ih, cases ih with h2 ih,
-existsi (m : ctx), existsi (h2 : m ∈ c), intros ψ h3, cases h3,
-subst h3,
-sorry, sorry
+intros h1, induction L,
+existsi (∅ : ctx), 
+have h2 : ∅ ∈ c, sorry,
+existsi (h2), intros ψ h3, exact false.elim h3,
+have h1a : ∀ φ, φ = L_hd → φ ∈ ⋃₀(c), 
+intros φ h2, apply h1, {exact set.mem_union_left (λ (L_hd : form), list.mem φ L_tl) h2},
+have h1b : ∀ φ, φ ∈ L_tl → φ ∈ ⋃₀(c), 
+intros φ h2, apply h1, {exact set.mem_union_right (eq φ) h2},
+specialize L_ih h1b,
+sorry
+end
+
+lemma union_consistent (AX : ctx) (c : set ctx) (h : chain (⊆) c) : (∀ m ∈ c, ax_consist AX m) → ax_consist AX (⋃₀c) :=
+begin
+intros h1, by_contradiction h2, rw ax_consist at h2,
+push_neg at h2, cases h2 with L h2,
+cases h2 with h2 h3, sorry
 end
 
 lemma lindenbaum (AX Γ : ctx) (hax : ax_consist AX Γ) : 
@@ -557,7 +544,11 @@ let S := { Γ'' | Γ'' ⊇ Γ ∧ ax_consist AX Γ''},
 have h : ∀ c ⊆ S, chain (⊆) c → ∃ub ∈ S, ∀ s ∈ c, s ⊆ ub, 
 {intros c h1 h2, use ⋃₀(c), split,
 have h3 := lindenhelper c h2,
+split,
 sorry,
+have h4 : (∀ m ∈ c, ax_consist AX m) → ax_consist AX (⋃₀c), from union_consistent AX c h2,
+apply h4, intros m h5,
+have h6 : m ∈ S, from set.mem_of_subset_of_mem h1 h5, exact h6.right,
 intros s h3, exact set.subset_sUnion_of_mem h3},
 cases zorn_subset S h with Γ' h1, cases h1 with h1 h2,
 use Γ', split, rw max_equiv, split, apply h1.2, 
