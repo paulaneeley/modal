@@ -87,22 +87,13 @@ lemma dne {Γ : ctx} {φ : form} :
 prfK Γ ((¬¬φ) ⊃ φ) :=
 begin
 have h1 : prfK Γ (φ ⊃ (φ ⊃ φ)), from pl1,
-have h2 : prfK Γ (((¬¬(φ ⊃ (φ ⊃ φ))) ⊃ (¬¬φ)) ⊃ ((¬φ) ⊃ ¬(φ ⊃ (φ ⊃ φ)))), from pl8,
-have h3 : prfK Γ (((¬φ) ⊃ ¬(φ ⊃ (φ ⊃ φ))) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from pl8,
-have h4 : prfK Γ (((¬¬(φ ⊃ (φ ⊃ φ))) ⊃ (¬¬φ)) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from cut h2 h3,
-have h5 : prfK Γ ((¬¬φ) ⊃ ((¬¬(φ ⊃ (φ ⊃ φ))) ⊃ (¬¬φ))), from pl1,
-have h6 : prfK Γ ((¬¬φ) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from cut h5 h4,
-have h7 : prfK Γ ((φ ⊃ (φ ⊃ φ)) ⊃ (((φ ⊃ (φ ⊃ φ)) ⊃ φ) ⊃ φ)), from likemp,
-have h8 : prfK Γ (((φ ⊃ (φ ⊃ φ)) ⊃ φ) ⊃ φ), from mp h7 h1,
-have h9 : prfK Γ ((¬¬φ) ⊃ φ), from cut h6 h8,
-exact h9
+exact (cut (cut pl1 (cut pl8 pl8)) (mp likemp h1))
 end
 
 
 lemma dni {Γ : ctx} {φ : form} : prfK Γ (φ ⊃ ¬¬φ) :=
 begin
-have h1 : prfK Γ ((¬¬(¬φ)) ⊃ (¬φ)), from dne,
-exact mp pl8 h1
+exact mp pl8 dne
 end
 
 
@@ -117,21 +108,14 @@ lemma cut1 {Γ : ctx} {φ ψ χ θ : form} :
   prfK Γ (θ ⊃ (φ ⊃ ψ)) → prfK Γ (ψ ⊃ χ) → prfK Γ (θ ⊃ (φ ⊃ χ)) :=
 begin
 intros h1 h2,
-have h3 : prfK Γ (φ ⊃ ψ) → prfK Γ (ψ ⊃ χ) → prfK Γ (φ ⊃ χ), from cut,
-have h4 : prfK Γ (θ ⊃ (φ ⊃ ψ)) → prfK Γ ((φ ⊃ ψ) ⊃ (φ ⊃ χ)) → prfK Γ (θ ⊃ (φ ⊃ χ)), from cut,
-specialize h4 h1,
-have h5 : prfK Γ ((φ ⊃ ψ) ⊃ (φ ⊃ χ)), from mp pl2 (mp pl1 h2),
-specialize h4 h5,
-exact h4
+exact cut h1 (mp pl2 (mp pl1 h2))
 end
 
 
 lemma imp_switch {Γ : ctx} {φ ψ χ : form} : prfK Γ (φ ⊃ (ψ ⊃ χ)) → prfK Γ (ψ ⊃ (φ ⊃ χ)) :=
 begin
 intro h1,
-have h2 : prfK Γ (ψ ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ))), from mp pl1 (mp pl2 h1),
-have h3 : prfK Γ ((ψ ⊃ (φ ⊃ ψ)) ⊃ (ψ ⊃ (φ ⊃ χ))), from mp pl2 h2,
-exact mp h3 pl1
+exact mp (mp pl2 (mp pl1 (mp pl2 h1))) pl1
 end
 
 
@@ -159,9 +143,7 @@ end
 lemma double_imp {Γ : ctx} {φ ψ : form} :
   prfK Γ ((φ ⊃ (φ ⊃ ψ)) ⊃ (φ ⊃ ψ)) :=
 begin
-have h1 : prfK Γ ((φ ⊃ ψ) ⊃ (φ ⊃ ψ)) → prfK Γ (φ ⊃ ((φ ⊃ ψ) ⊃ ψ)), from imp_switch,
-specialize h1 iden,
-exact mp pl2 h1
+exact mp pl2 (imp_switch iden)
 end
 
 
@@ -270,7 +252,7 @@ end
 lemma contra_equiv_false {Γ : ctx} {φ : form} : 
   prfK Γ ((φ & ¬φ) ↔ ⊥) :=
 begin
-have h1 : prfK Γ (¬⊤ ↔ ¬¬(φ & ¬φ)), from iff_not not_contra_equiv_true,
+have h1 := iff_not not_contra_equiv_true,
 exact (mp (mp pl4 (cut dni (cut (mp pl6 h1) dne))) (cut dni (cut (mp pl5 h1) dne)))
 end
 

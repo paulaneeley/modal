@@ -55,7 +55,7 @@ have h2 := add_comm _ _,
 exact (eq.subst h2 (lt_of_le_of_lt (le_max_right (complexity φ) (complexity ψ)) h1))
 end
 
-lemma tr3 : ∀ φ : formPA agents, 1 + max (complexity φ) 1 < complexity φ + 4 :=
+lemma tr3 : ∀ φ : formPA agents, 1 + max (complexity φ) 1 < 4 + complexity φ :=
 begin
 intro φ,
 have h1 : complexity φ < complexity φ + 1, from lt_add_one _,
@@ -63,7 +63,9 @@ have h2 : 0 < 2 ↔ 2 ≠ 0, from zero_lt_iff_ne_zero,
 cases h2, 
 specialize h2_mpr (nat.add_one_ne_zero 1),
 have h3 : 3 + (complexity φ + 1) = complexity φ + 4, from add_comm _ _,
-exact (eq.subst h3 (add_lt_add (lt_add_of_pos_right 1 h2_mpr) (max_lt h1 (lt_add_of_pos_left 1 comp_gt_zero))))
+have h4 : complexity φ + 4 = 4 + complexity φ, from add_comm (complexity φ) 4,
+have h5 : 3 + (complexity φ + 1) = 4 + complexity φ, from (rfl.congr h4).mp h3,
+exact (eq.subst h5 (add_lt_add (lt_add_of_pos_right 1 h2_mpr) (max_lt h1 (lt_add_of_pos_left 1 comp_gt_zero))))
 end
 
 lemma tr4helper {φ ψ : formPA agents} : (complexity φ + 4) * (1 + max (complexity ψ) 1) > 9 :=
@@ -150,21 +152,22 @@ have h5 : 1 + (complexity φ + 4) * complexity χ ≤ 1 + (complexity φ + 4) * 
 exact (lt_of_le_of_lt h5 tr5helper)
 end
 
-lemma tr5 : ∀ φ ψ χ : formPA agents, 1 + max ((complexity φ + 4) * complexity ψ) 
-  ((complexity φ + 4) * complexity χ) < (complexity φ + 4) * (1 + max (complexity ψ) (complexity χ)) :=
+lemma tr5 : ∀ φ ψ χ : formPA agents, 1 + max ((4 + complexity φ) * complexity ψ) 
+  ((4 + complexity φ) * complexity χ) < (4 + complexity φ) * (1 + max (complexity ψ) (complexity χ)) :=
 begin
-intros φ ψ χ,
-cases max_choice (complexity ψ) (complexity χ),
-cases max_choice ((complexity φ + 4) * complexity ψ) ((complexity φ + 4) * complexity χ),
-exact (eq.substr h_1 (eq.substr h (tr5helper))),
-exact (eq.substr h_1 (eq.substr h (tr5helper3 (tr5helper2 h)))),
-cases max_choice ((complexity φ + 4) * complexity ψ) ((complexity φ + 4) * complexity χ),
-exact (eq.substr h_1 (eq.substr h (tr5helper3 (tr5helper2 (eq.subst (max_comm (complexity ψ) (complexity χ)) h))))),
-exact (eq.substr h_1 (eq.substr h tr5helper)),
+  sorry
+-- intros φ ψ χ,
+-- cases max_choice (complexity ψ) (complexity χ),
+-- cases max_choice ((complexity φ + 4) * complexity ψ) ((complexity φ + 4) * complexity χ),
+-- exact (eq.substr h_1 (eq.substr h (tr5helper))),
+-- exact (eq.substr h_1 (eq.substr h (tr5helper3 (tr5helper2 h)))),
+-- cases max_choice ((complexity φ + 4) * complexity ψ) ((complexity φ + 4) * complexity χ),
+-- exact (eq.substr h_1 (eq.substr h (tr5helper3 (tr5helper2 (eq.subst (max_comm (complexity ψ) (complexity χ)) h))))),
+-- exact (eq.substr h_1 (eq.substr h tr5helper)),
 end
 
-lemma tr6 : ∀ φ ψ : formPA agents, 1 + max (complexity φ) (1 + (complexity φ + 4) 
-  * complexity ψ) < (complexity φ + 4) * (complexity ψ + 1) :=
+lemma tr6 : ∀ φ ψ : formPA agents, 1 + max (complexity φ) (1 + (4 + complexity φ) 
+  * complexity ψ) < (4 + complexity φ) * (1 + complexity ψ) :=
 begin
 intros φ ψ,
 have h1 : 1 + complexity φ < complexity φ + 4, linarith,
@@ -175,7 +178,8 @@ have h5 := mul_lt_mul h1 h2 h3 h4,
 have h6 : 1 + complexity φ < (complexity φ + 4) * (complexity ψ + 1), linarith,
 have h7 : 1 + 1 + (complexity φ + 4) * complexity ψ = 1 + (1 + (complexity φ + 4) * complexity ψ), linarith,
 have h8 : 1 + complexity ψ = complexity ψ + 1, linarith,
-exact (maxhelper h6 (eq.subst h8 (eq.subst h7 tr4helper2)))
+sorry
+--exact (maxhelper h6 (eq.subst h8 (eq.subst h7 tr4helper2)))
 end
 
 lemma tr7helper1 {φ ψ : formPA agents} : (complexity φ + 4) * (complexity ψ + 4) 
@@ -232,16 +236,17 @@ have h2 := tr7helper1,
 exact (eq.substr h2 (eq.subst h1 tr7helper4))
 end
 
-lemma tr7 : ∀ φ ψ χ : formPA agents, (1 + (4 + max (complexity φ) ((complexity φ + 4) 
-  * complexity ψ))) * complexity χ < (complexity φ + 4) * ((complexity ψ + 4) * complexity χ) :=
+lemma tr7 : ∀ φ ψ χ : formPA agents, (4 + (1 + max (complexity φ) ((4 + complexity φ) 
+  * complexity ψ))) * complexity χ < (4 + complexity φ) * ((4 + complexity ψ) * complexity χ) :=
 begin
-intros φ ψ χ,
-have h1 := mul_assoc (complexity φ + 4) (complexity ψ + 4) (complexity χ),
-have h2 : (5 + max (complexity φ) ((complexity φ + 4) * complexity ψ)) 
-  = (1 + 4 + max (complexity φ) ((complexity φ + 4) * complexity ψ)), linarith,
-have h3 : (1 + 4 + max (complexity φ) ((complexity φ + 4) * complexity ψ)) 
-  = (1 + (4 + max (complexity φ) ((complexity φ + 4) * complexity ψ))), linarith,
-exact (eq.subst h1 (mul_lt_mul_of_pos_right (eq.subst h3 (maxhelper tr7helper3 tr7helper6)) comp_gt_zero))
+  sorry
+-- intros φ ψ χ,
+-- have h1 := mul_assoc (complexity φ + 4) (complexity ψ + 4) (complexity χ),
+-- have h2 : (5 + max (complexity φ) ((complexity φ + 4) * complexity ψ)) 
+--   = (1 + 4 + max (complexity φ) ((complexity φ + 4) * complexity ψ)), linarith,
+-- have h3 : (1 + 4 + max (complexity φ) ((complexity φ + 4) * complexity ψ)) 
+--   = (1 + (4 + max (complexity φ) ((complexity φ + 4) * complexity ψ))), linarith,
+-- exact (eq.subst h1 (mul_lt_mul_of_pos_right (eq.subst h3 (maxhelper tr7helper3 tr7helper6)) comp_gt_zero))
 end
 
 

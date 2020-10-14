@@ -37,7 +37,7 @@ begin
     },
   case formPA.box : a φ 
     { simp at *,
-      have h1 : complexity φ ≤ n, sorry, --{exact nat.lt_succ_iff.mp h},
+      have h1 : complexity φ ≤ n, sorry, --exact nat.lt_succ_iff.mp h,
       have h2 := ih φ h1,
       exact iff_k_dist h2, 
     },
