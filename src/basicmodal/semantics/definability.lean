@@ -36,6 +36,23 @@ def euclid_class : set (frame) := { f : frame | euclidean (f.rel) }
 def equiv_class : set (frame) := { f : frame | equivalence (f.rel) }
 def ref_trans_class : set (frame) := ref_class ∩ trans_class
 
+lemma equiv_ref_euclid (f : frame) : f ∈ equiv_class ↔ f ∈ (ref_class ∩ euclid_class) :=
+begin
+rw equiv_class, rw ref_class, rw euclid_class,
+rw set.mem_set_of_eq, simp, rw equivalence, split,
+intro h1, cases h1 with h1 h2, cases h2 with h2 h3,
+split, exact h1, rw euclidean, intros x y z h4 h5,
+rw symmetric at h2, specialize h2 h4, rw transitive at h3,
+exact h3 h2 h5,
+intro h1, split, cases h1, exact h1_left,
+split, cases h1 with h1 h2, rw symmetric,
+intros x y h3, rw euclidean at h2, rw reflexive at h1,
+specialize h1 x, exact h2 h3 h1,
+rw transitive, intros x y z h2 h3, cases h1 with h1 h4,
+rw euclidean at h4, rw reflexive at h1,
+specialize h1 x, have h5 := h4 h2 h1, exact h4 h5 h3
+end
+
 
 lemma ref_helper : ∀ φ f, f ∈ ref_class → f_valid ((box φ) ⊃ φ) f :=
 begin
@@ -97,6 +114,8 @@ apply h1, intros z h4,
 have h6 := h h2, specialize h6 h4,
 clear h, specialize h3 z h6, exact h3
 end
+
+
 
 end
 

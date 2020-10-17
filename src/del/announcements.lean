@@ -67,8 +67,6 @@ intro h2,
 sorry,
 intro h1,
 intro h2, 
-rw forces at h1, 
-cases h2,
 sorry
 end
 

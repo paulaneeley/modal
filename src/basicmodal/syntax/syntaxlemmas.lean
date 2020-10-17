@@ -300,8 +300,19 @@ begin
 exact cut not_contra explosion
 end
 
-lemma box_dne {Γ : ctx} {φ : form} : prfK Γ ((¬□φ) ⊃ ¬(□(¬¬φ))) :=
+lemma box_dn {Γ : ctx} {φ : form} : prfK Γ ((¬□φ) ↔ ¬(□(¬¬φ))) :=
 begin
-exact (contrapos.mpr (mp kdist (nec dne)))
+have h1 := (contrapos.mpr (mp kdist (nec dne))),
+simp at *,
 end
 
+lemma dual_equiv1 {Γ : ctx} {φ : form} : prfK Γ ((□φ) ↔ (¬(◇(¬φ)))) :=
+begin
+exact mp (mp pl4 (cut (contrapos.mp (mp pl6 box_dn)) dni)) 
+  (cut dne (contrapos.mp (mp pl5 box_dn)))
+end
+
+lemma dual_equiv2 {Γ : ctx} {φ : form} : prfK Γ ((¬(□¬φ)) ↔ (◇φ)) :=
+begin
+exact mp (mp pl4 iden) iden,
+end

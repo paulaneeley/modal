@@ -3,9 +3,9 @@
 
 import del.languageDEL del.syntax.syntaxDEL data.set.basic
 variable {agents : Type}
-open formPA
+open formPA 
 local attribute [instance] classical.prop_decidable
-
+-- hi
 
 ---------------------- Semantics ----------------------
 

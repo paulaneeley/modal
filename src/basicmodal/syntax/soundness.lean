@@ -78,7 +78,7 @@ end
 
 def T_axioms : ctx := {φ : form | ∃ ψ, φ = (□ ψ ⊃ ψ)}
 def S4_axioms : ctx := T_axioms ∪ {φ : form | ∃ ψ, φ = (□ ψ ⊃ □ (□ ψ))}
-def S5_axioms : ctx := S4_axioms ∪ {φ : form | ∃ ψ, φ = (◇ ψ ⊃ □ (◇ ψ))}
+def S5_axioms : ctx := T_axioms ∪ {φ : form | ∃ ψ, φ = (◇ ψ ⊃ □ (◇ ψ))}
 
 
 lemma T_helper : ∀ φ ∈ T_axioms, F_valid φ ref_class :=
@@ -114,9 +114,8 @@ intros φ h1 f h2 v x,
 cases h2 with h2l h2r, 
 cases h2r with h2r h2rr,
 cases h1 with h1 h3, 
-{cases h1, apply T_helper, exact h1, 
-exact h2l, cases h1 with ψ h1, subst h1, 
-apply trans_helper, exact h2rr},
+{apply T_helper, exact h1, 
+exact h2l},
 {cases h3 with ψ h3, dsimp at h3,
 subst h3, apply euclid_helper, rw euclid_class,
 rw set.mem_set_of_eq, rw euclidean,

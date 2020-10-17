@@ -36,7 +36,7 @@ push_neg,
 let f : frame := 
 { states := ℕ,
   h := ⟨0⟩,
-  rel := λ x y, x = x},
+  rel := λ x y, x = y},
 use f, let v := λ n x, true,
 use v, let x := 42, use x,
 split, intros φ y h1, 
@@ -45,6 +45,57 @@ intro h1, apply h1 y,
 exact rfl,
 rw forces, trivial
 end
+
+lemma sem_consS4 : sem_cons S4_axioms :=
+begin
+rw sem_cons, rw global_sem_csq, push_neg,
+let f : frame := 
+{ states := ℕ,
+  h := ⟨0⟩,
+  rel := λ x y, x = y},
+use f, let v := λ n x, true,
+use v, let x := 42, use x,
+split, 
+intros φ y h1,
+rw S4_axioms at h1, cases h1,
+cases h1 with ψ h1, subst h1,
+intro h1, apply h1 y,
+exact rfl,
+cases h1 with ψ h1, subst h1,
+intro h1, rw forces at *,
+simp at *, rw forces, 
+simp at *, exact h1,
+rw forces, trivial
+end
+
+lemma sem_consS5 : sem_cons S5_axioms :=
+begin
+rw sem_cons, rw global_sem_csq, push_neg,
+let f : frame := 
+{ states := ℕ,
+  h := ⟨0⟩,
+  rel := λ x y, x = y},
+use f, let v := λ n x, true,
+use v, let x := 42, use x,
+split, 
+intros φ y h1,
+rw S5_axioms at h1, cases h1,
+rw S4_axioms at h1, cases h1,
+cases h1 with ψ h1, subst h1,
+intro h1, apply h1 y,
+exact rfl,
+cases h1 with ψ h1, subst h1,
+intro h1, rw forces at *,
+simp at *, rw forces, 
+simp at *, exact h1,
+simp at *, cases h1 with ψ h1,
+subst h1, intros h2, repeat {rw forces at *},
+simp at *, rw forces, intro h3,
+rw forces at *, simp at *, specialize h2 h3,
+exact h2,
+trivial
+end
+
 
 -- Any axiom system that is consistent does not prove false
 lemma nprfalse (AX : ctx) (hax : sem_cons AX) : ¬ prfK AX ⊥ :=
@@ -530,7 +581,8 @@ specialize L_ih h1b,
 sorry
 end
 
-lemma union_consistent (AX : ctx) (c : set ctx) (h : chain (⊆) c) : (∀ m ∈ c, ax_consist AX m) → ax_consist AX (⋃₀c) :=
+lemma union_consistent (AX : ctx) (c : set ctx) (h : chain (⊆) c) : 
+  (∀ m ∈ c, ax_consist AX m) → ax_consist AX (⋃₀c) :=
 begin
 intros h1, by_contradiction h2, rw ax_consist at h2,
 push_neg at h2, cases h2 with L h2,

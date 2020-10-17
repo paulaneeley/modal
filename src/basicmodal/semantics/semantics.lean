@@ -1,5 +1,7 @@
-
 import basicmodal.language basicmodal.syntax.syntax
+import logic.basic data.set.basic
+local attribute [instance] classical.prop_decidable
+
 
 open form
 
@@ -55,4 +57,28 @@ begin
 intros f v x φ, split, 
 {intros h1 h2, exact h1 h2},
 {intros h1 h2, specialize h1 h2, exact h1}
+end
+
+lemma forces_exists {f : frame} {v : nat → f.states → Prop} {x : f.states} {φ : form} :
+  forces f v x (◇φ) ↔ ∃ y : f.states, (f.rel x y ∧ forces f v y φ) :=
+begin
+simp at *,
+split,
+intro h1,
+rw forces at h1, rw forces at h1,
+have h2 := not_or_of_imp h1,
+clear h1, cases h2, push_neg at h2,
+cases h2 with y h2, cases h2 with h2 h3,
+existsi (y : f.states), split, exact h2,
+have h4 := (not_forces_imp f v y (¬φ)).mp h3,
+repeat {rw forces at h4}, repeat {rw imp_false at h4},
+rw not_not at h4, exact h4,
+rw forces at h2, exact false.elim h2,
+intro h1, cases h1 with y h1,
+cases h1 with h1 h2,
+rw forces,
+intro h3,
+rw forces at h3, specialize h3 y h1,
+rw ←not_forces_imp at h3, 
+exact absurd h2 h3
 end
