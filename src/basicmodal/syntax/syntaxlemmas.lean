@@ -302,8 +302,7 @@ end
 
 lemma box_dn {Γ : ctx} {φ : form} : prfK Γ ((¬□φ) ↔ ¬(□(¬¬φ))) :=
 begin
-have h1 := (contrapos.mpr (mp kdist (nec dne))),
-simp at *,
+exact mp (mp pl4 (contrapos.mpr (mp kdist (nec dne)))) (contrapos.mpr (mp kdist (nec dni)))
 end
 
 lemma dual_equiv1 {Γ : ctx} {φ : form} : prfK Γ ((□φ) ↔ (¬(◇(¬φ)))) :=

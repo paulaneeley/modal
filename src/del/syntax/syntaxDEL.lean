@@ -9,7 +9,7 @@ variables {agents : Type}
 
 -- Define a context
 @[reducible] def ctx (agents: Type) : Type := set (formPA agents)
-notation Γ `∪` φ := set.insert φ Γ
+notation Γ `un` φ := set.insert φ Γ
 
 -- Proof system, pg. 26
 inductive prfPA : ctx agents → formPA agents → Prop 

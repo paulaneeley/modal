@@ -231,7 +231,7 @@ exact mp (mp pl3 (cut dne pl6)) (cut dne pl5)
 end
 
 
-lemma phi_and_true {Γ : ctx agents} {φ : formPA agents} : prfPA Γ ((φ&~⊥) ↔ φ) :=
+lemma phi_and_true {Γ : ctx agents} {φ : formPA agents} : prfPA Γ ((φ&(~⊥)) ↔ φ) :=
 begin
 exact (mp (mp pl4 pl5) (mp (imp_switch pl4) prtrue))
 end
@@ -314,4 +314,40 @@ exact mp (mp pl4 (mp double_imp (imp_imp_iff_imp.mp
   (mp double_imp (imp_imp_iff_imp.mp (cut (cut pl6 pl5) 
   (imp_switch (cut pl5 (cut1 pl4 (cut2 (cut pl6 pl6) pl4)))))))
 end
+
+lemma demorgans {Γ : ctx agents} {φ ψ : formPA agents} : 
+  prfPA Γ (~(φ & ψ)) ↔ prfPA Γ (φ ⊃ ~ψ) :=
+begin
+split,
+intro h1,
+exact (and_right_imp.mp (mp (contrapos.mpr (mp pl5 and_switch)) h1)),
+intro h1,
+exact (mp (contrapos.mpr (mp pl5 and_switch)) (and_right_imp.mpr h1))
+end
+
+lemma explosion {Γ : ctx agents} {ψ : formPA agents} : prfPA Γ (⊥ ⊃ ψ) :=
+begin
+apply contrapos.mp, exact (mp pl1 iden)
+end
+
+lemma exfalso {Γ : ctx agents} {φ ψ : formPA agents} : prfPA Γ ((φ & ~φ) ⊃ ψ) :=
+begin
+exact cut not_contra explosion
+end
+
+lemma box_dn {Γ : ctx agents} {φ : formPA agents} {a : agents}  : prfPA Γ ((~K a φ) ↔ ~(K a (~~φ))) :=
+begin
+exact mp (mp pl4 (contrapos.mpr (mp kdist (nec dne)))) (contrapos.mpr (mp kdist (nec dni)))
+end
+
+lemma dual_equiv1 {Γ : ctx agents} {φ : formPA agents} {a : agents} : prfPA Γ ((K a φ) ↔ (~(~K a ~(~φ)))) :=
+begin
+exact mp (mp pl4 (cut (contrapos.mp (mp pl6 box_dn)) dni)) 
+  (cut dne (contrapos.mp (mp pl5 box_dn)))
+end
+
+-- lemma dual_equiv2 {Γ : ctx agents} {φ : formPA agents} {a : agents} : prfPA Γ ((~(K a ~ φ)) ↔ (~ K a ~ φ)) :=
+-- begin
+-- exact mp (mp pl4 iden) iden,
+-- end
 

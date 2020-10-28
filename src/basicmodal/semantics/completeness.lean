@@ -181,9 +181,24 @@ end
 lemma renameme (AX : ctx) (φ : form) (hax : sem_cons AX) : (¬ global_sem_csq AX φ) → 
   ∃ xΓ : (canonical AX).states, ¬ forces (canonical AX) (val_canonical AX) xΓ φ :=
 begin
-  intro h1,
-  have h2 : forces_ctx (canonical AX) (val_canonical AX) AX, from forcesAX AX hax,
-  rw forces_ctx at h2, specialize h2 φ, sorry
+intro h1,
+have h2 : ∃ Γ : ctx, max_ax_consist AX Γ, from max_ax_exists AX hax,
+cases h2 with xΓ h2,
+let f' := canonical AX,
+let v' := val_canonical AX,
+let xΓ' : f'.states := ⟨xΓ, h2⟩,
+existsi (xΓ' : (canonical AX).states),
+rw not_forces_imp, rw forces,
+intro h3, rw forces,
+rw global_sem_csq at h1,
+push_neg at h1,
+cases h1 with f h1,
+cases h1 with v h1,
+cases h1 with x h1,
+cases h1 with h1 h4,
+rw forces_ctx at h1,
+specialize h1 φ x,
+sorry
 end
 
 lemma T_reflexive : T_canonical ∈ ref_class :=
@@ -275,9 +290,11 @@ have h1 : prfK S5_axioms (◇(¬φ) ⊃ □(◇¬φ)),
 refine ax _, rw S5_axioms, simp, simp at *,
 have h2 : prfK S5_axioms ((¬□(◇¬φ)) ⊃ ¬(◇¬φ)), from contrapos.mpr h1,
 have h3 : prfK S5_axioms ((¬□(◇¬φ)) ⊃ (□φ)), from cut h2 (mp pl6 dual_equiv1),
-have h4 : prfK S5_axioms ((¬□(◇¬φ)) ↔ (¬¬◇(¬(◇¬φ)))), sorry,
+have h4 : prfK S5_axioms ((¬□(◇¬φ)) ↔ (¬¬◇(¬(◇¬φ)))),
+  from (mp (mp pl4 (contrapos.mpr (mp pl6 dual_equiv1))) (contrapos.mpr (mp pl5 dual_equiv1))),
 have h5 : prfK S5_axioms (◇(¬(◇¬φ)) ⊃ (□φ)), from cut dni (cut (mp pl6 h4) h3),
-have h6 : prfK S5_axioms ((◇(□φ)) ⊃ (◇(¬(◇¬φ)))), sorry,
+have h6 : prfK S5_axioms ((◇(□φ)) ⊃ (◇(¬(◇¬φ)))), 
+  from (contrapos.mpr (mp kdist (nec (contrapos.mpr (mp pl5 dual_equiv1))))),
 exact (mp pl1 (cut h6 h5))
 end
 

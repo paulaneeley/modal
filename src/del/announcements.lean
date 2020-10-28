@@ -14,7 +14,7 @@ lemma functional_announce (φ ψ : formPA agents) :
 begin
 rw F_valid, intros f h v x,
 rw forces, intro h1,
-rw forces_exists at h1,
+rw forces_update_dual at h1,
 cases h1 with Ph1 h1, intro h, exact h1
 end
 

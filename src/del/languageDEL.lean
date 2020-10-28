@@ -24,13 +24,13 @@ inductive formPA (agents : Type) : Type
 -- Notation
 --local notation `⊥`:80   := formPA.bot
 --local prefix `p`:80     := formPA.var
-notation `⊥`:80   := formPA.bot
-prefix `p`:80     := formPA.var
+notation `⊥`:80         := formPA.bot
+prefix `p`:80           := formPA.var
 infix `&`:80            := formPA.and
 infix `⊃`               := formPA.impl
 notation `~`:80 φ       := φ ⊃ formPA.bot
 notation `⊤`:80         := ~ (formPA.bot _)
-notation ψ `∨` φ        := ~((~ψ) & ~φ)
+notation φ `∨` ψ        := ((~φ) ⊃ ψ)
 notation φ ↔ ψ          := (φ ⊃ ψ) & (ψ ⊃ φ)
 notation `K`:80         := formPA.box -- "a knows that φ"
 notation `C`:80         := λ φ a, ~(K a (~φ)) -- "φ is consistent with a's knowledge"
