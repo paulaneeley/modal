@@ -165,9 +165,10 @@ rw global_sem_csq,
 push_neg,
 let f := canonical, use f AX,
 let v := val_canonical, use v AX,
-let xΓ' : (f AX).states := ⟨Γ', h3⟩, use xΓ',
+let xΓ' : (f AX).states := ⟨Γ', h3⟩,
 split, 
 exact forcesAX AX hax,
+use xΓ',
 have h5 : forces (f AX) (v AX) xΓ' (¬φ) ↔ ((¬φ) ∈ xΓ'.val), 
   from truth AX hax xΓ' ¬φ,
 cases h5 with h5 h6,
@@ -176,30 +177,6 @@ have h7 : ¬forces (f AX) (v AX) xΓ' φ ↔ forces (f AX) (v AX) xΓ' ¬φ,
 cases h7 with h7 h8, apply h8, apply h6, simp at *, exact h4
 end
 
--- if φ is not a global semantic consequence of AX, 
--- then ∃ xΓ ∈ canonical model, such that ¬ forces (canonical ax) (val canonical ax) xΓ φ
-lemma renameme (AX : ctx) (φ : form) (hax : sem_cons AX) : (¬ global_sem_csq AX φ) → 
-  ∃ xΓ : (canonical AX).states, ¬ forces (canonical AX) (val_canonical AX) xΓ φ :=
-begin
-intro h1,
-have h2 : ∃ Γ : ctx, max_ax_consist AX Γ, from max_ax_exists AX hax,
-cases h2 with xΓ h2,
-let f' := canonical AX,
-let v' := val_canonical AX,
-let xΓ' : f'.states := ⟨xΓ, h2⟩,
-existsi (xΓ' : (canonical AX).states),
-rw not_forces_imp, rw forces,
-intro h3, rw forces,
-rw global_sem_csq at h1,
-push_neg at h1,
-cases h1 with f h1,
-cases h1 with v h1,
-cases h1 with x h1,
-cases h1 with h1 h4,
-rw forces_ctx at h1,
-specialize h1 φ x,
-sorry
-end
 
 lemma T_reflexive : T_canonical ∈ ref_class :=
 begin
@@ -217,22 +194,31 @@ end
 
 theorem T_completeness (φ : form) : F_valid φ ref_class → prfK T_axioms φ :=
 begin
-rw ←not_imp_not, intro h1,
-have h2 : ax_consist T_axioms {¬φ}, from comphelper T_axioms φ sem_consT h1,
-simp at *,
-have h3 : ∃ Γ', max_ax_consist T_axioms Γ' ∧ {¬φ} ⊆ Γ', 
-  from lindenbaum T_axioms {¬φ} h2,
-cases h3 with Γ' h3, cases h3 with h3 h4, simp at *,
-rw F_valid, push_neg,
-let f := T_canonical, use f,
-split, exact T_reflexive,
-let v := val_canonical, use (@v T_axioms sem_consT),
-have h5 : (¬ global_sem_csq T_axioms φ) → 
-  ∃ xΓ : f.states, ¬ forces f (@val_canonical T_axioms sem_consT) xΓ φ, 
-  from renameme T_axioms φ sem_consT,
-have h6 : global_sem_csq T_axioms φ → prfK T_axioms φ, 
+rw ←not_imp_not, 
+intro h1,
+have h2 : global_sem_csq T_axioms φ → prfK T_axioms φ, 
   from completeness T_axioms sem_consT φ,
-rw ←not_imp_not at h6, specialize h6 h1, specialize h5 h6, exact h5
+rw ←not_imp_not at h2,
+specialize h2 h1,
+rw F_valid, 
+push_neg,
+let f := T_canonical, use f,
+split,
+exact T_reflexive,
+let v := val_canonical, use (@v T_axioms sem_consT),
+have h3 : ax_consist T_axioms {¬φ}, from comphelper T_axioms φ sem_consT h1,
+have h4 : ∃ Γ', max_ax_consist T_axioms Γ' ∧ {¬φ} ⊆ Γ', 
+  from lindenbaum T_axioms {¬φ} h3,
+simp at *,
+cases h4 with Γ' h4, cases h4 with h4 h5,
+let xΓ : f.states := ⟨Γ', h4⟩,
+use xΓ,
+have h6 : forces f (@v T_axioms sem_consT) xΓ (¬φ) ↔ ((¬φ) ∈ xΓ.val), 
+  from truth T_axioms sem_consT xΓ ¬φ,
+cases h6 with h6 h7,
+have h8: ¬forces f (@v T_axioms sem_consT) xΓ φ ↔ forces f (@v T_axioms sem_consT) xΓ ¬φ, 
+  from not_forces_imp f (@v T_axioms sem_consT) xΓ φ,
+cases h8 with h8 h9, apply h9, apply h7, simp at *, exact h5
 end
 
 lemma S4_reftrans : S4_canonical ∈ ref_trans_class :=
@@ -264,23 +250,31 @@ end
 
 theorem S4_completeness (φ : form) : F_valid φ ref_trans_class → prfK S4_axioms φ :=
 begin
-rw ←not_imp_not, intro h1,
-have h2 : ax_consist S4_axioms {¬φ}, from comphelper S4_axioms φ sem_consS4 h1,
-simp at *,
-have h3 : ∃ Γ', max_ax_consist S4_axioms Γ' ∧ {¬φ} ⊆ Γ', 
-  from lindenbaum S4_axioms {¬φ} h2,
-cases h3 with Γ' h3, cases h3 with h3 h4, simp at *,
-rw F_valid, push_neg,
-let f := S4_canonical, use f,
-split, exact S4_reftrans,
-let v := val_canonical, use (@v S4_axioms sem_consS4),
-have h5 : (¬ global_sem_csq S4_axioms φ) → 
-  ∃ xΓ : f.states, ¬ forces f (@val_canonical S4_axioms sem_consS4) xΓ φ, 
-  from renameme S4_axioms φ sem_consS4,
-have h6 : global_sem_csq S4_axioms φ → prfK S4_axioms φ, 
+rw ←not_imp_not, 
+intro h1,
+have h2 : global_sem_csq S4_axioms φ → prfK S4_axioms φ, 
   from completeness S4_axioms sem_consS4 φ,
-rw ←not_imp_not at h6, specialize h6 h1, 
-specialize h5 h6, exact h5
+rw ←not_imp_not at h2,
+specialize h2 h1,
+rw F_valid, 
+push_neg,
+let f := S4_canonical, use f,
+split,
+exact S4_reftrans,
+let v := val_canonical, use (@v S4_axioms sem_consS4),
+have h3 : ax_consist S4_axioms {¬φ}, from comphelper S4_axioms φ sem_consS4 h1,
+have h4 : ∃ Γ', max_ax_consist S4_axioms Γ' ∧ {¬φ} ⊆ Γ', 
+  from lindenbaum S4_axioms {¬φ} h3,
+simp at *,
+cases h4 with Γ' h4, cases h4 with h4 h5,
+let xΓ : f.states := ⟨Γ', h4⟩,
+use xΓ,
+have h6 : forces f (@v S4_axioms sem_consS4) xΓ (¬φ) ↔ ((¬φ) ∈ xΓ.val), 
+  from truth S4_axioms sem_consS4 xΓ ¬φ,
+cases h6 with h6 h7,
+have h8: ¬forces f (@v S4_axioms sem_consS4) xΓ φ ↔ forces f (@v S4_axioms sem_consS4) xΓ ¬φ, 
+  from not_forces_imp f (@v S4_axioms sem_consS4) xΓ φ,
+cases h8 with h8 h9, apply h9, apply h7, simp at *, exact h5
 end
 
 lemma euclid_dual {φ : form} : prfK S5_axioms ((◇(¬φ) ⊃ □(◇(¬φ))) ⊃ (◇(□φ) ⊃ □φ)) :=
@@ -338,23 +332,31 @@ end
 
 theorem S5_completeness (φ : form) : F_valid φ equiv_class → prfK S5_axioms φ :=
 begin
-rw ←not_imp_not, intro h1,
-have h2 : ax_consist S5_axioms {¬φ}, from comphelper S5_axioms φ sem_consS5 h1,
-simp at *,
-have h3 : ∃ Γ', max_ax_consist S5_axioms Γ' ∧ {¬φ} ⊆ Γ', 
-  from lindenbaum S5_axioms {¬φ} h2,
-cases h3 with Γ' h3, cases h3 with h3 h4, simp at *,
-rw F_valid, push_neg,
-let f := S5_canonical, use f,
-split, exact S5_equiv,
-let v := val_canonical, use (@v S5_axioms sem_consS5),
-have h5 : (¬ global_sem_csq S5_axioms φ) → 
-  ∃ xΓ : f.states, ¬ forces f (@val_canonical S5_axioms sem_consS5) xΓ φ, 
-  from renameme S5_axioms φ sem_consS5,
-have h6 : global_sem_csq S5_axioms φ → prfK S5_axioms φ, 
+rw ←not_imp_not, 
+intro h1,
+have h2 : global_sem_csq S5_axioms φ → prfK S5_axioms φ, 
   from completeness S5_axioms sem_consS5 φ,
-rw ←not_imp_not at h6, specialize h6 h1, 
-specialize h5 h6, exact h5
+rw ←not_imp_not at h2,
+specialize h2 h1,
+rw F_valid, 
+push_neg,
+let f := S5_canonical, use f,
+split,
+exact S5_equiv,
+let v := val_canonical, use (@v S5_axioms sem_consS5),
+have h3 : ax_consist S5_axioms {¬φ}, from comphelper S5_axioms φ sem_consS5 h1,
+have h4 : ∃ Γ', max_ax_consist S5_axioms Γ' ∧ {¬φ} ⊆ Γ', 
+  from lindenbaum S5_axioms {¬φ} h3,
+simp at *,
+cases h4 with Γ' h4, cases h4 with h4 h5,
+let xΓ : f.states := ⟨Γ', h4⟩,
+use xΓ,
+have h6 : forces f (@v S5_axioms sem_consS5) xΓ (¬φ) ↔ ((¬φ) ∈ xΓ.val), 
+  from truth S5_axioms sem_consS5 xΓ ¬φ,
+cases h6 with h6 h7,
+have h8: ¬forces f (@v S5_axioms sem_consS5) xΓ φ ↔ forces f (@v S5_axioms sem_consS5) xΓ ¬φ, 
+  from not_forces_imp f (@v S5_axioms sem_consS5) xΓ φ,
+cases h8 with h8 h9, apply h9, apply h7, simp at *, exact h5
 end
 
 end canonical

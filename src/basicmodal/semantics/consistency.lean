@@ -23,10 +23,10 @@ let f : frame :=
   h := ⟨0⟩,
   rel := λ x y, x = y},
 use f, let v := λ n x, true,
-use v, let x := 42, use x,
+use v, let x := 42,
 split, intros φ y h1, 
-exact false.elim h1, rw forces, 
-trivial 
+exact false.elim h1, use x, 
+rw forces, trivial 
 end
 
 lemma sem_consT : sem_cons T_axioms :=
@@ -38,11 +38,11 @@ let f : frame :=
   h := ⟨0⟩,
   rel := λ x y, x = y},
 use f, let v := λ n x, true,
-use v, let x := 42, use x,
+use v, let x := 42,
 split, intros φ y h1, 
 cases h1 with ψ h1, subst h1,
 intro h1, apply h1 y,
-exact rfl,
+exact rfl, use x,
 rw forces, trivial
 end
 
@@ -54,7 +54,7 @@ let f : frame :=
   h := ⟨0⟩,
   rel := λ x y, x = y},
 use f, let v := λ n x, true,
-use v, let x := 42, use x,
+use v, let x := 42,
 split, 
 intros φ y h1,
 rw S4_axioms at h1, cases h1,
@@ -65,6 +65,7 @@ cases h1 with ψ h1, subst h1,
 intro h1, rw forces at *,
 simp at *, rw forces, 
 simp at *, exact h1,
+use x,
 rw forces, trivial
 end
 
@@ -76,7 +77,7 @@ let f : frame :=
   h := ⟨0⟩,
   rel := λ x y, x = y},
 use f, let v := λ n x, true,
-use v, let x := 42, use x,
+use v, let x := 42,
 split, 
 intros φ y h1,
 rw S5_axioms at h1, cases h1,
@@ -86,7 +87,7 @@ exact rfl,
 cases h1 with ψ h1, subst h1,
 intro h1, rw forces at *,
 simp at *, rw forces, 
-exact h1,
+exact h1, use x,
 rw forces, trivial
 end
 
@@ -557,17 +558,9 @@ open zorn
 -- Lemma: if c is a chain of sets, L is a list of elements such that 
 -- every element in L is in Union(c), then there is an element m in c such that every 
 -- element of L is in m.
--- by induction on L.
--- S := collection of max cons sets
--- m := Γ'
 lemma lindenhelper (c : set ctx) (h : c.nonempty) (h1 : chain (⊆) c) (L : list form) :
 (∀ φ ∈ L, φ ∈ ⋃₀(c)) → ∃ m ∈ c, (∀ ψ ∈ L, ψ ∈ m) :=
 begin
--- have H : c = ∅ ∨ c ≠ ∅, from dec_em (c = ∅),
--- cases H, subst H,
--- have h := listempty,
--- intro h2,
--- specialize h h2, simp at *, subst h, simp at *, 
 intro h2,
 induction L, simp,
 rw ←set.nonempty_def, exact h,
@@ -581,12 +574,17 @@ simp at h2,
 cases h2 with m' h2,
 cases h2 with h2 h4,
 existsi (m' ∪ m : ctx), 
-have H : m' ∪ m ∈ c, 
-sorry,
-existsi (H : m' ∪ m ∈ c),
-intros ψ h5, cases h5,
-subst h5, exact set.mem_union_left m h4,
-specialize ih ψ h5, exact set.mem_union_right m' ih
+have h5 : m' ∪ m ∈ c, 
+{have h6 := chain.total_of_refl h1 h3 h2,
+cases h6,
+have h7 := set.union_eq_self_of_subset_right h6,
+exact (eq.substr h7 h2), 
+have h7 := set.union_eq_self_of_subset_left h6,
+exact (eq.substr h7 h3)},
+existsi (h5 : m' ∪ m ∈ c),
+intros ψ h6, cases h6,
+subst h6, exact set.mem_union_left m h4,
+specialize ih ψ h6, exact set.mem_union_right m' ih
 end
 
 
@@ -594,30 +592,38 @@ lemma lindenbaum (AX Γ : ctx) (hax : ax_consist AX Γ) :
   ∃ Γ', max_ax_consist AX Γ' ∧ Γ ⊆ Γ' :=
 begin
 let P := { Γ'' | Γ'' ⊇ Γ ∧ ax_consist AX Γ''},
-have h : ∀ c ⊆ P, chain (⊆) c → ∃ub ∈ P, ∀ s ∈ c, s ⊆ ub, 
-{intros c h1 h2, use ⋃₀(c), 
-split,
-have h3 := lindenhelper c sorry h2,
+have h : ∀ c ⊆ P, chain (⊆) c → c.nonempty → ∃ub ∈ P, ∀ s ∈ c, s ⊆ ub, 
+{intros c h2 h3 h4, use ⋃₀(c), 
+have h5 := lindenhelper c h4 h3,
 split, 
-rw superset, 
-sorry,
-rw ax_consist,
-intros L h4,
-specialize h3 L h4,
-cases h3 with m h3,
-cases h3 with h5 h3,
-have h6 : m ∈ P, from set.mem_of_mem_of_subset h5 h1,
-simp at *,
+split,
+rw superset,
+rw set.nonempty_def at h4,
+cases h4 with Γ'' h4,
+have h6 := set.mem_of_mem_of_subset h4 h2,
 cases h6 with h6 h7,
-rw ax_consist at h7, apply h7, exact h3,
-intros s h3, exact set.subset_sUnion_of_mem h3
-},
-cases zorn_subset P h with Γ' h1, cases h1 with h1 h2,
-use Γ', split, rw max_equiv, split, apply h1.2, 
-intros m h3 h4, symmetry, apply h2 m, split, apply set.subset.trans h1.1 h4,
-exact h3, exact h4, apply h1.1
+rw superset at h6,
+apply set.subset_sUnion_of_subset c Γ'' h6 h4,
+rw ax_consist,
+intros L h6,
+specialize h5 L h6,
+cases h5 with m h5,
+cases h5 with h7 h5,
+have h8 := set.mem_of_mem_of_subset h7 h2,
+cases h8 with h8 h9,
+rw ax_consist at h9, apply h9, exact h5,
+intros s h7, exact set.subset_sUnion_of_mem h7},
+have h1 : Γ ∈ P,
+split,
+exact set.subset.rfl,
+exact hax,
+cases zorn_subset₀ P h Γ h1 with Γ' h2,
+cases h2 with h2 h3,
+cases h3 with h3 h4,
+use Γ', split, rw max_equiv, split, apply h2.2, 
+intros m h5 h6, symmetry, apply h4 m, split, apply set.subset.trans h2.1 h6,
+exact h5, exact h6, apply h2.1
 end
-
 
 -- Corollary 8
 lemma max_ax_exists (AX : ctx) (hax : sem_cons AX) : ∃ Γ : ctx, max_ax_consist AX Γ :=

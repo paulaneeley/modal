@@ -12,7 +12,7 @@ open prfPA
 
 ---------------------- Completeness by Translation ----------------------
 
-theorem equiv_translation_aux' {Γ : ctx agents} (n : nat)  (φ : formPA agents) (h : complexity φ ≤ n) : 
+theorem equiv_translation_aux' {Γ : ctx agents} (n : nat) (φ : formPA agents) (h : complexity φ ≤ n) : 
   prfPA Γ (φ ↔ (translate φ)) :=
 begin
   simp at *,

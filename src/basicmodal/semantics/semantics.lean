@@ -43,13 +43,9 @@ def u_valid (φ : form) :=
 def forces_ctx (f : frame) (v : nat → f.states → Prop) 
   (Γ : ctx) := ∀ φ, ∀ x, φ ∈ Γ → forces f v x φ
 
--- Local semantic consequence
-def local_sem_csq (Γ : ctx) (φ : form) :=
-  ∀ f v x, forces_ctx f v Γ → forces f v x φ
-
 -- Global semantic consequence
 def global_sem_csq (Γ : ctx) (φ : form) :=
-  ∀ f v x, forces_ctx f v Γ → forces f v x φ
+  ∀ f v, forces_ctx f v Γ → ∀ x, forces f v x φ
 
 lemma not_forces_imp :  ∀ f v x φ, 
   (¬(forces f v x φ)) ↔ (forces f v x (¬φ)) :=
