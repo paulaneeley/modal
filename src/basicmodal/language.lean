@@ -8,8 +8,6 @@ inductive form : Type
 
 
 -- Notation
---local notation `⊥`:80   := form.bot
---local prefix `p`:80     := form.var
 notation `⊥`:80   := form.bot
 prefix `p`:80     := form.var
 infix `&`:79      := form.and

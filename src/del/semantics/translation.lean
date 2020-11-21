@@ -1,9 +1,11 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import del.languageDEL del.syntax.syntaxDEL del.syntax.syntaxlemmasDEL del.syntax.soundnessDEL
+import del.languageDEL del.syntax.syntaxDEL del.syntax.syntaxlemmasPADEL del.syntax.soundnessDEL
 import del.semantics.translationdefs  del.semantics.semanticsDEL
-import del.semantics.translationfunction del.semantics.complexitylemmas del.semantics.translationlemmas 
+import del.semantics.translationfunction del.semantics.complexitylemmas 
+import del.semantics.translationlemmas
+import del.semantics.completenessDEL del.semantics.consistencyPADEL
 import tactic.linarith
 
 variables {agents : Type}
@@ -12,32 +14,33 @@ open prfPA
 
 ---------------------- Completeness by Translation ----------------------
 
-theorem equiv_translation_aux' {Γ : ctx agents} (n : nat) (φ : formPA agents) (h : complexity φ ≤ n) : 
-  prfPA Γ (φ ↔ (translate φ)) :=
+theorem equiv_translation_aux' {Γ : ctxPA agents} (n : nat) (φ : formPA agents) (h : complexity φ ≤ n) : 
+  prfPA Γ (φ ↔ to_PA (translate φ)) :=
 begin
   simp at *,
   induction n with n ih generalizing φ,
   { have h1 : complexity φ > 0, from comp_gt_zero, linarith},
   cases φ,
   case formPA.bot 
-    { exact mp (mp pl4 iden) iden },
+    { exact mp (mp pl4 PAlemma.iden) PAlemma.iden },
   case formPA.var : m 
-    { exact mp (mp pl4 iden) iden },
+    { exact mp (mp pl4 PAlemma.iden) PAlemma.iden },
   case formPA.and : φ ψ 
     { rw translate,
       have h1 := ih φ (compand1 h),
       have h2 := ih ψ (compand2 h),
-      exact iff_iff_and_iff h1 h2
+      exact PAlemma.iff_iff_and_iff h1 h2
     },
   case formPA.impl : φ ψ 
     { rw translate,
+      repeat {rw to_PA},
       have h1 := ih φ (compimp1 h),
       have h2 := ih ψ (compimp2 h),
       exact iff_iff_imp_iff h1 h2
     },
   case formPA.box : a φ 
     { simp at *,
-      have h1 : complexity φ ≤ n, sorry, --exact nat.lt_succ_iff.mp h,
+      have h1 : complexity φ ≤ n, from nat.lt_succ_iff.mp (nat.one_add_le_iff.mp h),
       have h2 := ih φ h1,
       exact iff_k_dist h2, 
     },
@@ -50,7 +53,8 @@ begin
             {have : complexity φ + 1 ≤ nat.succ n, linarith,
              exact nat.lt_succ_iff.mp this},
           have h2 := ih φ h1,
-          have h3 := atomicbot, exact update_iff1 h2 h3 
+          have h3 : prfPA Γ ((U φ ⊥) ↔ (φ ⊃ ⊥)), from atomicbot, 
+          exact update_iff1 h2 h3 
         },
       case formPA.var : m 
         { repeat {rw translate},
@@ -59,13 +63,15 @@ begin
             {have : complexity φ + 1 ≤ nat.succ n, linarith,
              exact nat.lt_succ_iff.mp this},
           have h2 := ih φ h1,
-          have h3 := atomicperm, exact update_iff1 h2 h3 
+          have h3 : prfPA Γ ((U φ (p m)) ↔ (φ ⊃ (p m))), from atomicperm, 
+          exact update_iff1 h2 h3 
         },
       case formPA.and : ψ χ 
         { repeat {rw translate},
-          have h1 := announceconj,
+          have h1 : prfPA Γ ((U φ (ψ & χ)) ↔ ((U φ ψ) & (U φ χ))), from announceconj,
           have h2 := ih (U φ ψ) (updatecompand1 h),
           have h3 := ih (U φ χ) (updatecompand2 h),
+          simp at *,
           exact update_iff2 h2 h3 h1,
         },
       case formPA.impl : ψ χ
@@ -78,7 +84,7 @@ begin
         },
       case formPA.box : a ψ
         { repeat {rw translate}, 
-          have h1 := announceknow,
+          have h1 : prfPA Γ ((U φ (K a ψ)) ↔ (φ ⊃ (K a (U φ ψ)))), from announceknow,
           have h2 := ih (φ ⊃ K a (U φ ψ)) (updatecompknow2 h),
           exact update_iff4 h1 h2
         },
@@ -92,7 +98,7 @@ begin
 end
 
 
-theorem equiv_translation (Γ : ctx agents) : ∀ φ : formPA agents, prfPA Γ (φ ↔ (translate φ)) :=
+theorem equiv_translation (Γ : ctxPA agents) : ∀ φ : formPA agents, prfPA Γ (φ ↔ to_PA (translate φ)) :=
 begin
 intro φ,
 have h : complexity φ ≤ complexity φ + 1, linarith,
@@ -100,16 +106,74 @@ simp,
 exact equiv_translation_aux' (complexity φ + 1) φ h
 end
 
-
-theorem completenessPA {Γ : ctx agents} {φ : formPA agents} : 
-   (∀ ψ ∈ Γ, F_valid ψ equiv_class) → F_valid φ equiv_class → prfPA Γ φ :=
+-- Need help writing this
+lemma ctxPA_iff_ctx {Γ : ctx agents} {Γ' : ctxPA agents} {φ : form agents} : 
+  φ ∈ Γ ↔ (to_PA φ) ∈ Γ' :=
 begin
-intros h1 h2,
-have h3 : prfPA Γ (φ ⊃ translate φ), from mp pl5 (equiv_translation Γ φ),
-have h4 : prfPA Γ (φ ⊃ translate φ) → (∀ ψ ∈ Γ, F_valid ψ equiv_class) → 
-  F_valid (φ ⊃ translate φ) equiv_class, from soundnessPA,
-specialize h4 h3 h1,
-have h5 : F_valid (translate φ) equiv_class, {rw F_valid, intros f h v x,
-specialize h2 f h v x, specialize h4 f h v x h2, exact h4},
-sorry,
+sorry
+end
+
+lemma forces_ctxPA_iff_forces_ctx (f : frame agents) 
+  (v : nat → f.states → Prop) (Γ : ctx agents) (Γ' : ctxPA agents) (h : consistPA.max_ax_consist Γ') : 
+  forces_ctxPA f v Γ' ↔ forces_ctx f v Γ :=
+begin
+split,
+intros h1 φ x h2,
+rw forces_ctxPA at h1,
+specialize h1 (to_PA φ) x,
+have h3 : φ ∈ Γ ↔ (to_PA φ) ∈ Γ', from ctxPA_iff_ctx,
+have h4 : to_PA φ ∈ Γ', from h3.mp h2,
+specialize h1 h4, exact (forcesPA_iff_forces φ f v x).mp h1,
+intros h1 φ x h2,
+rw forces_ctx at h1,
+specialize h1 (translate φ) x,
+have h3 : (translate φ) ∈ Γ ↔ (to_PA (translate φ)) ∈ Γ', 
+  sorry,
+  --from ctxPA_iff_ctx,
+have h4 := (consistPA.max_translate h).mp h2,
+have h5 : translate φ ∈ Γ, from ctxPA_iff_ctx.mpr h4, 
+specialize h1 h5, 
+have h6 := (forcesPA_iff_forces (translate φ) f v x).mpr h1, 
+exact (forcesPA_translate f v x φ).mpr h6,
+end
+
+lemma global_sem_csqPA_iff_global_sem_csq (Γ : ctx agents) (Γ' : ctxPA agents) 
+  (h : consistPA.max_ax_consist Γ') (F : set (frame agents)) (φ : form agents) : 
+  global_sem_csqPA Γ' F (to_PA φ) ↔ global_sem_csq Γ F φ :=
+begin
+split,
+intros h1 f h2 v h3 x,
+rw global_sem_csqPA at h1,
+have h4 := (forces_ctxPA_iff_forces_ctx f v Γ Γ' h).mpr h3,
+exact (forcesPA_iff_forces φ f v x).mp (h1 f h2 v h4 x),
+intros h1 f h2 v h3 x,
+have h4 := (forces_ctxPA_iff_forces_ctx f v Γ Γ' h).mp h3,
+exact (forcesPA_iff_forces φ f v x).mpr (h1 f h2 v h4 x)
+end
+
+
+theorem completenessPA {φ : formPA agents} (Γ : ctxPA agents) (h : consistPA.max_ax_consist Γ) : 
+  global_sem_csqPA Γ equiv_class φ → prfPA Γ φ :=
+begin
+intros h1,
+have h2 : prfPA ∅ (φ ⊃ to_PA (translate φ)), 
+  from mp pl5 (equiv_translation ∅ φ),
+have h3 : prfPA ∅ (φ ⊃ to_PA (translate φ)) → 
+  global_sem_csqPA ∅ equiv_class (φ ⊃ to_PA (translate φ)), 
+  from soundnessPA,
+specialize h3 h2,
+have h4 : global_sem_csqPA ∅ equiv_class (to_PA (translate φ)), 
+{rw global_sem_csqPA, intros f h4 v h5 x,
+specialize h1 f h4 v h5 x, specialize h3 f h4 v h5 x, exact h3 h1},
+have h5 : global_sem_csq (∅ : ctx agents) equiv_class (translate φ), 
+  from (global_sem_csqPA_iff_global_sem_csq ∅ ∅ equiv_class (translate φ) ).mp h4,
+have h6 : global_sem_csq ∅ equiv_class (translate φ) → prfS5 ∅ (translate φ), 
+  from canonical.completeness sem_consS5 (translate φ),
+specialize h6 h5,
+have h7 : prfPA ∅ (to_PA (translate φ)), sorry,
+have h8 : prfPA ∅ (φ ↔ to_PA (translate φ)), from equiv_translation ∅ φ,
+simp at *,
+have h9 : prfPA ∅ ((to_PA (translate φ)) ⊃ φ), from mp pl6 h8,
+have h10 : prfPA ∅ φ, from mp h9 h7,
+exact h10
 end
