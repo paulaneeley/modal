@@ -119,7 +119,7 @@ specialize h1 (λ h4, h5), rw forcesPA at h1, specialize h1 h4,
 exact h1},
 {split, rw forcesPA, rw public_announce_know, intro h1, exact h1,
 intro h1, rw public_announce_know, exact h1}, 
-{split, intro h1, rw public_announce_comp,
-exact h1, intro h1, rw public_announce_comp at h1, exact h1}
+{split, intro h1, rw compositionPA.public_announce_comp,
+exact h1, intro h1, rw compositionPA.public_announce_comp at h1, exact h1}
 end
 

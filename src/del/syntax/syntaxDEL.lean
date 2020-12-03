@@ -1,7 +1,7 @@
 -- Following the textbook "Dynamic Epistemic Logic" by 
 -- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
 
-import del.languageDEL
+import del.languageDEL data.set.basic
 variables {agents : Type}
 
 
@@ -70,3 +70,31 @@ inductive prfPA : ctxPA agents → formPA agents → Prop
   {φ ψ} {a}              : prfPA Γ ((U φ (K a ψ)) ↔ (φ ⊃ (K a (U φ ψ))))
 | announcecomp {Γ} 
   {φ ψ χ}                : prfPA Γ ((U φ (U ψ χ)) ↔ (U (φ & (U φ ψ)) χ))
+
+
+lemma to_prfPA {Γ : ctx agents} {φ : form agents} : prfS5 Γ φ → prfPA (to_PA '' Γ) (to_PA φ) :=
+begin
+intro h1,
+induction h1,
+rename h1_h h,
+apply prfPA.ax,
+use h1_φ,
+split,
+exact h,
+refl,
+apply prfPA.pl1,
+apply prfPA.pl2,
+apply prfPA.pl3,
+apply prfPA.pl4,
+apply prfPA.pl5,
+apply prfPA.pl6,
+apply prfPA.pl7,
+apply prfPA.pl8,
+apply prfPA.kdist,
+apply prfPA.truth,
+apply prfPA.posintro,
+apply prfPA.negintro,
+apply prfPA.mp h1_ih_hpq h1_ih_hp,
+apply prfPA.nec h1_ih,
+end
+

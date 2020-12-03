@@ -46,6 +46,7 @@ def forcesPA : ∀ f : frame agents,
   | f v x (update φ ψ) := ∀ h : forcesPA f v x φ, 
       forcesPA (f.restrict (λ y, forcesPA f v y φ) x h) (λ n u, v n u.val) ⟨x, h⟩ ψ
 
+
 -- φ is valid in a model M = (f,v)
 def m_validPA (φ : formPA agents) (f : frame agents) 
   (v : nat → f.states → Prop) := 
@@ -116,54 +117,6 @@ push_neg at h1,
 cases h1 with Ph2 h2, exact Ph2},
 {intro h1, cases h1 with Ph1 h1, 
 intro h2, apply h2, exact h1}
-end
-
-lemma forcesPA_translate (f : frame agents) (v : nat → f.states → Prop) 
-  (x : f.states) (φ : formPA agents) : forcesPA f v x φ ↔ forcesPA f v x (to_PA (translate φ)) :=
-begin
-induction φ generalizing x,
-repeat {split},
-repeat {intro h1, exact h1},
-repeat {rename φ_φ φ},
-repeat {rename φ_ψ ψ},
-repeat {rename φ_ih_φ ih_φ},
-repeat {rename φ_ih_ψ ih_ψ},
-repeat {rename φ_a a},
-intro h1, rw translate,
-cases h1 with h1 h2,
-split,
-exact (ih_φ x).mp h1, exact (ih_ψ x).mp h2,
-intro h1, rw translate at h1,
-cases h1 with h1 h2,
-split,
-exact (ih_φ x).mpr h1, exact (ih_ψ x).mpr h2,
-intro h1, rw translate, intro h2,
-exact (ih_ψ x).mp (h1 ((ih_φ x).mpr h2)),
-intro h1, rw translate at h1,
-intro h2,
-exact (ih_ψ x).mpr (h1 ((ih_φ x).mp h2)),
-intro h1, rw translate, rw to_PA,
-intros y h2,
-rw forcesPA at h1,
-specialize h1 y h2,
-specialize φ_ih y, exact φ_ih.mp h1,
-intro h1, rw translate at h1, rw to_PA at h1,
-intros y h2,
-rw forcesPA at h1,
-specialize h1 y h2,
-specialize φ_ih y, exact φ_ih.mpr h1,
-induction ψ, 
-repeat {rename ψ_φ ψ},
-repeat {rename ψ_ψ χ},
-repeat {rename ψ_ih_φ ih_ψ},
-repeat {rename ψ_ih_ψ ih_χ},
-repeat {intro h1, repeat {rw translate},
-repeat {rw to_PA}, 
-intro h2,
-have h3 := (ih_φ x).mpr h2,
-specialize h1 h3,
-exact h1},
-repeat {sorry},
 end
 
 -- definition of forces for basic modal language indexed over agents...

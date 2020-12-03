@@ -166,7 +166,7 @@ have h6 : prfS5 ∅ ((C a (K a φ)) ⊃ (C a (¬(C a ¬φ)))),
 exact (mp pl1 (cut h6 h5))
 end
 
-lemma S5_equiv {a : agents} (hax : sem_cons (∅ : ctx agents) equiv_class) : 
+lemma S5_equiv (hax : sem_cons (∅ : ctx agents) equiv_class) : 
   canonical ∈ (equiv_class : set (frame agents)) :=
 begin
 rw equiv_ref_euclid,
@@ -226,8 +226,7 @@ let f := canonical,
 use f,
 let v := val_canonical, 
 split,
-exact S5_equiv hax,
-sorry,
+exact S5_equiv hax, 
 use v,
 let xΓ' : f.states := ⟨Γ', h3⟩,
 split, 
