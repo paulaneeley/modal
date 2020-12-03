@@ -245,7 +245,7 @@ intro h3,
 exact h2,
 end
 
--- NEW LEMMAS START HERE --
+-- LEMMAS FROM 12/02/2020 MEETING START HERE --
 
 def is_modal_iso (f1 f2 : frame agents) (v1 : nat → f1.states → Prop)
   (v2 : nat → f2.states → Prop) (F : f1.states ≃ f2.states) := 
