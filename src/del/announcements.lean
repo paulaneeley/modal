@@ -106,108 +106,6 @@ end
 
 namespace compositionPA
 
--- -- The theory of x in m
--- def theory_at (f : frame agents) (v : nat → f.states → Prop) (x : f.states) : 
---   set (formPA agents) := { φ : formPA agents | forcesPA f v x φ}
-
--- -- Invariance under bisimulation
--- def base {f1 f2 : frame agents} (v1 : nat → f1.states → Prop) 
---   (v2 : nat → f2.states → Prop) (x1 : f1.states) (x2 : f2.states) := 
---   ∀ n, v1 n x1 ↔ v2 n x2
-
--- def forth {f1 f2 : frame agents} (bisim : f1.states → f2.states → Prop) 
---   (x1 : f1.states) (x2 : f2.states) := 
---   ∀ a, ∀ y1, f1.rel a x1 y1 → (∃ y2 : f2.states, f2.rel a x2 y2 ∧ bisim y1 y2)
-
--- def back {f1 f2 : frame agents} (bisim : f1.states → f2.states → Prop) 
---   (x1 : f1.states) (x2 : f2.states) := 
---   ∀ a, ∀ y2, f2.rel a x2 y2 → (∃ y1 : f1.states, f1.rel a x1 y1 ∧ bisim y1 y2)
-
--- -- Bisimulation between M1 = (f1,v1) and M2 = (f2,v2)
--- def is_bisimulation {f1 f2 : frame agents} (v1 : nat → f1.states → Prop) 
---   (v2 : nat → f2.states → Prop) (bisim : f1.states → f2.states → Prop) := ∀ x1 x2,
---   bisim x1 x2 → (base v1 v2 x1 x2 ∧ forth bisim x1 x2 ∧ back bisim x1 x2)
-
--- theorem invariance_bisim {f1 f2 : frame agents} {v1 : nat → f1.states → Prop}
---   {v2 : nat → f2.states → Prop} (bisim : f1.states → f2.states → Prop) 
---   (h : is_bisimulation v1 v2 bisim) (x1 : f1.states) (x2 : f2.states) : 
---   bisim x1 x2 → theory_at f1 v1 x1 = theory_at f2 v2 x2 :=
--- begin
--- intros h1, ext φ, revert x1 x2, induction φ,
--- {intros x1 x2 h1, split, intro h2, exact h2, intro h2, exact h2}, 
--- {intros x1 x2 h1, specialize h x1 x2 h1, cases h, 
--- specialize h_left φ, cases h_left, split, intro h2, 
--- exact h_left_mp h2, intro h2, exact h_left_mpr h2}, 
--- {intros x1 x2 h1, specialize φ_ih_φ x1 x2 h1, specialize φ_ih_ψ x1 x2 h1, 
--- cases φ_ih_φ, cases φ_ih_ψ, split, intro h2, cases h2, split, 
--- exact φ_ih_φ_mp h2_left, exact φ_ih_ψ_mp h2_right, intro h2, 
--- cases h2, split, exact φ_ih_φ_mpr h2_left, exact φ_ih_ψ_mpr h2_right}, 
--- {intros x1 x2 h1, specialize φ_ih_φ x1 x2 h1, specialize φ_ih_ψ x1 x2 h1,
--- cases φ_ih_φ, cases φ_ih_ψ, split, intros h2 h3, have h4 := φ_ih_φ_mpr h3,
--- have h5 := h2 h4, exact φ_ih_ψ_mp h5, intros h2 h3, have h4 := φ_ih_φ_mp h3,
--- have h5 := h2 h4, exact φ_ih_ψ_mpr h5},
--- {rename φ_φ φ, intros x1 x2 h1, specialize h x1 x2 h1, cases h with h4 h5,
--- cases h5 with h5 h6, split,
--- {intros h2 y2 h3, specialize h6 φ_a y2 h3, cases h6 with y1 h6, 
--- cases h6 with h6 h7, specialize h2 y1 h6, specialize φ_ih y1 y2 h7, 
--- cases φ_ih, exact φ_ih_mp h2},
--- {intros h2 y1 h3, specialize h5 φ_a y1 h3, cases h5 with y2 h5, 
--- cases h5 with h5 h7, specialize h2 y2 h5, specialize φ_ih y1 y2 h7, 
--- cases φ_ih, exact φ_ih_mpr h2}},
--- {rename φ_φ φ, rename φ_ψ ψ, rename φ_ih_φ ih_φ, rename φ_ih_ψ ih_ψ,
--- intros x1 x2 h1, specialize h x1 x2 h1, cases h with h2 h3,
--- cases h3 with h3 h4, split,
--- {
---   intro h5,
---   intro h6,
---   rw theory_at at h5,
---   rw set.mem_set_of_eq at h5,
---   rw forcesPA at h5,
---   specialize ih_φ x1 x2 h1,
---   repeat {rw theory_at at ih_φ},
---   repeat {rw set.mem_set_of_eq at ih_φ},
---   have h7 := ih_φ.mpr h6,
---   specialize h5 h7,
---   specialize ih_ψ x1 x2 h1,
---   repeat {rw theory_at at ih_ψ},
---   repeat {rw set.mem_set_of_eq at ih_ψ},
---   have h8 : forcesPA f1 v1 x1 ψ, 
---   sorry,
---   have h9 := ih_ψ.mp h8,
---   sorry,
--- }, 
--- {
---   intro h5,
---   intro h6,
---   rw theory_at at h5,
---   rw set.mem_set_of_eq at h5,
---   rw forcesPA at h5,
---   specialize ih_φ x1 x2 h1,
---   repeat {rw theory_at at ih_φ},
---   repeat {rw set.mem_set_of_eq at ih_φ},
---   have h7 := ih_φ.mp h6,
---   specialize h5 h7,
---   specialize ih_ψ x1 x2 h1,
---   repeat {rw theory_at at ih_ψ},
---   repeat {rw set.mem_set_of_eq at ih_ψ},
---   have h8 : forcesPA f2 v2 x2 ψ, 
---   sorry,
---   have h9 := ih_ψ.mpr h8,
---   sorry,
--- }}
--- end
-
--- lemma comp_helper3 {f1 f2 : frame agents} {v1 : nat → f1.states → Prop} 
---   {v2 : nat → f2.states → Prop} {x1 : f1.states} {x2 : f2.states} {φ : formPA agents} :
---   forcesPA f1 v1 x1 φ → theory_at f1 v1 x1 = theory_at f2 v2 x2 → forcesPA f2 v2 x2 φ :=
--- begin
--- intros h1 h2,
--- repeat {rw theory_at at h2},
--- simp at *,
--- repeat {rw set_of at h2},
--- exact eq.subst h2 h1,
--- end
-
 variables A A'     : Prop
 variable  B        : A → Prop
 variable  A''      : A' → Prop
@@ -247,36 +145,100 @@ end
 
 -- lemmas from 12/02/2020 meeting start here --
 
-def is_modal_iso (f1 f2 : frame agents) (v1 : nat → f1.states → Prop)
-  (v2 : nat → f2.states → Prop) (F : f1.states ≃ f2.states) := 
+def is_frame_iso (f1 f2 : frame agents) (F : f1.states ≃ f2.states) := 
   ∀ x x' : f1.states, ∀ a : agents, (f1.rel a x x' ↔ f2.rel a (F x) (F x'))
+
+def is_model_iso (f1 f2 : frame agents) (v1 : nat → f1.states → Prop)
+  (v2 : nat → f2.states → Prop) (F : f1.states ≃ f2.states) := 
+  is_frame_iso f1 f2 F ∧ ∀ n, ∀ x : f1.states, v1 n x = v2 n (F x)
+
+lemma model_iso_symm {f1 f2 : frame agents} {v1 : nat → f1.states → Prop}
+  {v2 : nat → f2.states → Prop} {F : f1.states ≃ f2.states} :
+  is_model_iso f1 f2 v1 v2 F → is_model_iso f2 f1 v2 v1 (F.symm) :=
+begin
+intro h1,
+rw is_model_iso at *,
+cases h1 with h1 h2,
+split,
+rw is_frame_iso at *,
+intros x x' a,
+specialize h1 (F.inv_fun x) (F.inv_fun x') a, 
+simp at h1,
+exact h1.symm,
+intros n x,
+specialize h2 n (F.inv_fun x), simp at *,
+exact h2.symm
+end
+
+def restrict_F {f1 f2 : frame agents} {v1 : nat → f1.states → Prop}
+  {v2 : nat → f2.states → Prop} (F : f1.states ≃ f2.states) 
+  (φ : formPA agents) (x : f1.states) (h : ∀ y : f1.states,
+  (forcesPA f1 v1 y φ ↔ forcesPA f2 v2 (F y) φ)) (h' : forcesPA f1 v1 x φ)
+  (h'' : forcesPA f2 v2 (F x) φ) : 
+  (f1.restrict (λ y, forcesPA f1 v1 y φ) x h').states 
+  ≃ (f2.restrict (λ y, forcesPA f2 v2 y φ) (F x) h'').states :=
+{ to_fun := λ ⟨y, hy⟩, ⟨(F y), (h y).mp hy⟩,
+  inv_fun := λ ⟨y, hy⟩, ⟨(F.inv_fun y), (h (F.inv_fun y)).mpr 
+  begin
+    convert hy,
+    apply F.right_inv,
+  end ⟩,
+  left_inv := 
+  begin
+    intro y,
+    cases y with y hy,
+    ext,
+    apply F.left_inv,
+  end,
+  right_inv := 
+  begin
+  intro y,
+    cases y with y hy,
+    ext,
+    apply F.right_inv,
+  end }
+
 
 lemma update_iso {f1 f2 : frame agents} {v1 : nat → f1.states → Prop}
   {v2 : nat → f2.states → Prop} (F : f1.states ≃ f2.states) :
-  is_modal_iso f1 f2 v1 v2 F → ∀ φ : formPA agents, ∀ x : f1.states,
-  ∀ h : forcesPA f1 v1 x φ, ∀ h' : forcesPA f2 v2 (F x) φ, 
-  ∃ F' : (f1.restrict (λ y, forcesPA f1 v1 y φ) x h).states
-  ≃ (f2.restrict (λ y, forcesPA f2 v2 y φ) (F x) h').states,
-  is_modal_iso (f1.restrict (λ y, forcesPA f1 v1 y φ) x h) 
-  (f2.restrict (λ y, forcesPA f2 v2 y φ) (F x) h') (λ n u, v1 n u.val) (λ n u, v2 n u.val) F' :=
+  is_model_iso f1 f2 v1 v2 F → ∀ φ : formPA agents,
+  ∀ h : (∀ x : f1.states, forcesPA f1 v1 x φ ↔ forcesPA f2 v2 (F x) φ), 
+  ∀ x, ∀ h' : forcesPA f1 v1 x φ, 
+  ∀ h'' : forcesPA f2 v2 (F x) φ, 
+  is_model_iso (f1.restrict (λ y, forcesPA f1 v1 y φ) x h') 
+  (f2.restrict (λ y, forcesPA f2 v2 y φ) (F x) h'') (λ n u, v1 n u.val) 
+  (λ n u, v2 n u.val) (restrict_F F φ x h h' h'') :=
 begin
-sorry
+intros h1 φ h2 x h3 h4,
+cases h1 with h1 h6,
+split,
+intros x1 y1 a,
+cases x1 with x1 hx1,
+cases y1 with y1 hy1,
+rw is_frame_iso at h1,
+specialize h1 x1 y1 a,
+apply h1,
+intros n x1,
+dsimp,
+cases x1 with x1 hx1,
+specialize h6 n x1,
+apply h6,
 end
 
-lemma comp_helper4 {f1 f2 : frame agents} {v1 : nat → f1.states → Prop} 
-  {v2 : nat → f2.states → Prop} (F : f1.states ≃ f2.states) :
-  (is_modal_iso f1 f2 v1 v2 F ∧ ∀ n : nat, ∀ x : f1.states, v1 n x = v2 n (F x)) → ∀ s1 : f1.states, 
-  ∀ φ : formPA agents, forcesPA f1 v1 s1 φ ↔ forcesPA f2 v2 (F s1) φ :=
+lemma comp_helper3 (f1 f2 : frame agents) (v1 : nat → f1.states → Prop)
+  (v2 : nat → f2.states → Prop) (F : f1.states ≃ f2.states) :
+  is_model_iso f1 f2 v1 v2 F → ∀ s1 : f1.states, ∀ φ : formPA agents, 
+  forcesPA f1 v1 s1 φ ↔ forcesPA f2 v2 (F s1) φ :=
 begin
 intro h1,
-cases h1 with h1 h2,
-intros x1 φ, induction φ generalizing x1,
+intros x1 φ, induction φ generalizing f1 v1 f2 v2 F h1 x1,
 split,
 repeat {intro h3,
 exact h3},
 split,
 repeat {intro h3,
 rename φ n,
+cases h1 with h1 h2,
 specialize h2 n x1,
 rw forcesPA at *,
 convert h3},
@@ -291,53 +253,136 @@ repeat {intro h3,
 rw forcesPA at *,
 cases h3 with h3 h4,
 split},
-exact (φ_ih x1).mp h3,
-exact (ψ_ih x1).mp h4,
-exact (φ_ih x1).mpr h3,
-exact (ψ_ih x1).mpr h4,
+exact (φ_ih f1 v1 f2 v2 F h1 x1).mp h3,
+exact (ψ_ih f1 v1 f2 v2 F h1 x1).mp h4,
+exact (φ_ih f1 v1 f2 v2 F h1 x1).mpr h3,
+exact (ψ_ih f1 v1 f2 v2 F h1 x1).mpr h4,
 split,
 repeat {intros h3 h4},
-exact (ψ_ih x1).mp (h3 ((φ_ih x1).mpr h4)),
-exact (ψ_ih x1).mpr (h3 ((φ_ih x1).mp h4)),
+exact (ψ_ih f1 v1 f2 v2 F h1 x1).mp (h3 ((φ_ih f1 v1 f2 v2 F h1 x1).mpr h4)),
+exact (ψ_ih f1 v1 f2 v2 F h1 x1).mpr (h3 ((φ_ih f1 v1 f2 v2 F h1 x1).mp h4)),
 split,
 intros h3 y1 h4,
-rw is_modal_iso at h1,
+specialize φ_ih f1 v1 f2 v2 F h1 (F.inv_fun y1),
+cases h1 with h1 h5,
+rw is_frame_iso at h1,
 specialize h3 (F.inv_fun y1),
-specialize φ_ih (F.inv_fun y1),
 specialize h1 x1 (F.inv_fun y1) a,
 simp at *,
 exact φ_ih.mp (h3 (h1.mpr h4)),
 intros h3 x2 h4,
-rw is_modal_iso at h1,
+specialize φ_ih f1 v1 f2 v2 F h1 x2,
+cases h1 with h1 h5,
+rw is_frame_iso at h1,
 specialize h1 x1 x2 a,
-specialize φ_ih x2,
 rw forcesPA at h3,
 specialize h3 (F.to_fun x2),
 simp at *,
 exact φ_ih.mpr (h3 (h1.mp h4)),
 split,
-intros h3 h4,
-specialize φ_ih x1,
-have h5 := update_iso F h1 φ x1 (φ_ih.mpr h4) h4,
-cases h5 with F' h5,
-rw forcesPA at h3,
-specialize h3 (φ_ih.mpr h4),
-repeat {sorry}
+intro h2,
+specialize φ_ih f1 v1 f2 v2 F h1,
+intro h3,
+have h4 := ((φ_ih x1).mpr h3),
+have h5 := update_iso F h1 φ φ_ih x1 h4 h3,
+rw forcesPA at h2,
+specialize h2 h4,
+specialize ψ_ih (f1.restrict (λ (y : f1.states), forcesPA f1 v1 y φ) x1 h4)
+  (λ (n : ℕ) (u : (f1.restrict (λ (y : f1.states), forcesPA f1 v1 y φ) x1 h4).states), v1 n u.val)
+  (f2.restrict (λ (y : f2.states), forcesPA f2 v2 y φ) (F x1) h3)
+  (λ (n : ℕ) (u : (f2.restrict (λ (y : f2.states), forcesPA f2 v2 y φ) (F x1) h3).states), 
+  v2 n u.val) (restrict_F F φ x1 φ_ih h4 h3) h5 ⟨x1, h4⟩,
+have h6 := ψ_ih.mp h2,
+convert h6,
+intro h2,
+specialize φ_ih f1 v1 f2 v2 F h1,
+intro h3,
+have h4 := (φ_ih x1).mp h3,
+rw forcesPA at h2,
+specialize h2 h4,
+have h5 := update_iso F h1 φ φ_ih x1 h3 h4,
+specialize ψ_ih (f2.restrict (λ (y : f2.states), forcesPA f2 v2 y φ) (F x1) h4)
+  (λ (n : ℕ) (u : (f2.restrict (λ (y : f2.states), forcesPA f2 v2 y φ) (F x1) h4).states), v2 n u.val)
+  (f1.restrict (λ (y : f1.states), forcesPA f1 v1 y φ) x1 h3)
+  (λ (n : ℕ) (u : (f1.restrict (λ (y : f1.states), forcesPA f1 v1 y φ) x1 h3).states), v1 n u.val) 
+  (_) (model_iso_symm h5) ⟨F x1, h4⟩,
+have h6 := ψ_ih.mp h2,
+convert h6,
+{exact (equiv.eq_symm_apply F).mpr rfl},
 end
 
-
 -- Proposition 4.17, pg. 78
-lemma public_announce_comp (φ ψ χ : formPA agents) (f : frame agents) 
+lemma public_announce_comp1 (φ ψ χ : formPA agents) (f : frame agents) 
   (v : nat → f.states → Prop) (s : f.states) :
   forcesPA f v s (U (φ & U φ ψ) χ) ↔ forcesPA f v s (U φ (U ψ χ)) :=
 begin
 apply comp_helper1,
 apply comp_helper2,
 intros h1 h2 h3,
-split,
-intro h4,
---have h5 := comp_helper4,
-repeat {sorry}
+let F : (f.restrict (λ (y : f.states), forcesPA f v y (φ&φ.update ψ)) s h1).states ≃ ((f.restrict 
+  (λ (y : f.states), forcesPA f v y φ) s h2).restrict (λ (y : (f.restrict (λ (y : f.states), 
+  forcesPA f v y φ) s h2).states), forcesPA (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2) 
+  (λ (n : ℕ) (u : (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).states), v n u.val) y ψ) 
+  ⟨s, h2⟩ h3).states :=
+  {to_fun :=
+  begin
+    rintro ⟨x, h⟩,
+    use x,
+    apply h.left,
+    apply h.right,
+  end,
+  inv_fun := 
+  begin
+    rintro ⟨⟨x, h4⟩, h5⟩,
+    exact ⟨x, ⟨h4, λ _, h5⟩⟩, 
+  end,
+  left_inv := 
+  begin
+    rintro ⟨x, h⟩,
+    ext,
+    refl,
+  end,
+  right_inv :=
+  begin
+    rintro ⟨⟨x, h4⟩, h5⟩,
+    dsimp,
+    refl,
+  end},
+have h4 := comp_helper3 (f.restrict (λ (y : f.states), forcesPA f v y (φ&φ.update ψ)) s h1)
+  ((f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).restrict (λ (y : (f.restrict (λ (y : f.states), 
+  forcesPA f v y φ) s h2).states), forcesPA (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2) 
+  (λ (n : ℕ) (u : (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).states), v n u.val) y ψ) ⟨s, h2⟩ h3)
+  (λ (n : ℕ) (u : (f.restrict (λ (y : f.states), forcesPA f v y (φ&φ.update ψ)) s h1).states), v n u.val)
+  (λ (n : ℕ) (u : ((f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).restrict (λ (y : (f.restrict 
+  (λ (y : f.states), forcesPA f v y φ) s h2).states), forcesPA (f.restrict (λ (y : f.states), forcesPA f v y φ)
+  s h2) (λ (n : ℕ) (u : (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).states), v n u.val) y ψ) 
+  ⟨s, h2⟩ h3).states), (λ (n : ℕ) (u : (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).states), 
+  v n u.val) n u.val),
+specialize h4 F,
+have h5 : is_model_iso (f.restrict (λ (y : f.states), forcesPA f v y (φ&φ.update ψ)) s h1) 
+  ((f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).restrict (λ (y : (f.restrict (λ (y : f.states), 
+  forcesPA f v y φ) s h2).states), forcesPA (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2) 
+  (λ (n : ℕ) (u : (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).states), v n u.val) y ψ) 
+  ⟨s, h2⟩ h3) (λ (n : ℕ) (u : (f.restrict (λ (y : f.states), forcesPA f v y (φ&φ.update ψ)) s h1).states), 
+  v n u.val) (λ (n : ℕ) (u : ((f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).restrict 
+  (λ (y : (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).states), forcesPA (f.restrict 
+  (λ (y : f.states), forcesPA f v y φ) s h2) (λ (n : ℕ) (u : (f.restrict (λ (y : f.states), 
+  forcesPA f v y φ) s h2).states), v n u.val) y ψ) ⟨s, h2⟩ h3).states), (λ (n : ℕ) (u : 
+  (f.restrict (λ (y : f.states), forcesPA f v y φ) s h2).states), v n u.val) n u.val) F,
+{
+  clear h4,
+  split,
+  intros x1 y1 a,
+  cases x1 with x1 hx1,
+  cases y1 with y1 hy1,
+  refl,
+  intros n x,
+  cases x with x hx,
+  refl
+},
+specialize h4 h5,
+specialize h4 ⟨s, h1⟩ χ,
+convert h4
 end
 
 end compositionPA

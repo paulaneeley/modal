@@ -26,7 +26,6 @@ open set
 variable f : frame
 variables {α : Type} (r : α → α → Prop)
 
-
 def euclidean := ∀ ⦃x y z⦄, r x y → r x z → r y z 
 
 def ref_class : set (frame) := { f : frame | reflexive (f.rel) }
