@@ -9,10 +9,10 @@ import basicmodal.language
 
 -- Define a context
 @[reducible] def ctx : Type := set (form)
-notation AX `un` φ := set.insert φ AX
+notation AX `∪` φ := set.insert φ AX
 
 
--- Proof system, pg. 26
+-- Proof system
 inductive prfK : ctx → form → Prop 
 | ax {AX} {φ} (h : φ ∈ AX) : prfK AX φ
 | pl1 {AX} {φ ψ}           : prfK AX (φ ⊃ (ψ ⊃ φ))

@@ -23,7 +23,7 @@ lemma prtrue {Γ : ctx} : prfK Γ ⊤ := iden
 
 
 lemma weak {Γ : ctx} {φ ψ : form} :
-  prfK Γ φ → prfK (Γ un ψ) φ :=
+  prfK Γ φ → prfK (Γ ∪ ψ) φ :=
 begin
 intro h,
 induction h,
@@ -44,7 +44,7 @@ end
 
 
 lemma pr {Γ : ctx} {φ : form} :
-  prfK (Γ un φ) φ :=
+  prfK (Γ ∪ φ) φ :=
 begin
 apply ax;
 apply or.intro_left;
@@ -61,7 +61,7 @@ end
 
 
 lemma conv_deduction {Γ : ctx} {φ ψ : form} :
-  prfK Γ (φ ⊃ ψ) → prfK (Γ un φ) ψ :=
+  prfK Γ (φ ⊃ ψ) → prfK (Γ ∪ φ) ψ :=
 begin
 intro h, 
 exact mp (weak h) pr 

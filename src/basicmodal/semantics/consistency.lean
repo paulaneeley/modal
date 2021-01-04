@@ -284,7 +284,7 @@ end
 
 
 lemma five (AX : ctx) : 
-  ∀ Γ : ctx, ∀ φ : form, ¬ ax_consist AX (Γ un φ) → ∃ L',
+  ∀ Γ : ctx, ∀ φ : form, ¬ ax_consist AX (Γ ∪ φ) → ∃ L',
   (∀ ψ ∈ L', ψ ∈ Γ) ∧ prfK AX (fin_conj L' ⊃ ¬φ) :=
 begin
 intro Γ, intro φ, intro h1, rw ax_consist at h1, 
@@ -306,10 +306,10 @@ begin
 intros h1 φ, rw or_iff_not_and_not, by_contradiction h2,
 cases h2 with h2l h2r,
 cases h1 with h1l h1r,
-have h2 := h1r (Γ un φ), have h3 := h1r (Γ un ¬φ),
-have h4 : ¬ax_consist AX (Γ un ¬φ), 
+have h2 := h1r (Γ ∪ φ), have h3 := h1r (Γ ∪ ¬φ),
+have h4 : ¬ax_consist AX (Γ ∪ ¬φ), 
 {apply h3, from set.ssubset_insert h2r},
-have h5 : ¬ax_consist AX (Γ un φ), 
+have h5 : ¬ax_consist AX (Γ ∪ φ), 
 {apply h2, from set.ssubset_insert h2l}, 
 clear h2 h3, have h6 := five AX Γ φ _, have h7 := five AX Γ (¬φ) _, 
 cases h6 with L' h6, cases h7 with L h7, cases h6 with h6l h6r,
