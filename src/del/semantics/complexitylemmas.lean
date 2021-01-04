@@ -98,9 +98,9 @@ end
 
 lemma tr4helper1 {n m : nat} : n ≥ 4 → m ≥ 1 → 2 + n * m < n * (1 + m) :=
 begin
-  intros h1 h2,
-  have h3 := mul_add n 1 m,
-  linarith,
+intros h1 h2,
+have h3 := mul_add n 1 m,
+linarith,
 end
 
 
@@ -288,37 +288,37 @@ end
 
 lemma compand1 {φ ψ : formPA agents} {n : nat} : complexity (φ & ψ) ≤ n + 1 → complexity φ ≤ n :=
 begin
-  intro h,
-  rw complexity at *,
-  have h1 := le_max_left (complexity φ) (complexity ψ),
-  linarith
+intro h,
+rw complexity at *,
+have h1 := le_max_left (complexity φ) (complexity ψ),
+linarith
 end
 
 
 lemma compand2 {φ ψ : formPA agents} {n : nat} : complexity (φ & ψ) ≤ n + 1 → complexity ψ ≤ n :=
 begin
-  intro h,
-  rw complexity at *,
-  have h1 := le_max_right (complexity φ) (complexity ψ),
-  linarith
+intro h,
+rw complexity at *,
+have h1 := le_max_right (complexity φ) (complexity ψ),
+linarith
 end
 
 
 lemma compimp1 {φ ψ : formPA agents} {n : nat} : complexity (φ ⊃ ψ) ≤ n + 1 → complexity φ ≤ n :=
 begin
-  intro h,
-  rw complexity at *,
-  have h1 := le_max_left (complexity φ) (complexity ψ),
-  linarith
+intro h,
+rw complexity at *,
+have h1 := le_max_left (complexity φ) (complexity ψ),
+linarith
 end
 
 
 lemma compimp2 {φ ψ : formPA agents} {n : nat} : complexity (φ ⊃ ψ) ≤ n + 1 → complexity ψ ≤ n :=
 begin
-  intro h,
-  rw complexity at *,
-  have h1 := le_max_right (complexity φ) (complexity ψ),
-  linarith
+intro h,
+rw complexity at *,
+have h1 := le_max_right (complexity φ) (complexity ψ),
+linarith
 end
 
 

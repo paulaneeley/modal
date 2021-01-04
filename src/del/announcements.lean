@@ -31,9 +31,11 @@ lemma partial_announce (φ ψ : formPA agents) :
 begin
 rw F_validPA, 
 push_neg,
-let f : frame agents := { states := nat,
+let f : frame agents := 
+{ states := nat,
   h := ⟨0⟩,
-  rel := λ a, λ x y : nat, x = y }, 
+  rel := λ a, λ x y : nat, x = y 
+}, 
 use f, split, intro a,
 split, intro x, 
 exact eq.refl x,
@@ -84,8 +86,8 @@ lemma public_announce_neg (φ ψ : formPA agents) (f : frame agents)
 begin
 split,
 intros h1 h2 h3, specialize h1 h2,
-specialize h3 h2, rw ←not_forces_impPA at h1,
-exact absurd h3 h1,
+rw ←not_forces_impPA at h1,
+exact absurd (h3 h2) h1,
 intros h1, rw forcesPA at h1, rw imp_iff_not_or at h1,
 cases h1,
 intro h2, exact absurd h2 h1,
@@ -108,10 +110,10 @@ end
 
 namespace compositionPA
 
-variables A A'     : Prop
-variable  B        : A → Prop
-variable  A''      : A' → Prop
-variable  B'       : ∀ h : A', A'' h → Prop
+variables A A' : Prop
+variable  B    : A → Prop
+variable  A''  : A' → Prop
+variable  B'   : ∀ h : A', A'' h → Prop
 
 
 lemma comp_helper1 (h : A ↔ ∃ h : A', A'' h) 

@@ -124,8 +124,7 @@ have h4 : global_sem_csqPA ∅ equiv_class (to_PA (translate φ)),
 exact h3 h2 f h4 v h5 x (h1 f h4 v h5 x)},
 have h5 := (global_sem_csqPA_iff_global_sem_csq equiv_class (translate φ) ).mp h4,
 have h6 := canonical.completeness sem_consS5 (translate φ),
-specialize h6 h5,
-have h7 := to_prfPA h6,
+have h7 := to_prfPA (h6 h5),
 simp at *,
 exact mp (mp pl6 (equiv_translation ∅ φ)) h7
 end

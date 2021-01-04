@@ -25,22 +25,21 @@ lemma prtrue {Γ : ctx} : prfK Γ ⊤ := iden
 lemma weak {Γ : ctx} {φ ψ : form} :
   prfK Γ φ → prfK (Γ un ψ) φ :=
 begin
-  intro h,
-  induction h,
-  { apply ax,
-    exact (set.mem_insert_of_mem _ h_h) },
-  { exact pl1 },
-  { exact pl2 },
-  { exact pl3 },
-  { exact pl4 },
-  { exact pl5 },
-  { exact pl6 },
-  { exact pl8 },
-  { exact kdist },
-  { apply mp,
-    { exact h_ih_hpq },
-    { exact h_ih_hp } },
-  { exact nec h_ih }
+intro h,
+induction h,
+{apply ax, exact (set.mem_insert_of_mem _ h_h)},
+{exact pl1},
+{exact pl2},
+{exact pl3},
+{exact pl4},
+{exact pl5},
+{exact pl6},
+{exact pl8},
+{exact kdist},
+{apply mp,
+  {exact h_ih_hpq},
+  {exact h_ih_hp}},
+{exact nec h_ih }
 end
 
 

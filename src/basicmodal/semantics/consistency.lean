@@ -112,24 +112,22 @@ end
 lemma prnot_to_notpr (φ : form) (AX : ctx) (hax : sem_cons AX) : 
   prfK AX (¬φ) → ¬ prfK AX φ :=
 begin
-intro h1, by_contradiction h2, simp at *,
-have h3 : prfK AX ⊥, from mp (mp pl5 contra_equiv_false) (mp (mp pl4 h2) h1),
-have h4 : ¬ prfK AX ⊥, from nprfalse AX hax,
-exact absurd h3 h4
+intro h1, by_contradiction h2,
+exact absurd (mp (mp pl5 contra_equiv_false) (mp (mp pl4 h2) h1)) (nprfalse AX hax)
 end 
 
 
 lemma pr_to_notprnot (φ : form) (AX : ctx) (hax : sem_cons AX) : 
   prfK AX φ → ¬ prfK AX (¬φ) :=
 begin
-have h1 : prfK AX (¬φ) → ¬ prfK AX φ, from prnot_to_notpr φ AX hax,
+have h1 := prnot_to_notpr φ AX hax,
 rw ←not_imp_not at h1, intro h2, apply h1, rw not_not, exact h2,
 end 
 
 
 -- Finite conjunction of formulas
 def fin_conj : list form → form
-  | []  := ⊤
+  | []      := ⊤
   | (φ::φs) := φ & (fin_conj φs)
 
 
@@ -137,10 +135,7 @@ def fin_conj : list form → form
 lemma fin_conj_simp {Γ : ctx} : ∀ ψ : form, prfK Γ (¬fin_conj [ψ, ¬ψ]) :=
 begin
 intro ψ,
-have h2 : (prfK Γ (((¬ψ)&⊤) ↔ (¬ψ)) → 
-  (prfK Γ (¬(ψ & ((¬ψ)&⊤))) ↔ prfK Γ (¬(ψ & (¬ψ))))), 
-  from not_and_subst,
-exact (h2 phi_and_true).mpr not_contra
+exact (not_and_subst phi_and_true).mpr not_contra
 end
 
 
@@ -175,11 +170,8 @@ lemma fin_conj_empty {AX : ctx} {L : list form} (hax : sem_cons AX) :
   L = [] → ¬ prfK AX (fin_conj L ⊃ ⊥) :=
 begin
 intro h1, subst h1,
-have h1 : prfK AX (¬⊥), from iden,
 by_contradiction h2,
-have h3 : prfK AX ⊥, from mp h2 h1,
-have h4 : ¬ prfK AX ⊥, from nprfalse AX hax,
-exact absurd h3 h4
+exact absurd (mp h2 iden) (nprfalse AX hax)
 end 
 
 
@@ -199,9 +191,7 @@ lemma fin_conj_repeat {AX : ctx} {φ : form} {L : list form} (hax : sem_cons AX)
   (∀ ψ ∈ L, ψ = ¬φ) → prfK AX (¬fin_conj L) → prfK AX φ :=
 begin
 intros h1 h2, induction L,
-have h3 := mp dne h2,
-have h4 := nprfalse AX hax,
-exact absurd h3 h4,
+exact absurd (mp dne h2) (nprfalse AX hax),
 simp at *,
 cases h1 with h1 h3, 
 have h5 := contrapos.mpr (fin_conj_repeat_helper hax h3),
@@ -232,10 +222,8 @@ begin
 intros h1 h2,
 by_contradiction h3,
 have h4 := list.length_pos_of_ne_nil,
-specialize h4 h3,
 have h5 := list.exists_mem_of_length_pos,
-specialize h5 h4,
-cases h5 with φ h5,
+cases h5 (h4 h3) with φ h5,
 exact absurd (h1 φ h5) (set.eq_empty_iff_forall_not_mem.mp h2 φ)
 end
 
@@ -278,8 +266,7 @@ have h1a : ∀ (ψ : form), ψ ∈ L_tl → ψ ∈ Γ ∨ ψ = φ,
 have h1b : L_hd ∈ Γ ∨ L_hd = φ, 
 {apply h1 L_hd, left, refl},
 cases h1b, 
-have h3 : prfK AX (fin_conj L_tl ⊃ (L_hd ⊃ b)), 
-  from and_right_imp.mp h2,
+have h3 := and_right_imp.mp h2,
 cases L_ih h1a (L_hd ⊃ b) h3 with L' ih, existsi (L_hd::L' : list form),
 cases ih, split, intros ψ h4, cases h4, 
 subst h4, exact h1b, 
@@ -287,10 +274,10 @@ apply ih_left ψ h4, rw imp_shift at ih_right,
 rw ←imp_conj_imp_imp at ih_right, exact ih_right,
 have h3 : prfK AX (fin_conj (L_hd::L_tl) ⊃ b), 
 exact h2, exact b,
-have h5 := and_right_imp.mp,
-have h6 : prfK AX (fin_conj L_tl ⊃ (φ ⊃ b)), 
-  from eq.subst h1b (h5 h2),
-cases L_ih h1a (φ ⊃ b) h6 with L' ih, 
+have h4 := and_right_imp.mp,
+have h5 : prfK AX (fin_conj L_tl ⊃ (φ ⊃ b)), 
+  from eq.subst h1b (h4 h2),
+cases L_ih h1a (φ ⊃ b) h5 with L' ih, 
 existsi (L' : list form), split, 
 exact ih.left, exact imp_imp_iff_imp.mp ih.right}
 end
@@ -303,8 +290,7 @@ begin
 intro Γ, intro φ, intro h1, rw ax_consist at h1, 
 push_neg at h1,
 cases h1 with L h1,
-have h2 : (∀ ψ ∈ L, ψ ∈ Γ ∨ ψ = φ) → prfK AX (fin_conj L ⊃ ⊥) → ∃ L',
-  (∀ ψ ∈ L', ψ ∈ Γ) ∧ prfK AX (fin_conj L' ⊃ (φ ⊃ ⊥)), from five_helper AX Γ φ L ⊥,
+have h2 := five_helper AX Γ φ L ⊥,
 cases h1,
 have h3 : (∀ (ψ : form), ψ ∈ L → ψ ∈ Γ ∨ ψ = φ), 
 {intros ψ this, exact or.swap (h1_left ψ this)},
@@ -348,10 +334,8 @@ split, exact six_helper AX Γ h h1 φ,
 cases h2 with h2 h3,
 specialize h ([φ, ¬φ]), simp at *,
 have h4 : (∀ (ψ : form), ψ = φ ∨ ψ = ¬φ → ψ ∈ Γ), 
-{intros ψ h4, simp at *, cases h4, subst h4, exact h2, subst h4, exact h3},
-specialize h h4, rw fin_ax_consist at h, 
-have h5 : prfK AX (¬fin_conj [φ, ¬φ]), from fin_conj_simp φ, 
-exact absurd h5 h},
+{intros ψ h4, cases h4, subst h4, exact h2, subst h4, exact h3},
+exact absurd (fin_conj_simp φ) (h h4)},
 intro h1, split, exact h,
 intros Γ' h2,
 have h3 : Γ ⊆ Γ' ∧ ¬ Γ' ⊆ Γ, from h2,
@@ -361,7 +345,7 @@ apply (exists.elim h3_right), simp, intros ψ h4 h5,
 specialize h1 ψ, cases h1,
 cases h1_left,
 apply absurd h1_left h5,
-have h6 : (¬ψ) ∈ Γ', from set.mem_of_subset_of_mem h3_left h1_left,
+have h6 := set.mem_of_subset_of_mem h3_left h1_left,
 rw ax_consist, 
 push_neg,
 existsi ([ψ,¬ψ] : list form),
@@ -571,7 +555,7 @@ end
 lemma lindenbaum (AX Γ : ctx) (hax : ax_consist AX Γ) : 
   ∃ Γ', max_ax_consist AX Γ' ∧ Γ ⊆ Γ' :=
 begin
-let P := { Γ'' | Γ'' ⊇ Γ ∧ ax_consist Γ''},
+let P := { Γ'' | Γ'' ⊇ Γ ∧ ax_consist AX Γ''},
 have h : ∀ c ⊆ P, chain (⊆) c → c.nonempty → ∃ub ∈ P, ∀ s ∈ c, s ⊆ ub, 
 {intros c h2 h3 h4, use ⋃₀(c), 
 have h5 := lindenhelper c h4 h3,

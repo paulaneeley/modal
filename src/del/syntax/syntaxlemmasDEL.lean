@@ -30,26 +30,25 @@ lemma prtrue {Γ : ctx agents} : prfS5 Γ ¬⊥ := iden
 lemma weak {Γ : ctx agents} {φ ψ : form agents} :
   prfS5 Γ φ → prfS5 (Γ ∪ ψ) φ :=
 begin
-  intro h,
-  induction h,
-  { apply ax,
-    exact (set.mem_insert_of_mem _ h_h) },
-  { exact pl1 },
-  { exact pl2 },
-  { exact pl3 },
-  { exact pl4 },
-  { exact pl5 },
-  { exact pl6 },
-  { exact pl7 },
-  { exact pl8 },
-  { exact kdist },
-  { exact truth },
-  { exact posintro },
-  { exact negintro },
-  { apply mp,
-    { exact h_ih_hpq },
-    { exact h_ih_hp } },
-  { exact nec h_ih }
+intro h,
+induction h,
+{apply ax, exact (set.mem_insert_of_mem _ h_h)},
+{exact pl1},
+{exact pl2},
+{exact pl3},
+{exact pl4},
+{exact pl5},
+{exact pl6},
+{exact pl7},
+{exact pl8},
+{exact kdist},
+{exact truth},
+{exact posintro},
+{exact negintro},
+{apply mp,
+  {exact h_ih_hpq},
+  {exact h_ih_hp}},
+{exact nec h_ih}
 end
 
 

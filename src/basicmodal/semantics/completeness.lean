@@ -67,12 +67,11 @@ intros ψ h4, apply h5_left, exact h4,
 exact h3,
 simp at *,
 intros yΔ h1 h2,
-have h3 := h2 φ, 
-by_contradiction h4,
-have h5 := (max_notiff AX xΓ.1 xΓ.2 (◇φ)).mp h4,
-have h6 := (max_dn AX xΓ.1 xΓ.2 (□¬φ)).mpr h5,
-have h8 := (max_notiff AX yΔ.1 yΔ.2 φ).mpr (h2 (¬φ) h6),
-exact absurd h1 h8
+by_contradiction h3,
+have h4 := (max_notiff AX xΓ.1 xΓ.2 (◇φ)).mp h3,
+have h5 := (max_dn AX xΓ.1 xΓ.2 (□¬φ)).mpr h4,
+have h6 := (max_notiff AX yΔ.1 yΔ.2 φ).mpr (h2 (¬φ) h5),
+exact absurd h1 h6
 end
 
 
@@ -106,11 +105,10 @@ split, intros h1,
 by_contradiction h2,
 have h4 := (existence AX hax xΓ (¬φ)).mp,
 have h5 := max_boxdn AX xΓ.1 xΓ.2 φ ((max_notiff AX xΓ.1 xΓ.2 φ.box).mp h2),
-specialize h4 h5, cases h4 with xΔ h4, cases h4 with h4 h6,
+cases h4 h5 with xΔ h4, cases h4 with h4 h6,
 have h7 := max_notiff AX xΔ.1 xΔ.2 φ,
 cases h7 with h7l h7r,
-specialize h1 xΔ h6,
-exact absurd ((ih_φ xΔ).mp h1) (h7r h4),
+exact absurd ((ih_φ xΔ).mp (h1 xΔ h6)) (h7r h4),
 intros h1 xΔ h2,
 apply (ih_φ xΔ).mpr, exact h2 φ h1,
 end
@@ -137,11 +135,10 @@ theorem forcesAX (AX : ctx) (hax : sem_cons AX) :
   forces_ctx (canonical AX) (val_canonical AX) AX :=
 begin
 intros φ xΓ h1,
-have h2 := mp pl1 (ax h1),
-have h3 : ∀ ψ ∈ list.nil, ψ ∈ xΓ.val, 
-{intros ψ h3, have h5 := list.ne_nil_of_length_pos (list.length_pos_of_mem h3),
-simp at *, exact false.elim h5},
-exact (truth AX hax xΓ φ).mpr (exercise1 xΓ.2 h3 h2)
+have h2 : ∀ ψ ∈ list.nil, ψ ∈ xΓ.val, 
+{intros ψ h3, have h4 := list.ne_nil_of_length_pos (list.length_pos_of_mem h3),
+simp at *, exact false.elim h4},
+exact (truth AX hax xΓ φ).mpr (exercise1 xΓ.2 h2 (mp pl1 (ax h1)))
 end
 
 
@@ -262,13 +259,12 @@ begin
 simp,
 have h1 : prfK S5_axioms (◇(¬φ) ⊃ □(◇¬φ)),
 refine ax _, rw S5_axioms, simp, simp at *,
-have h2 : prfK S5_axioms ((¬□(◇¬φ)) ⊃ ¬(◇¬φ)), from contrapos.mpr h1,
-have h3 : prfK S5_axioms ((¬□(◇¬φ)) ⊃ (□φ)), from cut h2 (mp pl6 dual_equiv1),
+have h2 := contrapos.mpr h1,
+have h3 := cut h2 (mp pl6 dual_equiv1),
 have h4 : prfK S5_axioms ((¬□(◇¬φ)) ↔ (¬¬◇(¬(◇¬φ)))),
   from (mp (mp pl4 (contrapos.mpr (mp pl6 dual_equiv1))) (contrapos.mpr (mp pl5 dual_equiv1))),
-have h5 : prfK S5_axioms (◇(¬(◇¬φ)) ⊃ (□φ)), from cut dni (cut (mp pl6 h4) h3),
-have h6 : prfK S5_axioms ((◇(□φ)) ⊃ (◇(¬(◇¬φ)))), 
-  from (contrapos.mpr (mp kdist (nec (contrapos.mpr (mp pl5 dual_equiv1))))),
+have h5 := cut dni (cut (mp pl6 h4) h3),
+have h6 := (contrapos.mpr (mp kdist (nec (contrapos.mpr (mp pl5 dual_equiv1))))),
 exact (mp pl1 (cut h6 h5))
 end
 
@@ -299,8 +295,7 @@ apply h5,
 by_contradiction h6,
 have h7 := (max_notiff S5_axioms x.1 x.2 (¬(¬φ.box).box)).mp h6,
 have h8 := (max_dn S5_axioms x.1 x.2 ((¬φ.box).box)).mpr h7,
-specialize h1 (¬φ.box) h8,
-have h9 := (max_notiff S5_axioms y.1 y.2 (φ.box)).mpr h1,
+have h9 := (max_notiff S5_axioms y.1 y.2 (φ.box)).mpr (h1 (¬φ.box) h8),
 exact absurd h3 h9,
 exact (cut (mp pl5 phi_and_true) h4)
 end

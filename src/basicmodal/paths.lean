@@ -9,12 +9,12 @@ variable {α : Type*}
 
 
 def path (R : α → α → Prop) : α → list α → Prop
-| x [] := true
+| x []      := true
 | x (y::ys) := R x y ∧ path y ys
 
 
 def last (R : α → α → Prop) : α → list α → α
-| x [] := x
+| x []      := x
 | x (y::ys) := last y ys
 
 
@@ -24,7 +24,7 @@ def reachable (R : α → α → Prop) (x y : α) : Prop := ∃ l : list α, pat
 ---------------------- Lemmas about R* ----------------------
 
 lemma reach_right : ∀ x y z : α, ∀ R : α → α → Prop, 
-  reachable R x y ∧ R y z →  reachable R x z :=
+  reachable R x y ∧ R y z → reachable R x z :=
 begin
 intros x y z R h1, cases h1 with h1 h2,
 cases h1 with l h1,

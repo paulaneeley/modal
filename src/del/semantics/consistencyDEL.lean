@@ -81,7 +81,7 @@ end
 
 -- finite conjunction of formulas
 def fin_conj : list (form agents) → form agents
-  | []  := ¬form.bot
+  | []      := ¬form.bot
   | (φ::φs) := φ & (fin_conj φs)
 
 
@@ -201,7 +201,7 @@ def max_ax_consist (Γ : ctx agents) :=
 
 lemma max_imp_ax {Γ : ctx agents} : max_ax_consist Γ → ax_consist Γ :=
 begin
-intro h1, rw max_ax_consist at h1, cases h1, exact h1_left
+intro h1, exact h1.left
 end
 
 
@@ -223,8 +223,7 @@ have h1a : ∀ (ψ : form agents), ψ ∈ L_tl → ψ ∈ Γ ∨ ψ = φ,
 have h1b: L_hd ∈ Γ ∨ L_hd = φ, 
   {apply h1 L_hd, left, refl},
 cases h1b, 
-have h3 : prfS5 ∅ (fin_conj L_tl ⊃ (L_hd ⊃ b)), 
-  from and_right_imp.mp h2,
+have h3 := and_right_imp.mp h2,
 cases L_ih h1a (L_hd ⊃ b) h3 with L' ih, existsi (L_hd::L' : list (form agents)),
 cases ih, split, intros ψ h4, cases h4, 
 subst h4, exact h1b, 
@@ -232,12 +231,9 @@ apply ih_left ψ h4, rw imp_shift at ih_right,
 rw ←imp_conj_imp_imp at ih_right, exact ih_right,
 have h3 : prfS5 ∅ (fin_conj (L_hd::L_tl) ⊃ b), 
 exact h2, exact b,
-have h5 : prfS5 ∅ (fin_conj (L_hd :: L_tl) ⊃ b) → 
-  prfS5 ∅ (fin_conj L_tl ⊃ (L_hd ⊃ b)), 
-  from and_right_imp.mp,
-have h6 : prfS5 ∅ (fin_conj L_tl ⊃ (φ ⊃ b)), 
-  from eq.subst h1b h5 h2,
-cases L_ih h1a (φ ⊃ b) h6 with L' ih, 
+have h4 : prfS5 ∅ (fin_conj L_tl ⊃ (φ ⊃ b)), 
+  from eq.subst h1b (and_right_imp.mp) h2,
+cases L_ih h1a (φ ⊃ b) h4 with L' ih, 
 cases ih, existsi (L' : list (form agents)), split, 
 exact ih_left, exact imp_imp_iff_imp.mp ih_right}
 end
@@ -442,9 +438,9 @@ begin
 intros h1 h2,
 have h3 : (∀ χ ∈ [φ], χ ∈ Γ) → prfS5 ∅ (fin_conj [φ] ⊃ (ψ ⊃ (φ & ψ))) → (ψ ⊃ (φ & ψ)) ∈ Γ, 
   from exercise1 h1,
-simp at *, specialize h3 h2.left,
+simp at *,
 apply max_imp_2 h1, 
-exact h3 (cut (mp pl5 phi_and_true) pl4), exact h2.right
+exact (h3 h2.left) (cut (mp pl5 phi_and_true) pl4), exact h2.right
 end
 
 

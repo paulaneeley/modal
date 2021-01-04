@@ -188,7 +188,7 @@ from eq.subst h2 (hr x1).left, exact h5,
 have h5 : back (λ (x1 : f1.states) (x2 : f2.states), g x1 = x2) x1 x2,
 from eq.subst h2 (hr x1).right, exact h5},
 specialize h3 h4 x y hl, intro h2, apply h1,
-rw set.subset.antisymm_iff at h3, cases h3, 
+rw set.subset.antisymm_iff at h3, cases h3,
 rw set.subset_def at h3_left,
 exact h3_left φ h2
 end
