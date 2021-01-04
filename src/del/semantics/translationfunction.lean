@@ -1,5 +1,14 @@
+/-
+Copyright (c) 2021 Paula Neeley. All rights reserved.
+Author: Paula Neeley
+Following the textbook "Dynamic Epistemic Logic" by 
+Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+-/
+
 import del.languageDEL del.semantics.complexitylemmas
+
 variables {agents : Type}
+
 
 -- Def 7.20, pg. 186, Translation function t
 @[simp] def translate : formPA agents → form agents

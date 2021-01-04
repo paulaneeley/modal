@@ -1,12 +1,17 @@
--- Following the textbook "Dynamic Epistemic Logic" by 
--- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+/-
+Copyright (c) 2021 Paula Neeley. All rights reserved.
+Author: Paula Neeley
+Following the textbook "Dynamic Epistemic Logic" by 
+Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+-/
 
 import del.syntax.syntaxDEL del.syntax.syntaxlemmasPADEL
 import del.semantics.translationfunction
-variables {agents : Type}
 
+variables {agents : Type}
 open prfPA
 open PAlemma
+
 
 lemma iff_iff_imp_iff {Γ : ctxPA agents} {φ ψ χ θ : formPA agents} : 
   prfPA Γ (φ ↔ χ) → prfPA Γ (ψ ↔ θ) → prfPA Γ ((φ ⊃ ψ) ↔ (χ ⊃ θ)) :=

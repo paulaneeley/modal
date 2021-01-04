@@ -1,16 +1,21 @@
--- Following the textbook "Dynamic Epistemic Logic" by 
--- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+/-
+Copyright (c) 2021 Paula Neeley. All rights reserved.
+Author: Paula Neeley
+Following the textbook "Dynamic Epistemic Logic" by 
+Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+-/
 
 import del.languageDEL del.syntax.syntaxDEL data.set.basic
-
-open prfS5
 local attribute [instance] classical.prop_decidable
+
 variables {agents : Type}
+open prfS5
 
 
 ---------------------- Helper Lemmas ----------------------
 
 namespace S5lemma
+
 
 lemma iden {Γ : ctx agents} {φ : form agents} :
   prfS5 Γ (φ ⊃ φ) :=
@@ -18,10 +23,9 @@ begin
 exact mp (mp (@pl2 _ _ φ (φ ⊃ φ) φ) pl1) pl1
 end
 
-lemma prtrue {Γ : ctx agents} : prfS5 Γ ¬⊥ :=
-begin
-exact iden
-end
+
+lemma prtrue {Γ : ctx agents} : prfS5 Γ ¬⊥ := iden
+
 
 lemma weak {Γ : ctx agents} {φ ψ : form agents} :
   prfS5 Γ φ → prfS5 (Γ ∪ ψ) φ :=
@@ -92,22 +96,13 @@ lemma dne {Γ : ctx agents} {φ : form agents} :
 prfS5 Γ ((¬¬φ) ⊃ φ) :=
 begin
 have h1 : prfS5 Γ (φ ⊃ (φ ⊃ φ)), from pl1,
-have h2 : prfS5 Γ (((¬¬(φ ⊃ (φ ⊃ φ))) ⊃ (¬¬φ)) ⊃ ((¬φ) ⊃ ¬(φ ⊃ (φ ⊃ φ)))), from pl8,
-have h3 : prfS5 Γ (((¬φ) ⊃ ¬(φ ⊃ (φ ⊃ φ))) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from pl8,
-have h4 : prfS5 Γ (((¬¬(φ ⊃ (φ ⊃ φ))) ⊃ (¬¬φ)) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from cut h2 h3,
-have h5 : prfS5 Γ ((¬¬φ) ⊃ ((¬¬(φ ⊃ (φ ⊃ φ))) ⊃ (¬¬φ))), from pl1,
-have h6 : prfS5 Γ ((¬¬φ) ⊃ ((φ ⊃ (φ ⊃ φ)) ⊃ φ)), from cut h5 h4,
-have h7 : prfS5 Γ ((φ ⊃ (φ ⊃ φ)) ⊃ (((φ ⊃ (φ ⊃ φ)) ⊃ φ) ⊃ φ)), from likemp,
-have h8 : prfS5 Γ (((φ ⊃ (φ ⊃ φ)) ⊃ φ) ⊃ φ), from mp h7 h1,
-have h9 : prfS5 Γ ((¬¬φ) ⊃ φ), from cut h6 h8,
-exact h9
+exact (cut (cut pl1 (cut pl8 pl8)) (mp likemp h1))
 end
 
 
 lemma dni {Γ : ctx agents} {φ : form agents} : prfS5 Γ (φ ⊃ ¬¬φ) :=
 begin
-have h1 : prfS5 Γ ((¬¬(¬φ)) ⊃ (¬φ)), from dne,
-exact mp pl8 h1
+exact mp pl8 dne
 end
 
 
@@ -122,21 +117,14 @@ lemma cut1 {Γ : ctx agents} {φ ψ χ θ : form agents} :
   prfS5 Γ (θ ⊃ (φ ⊃ ψ)) → prfS5 Γ (ψ ⊃ χ) → prfS5 Γ (θ ⊃ (φ ⊃ χ)) :=
 begin
 intros h1 h2,
-have h3 : prfS5 Γ (φ ⊃ ψ) → prfS5 Γ (ψ ⊃ χ) → prfS5 Γ (φ ⊃ χ), from cut,
-have h4 : prfS5 Γ (θ ⊃ (φ ⊃ ψ)) → prfS5 Γ ((φ ⊃ ψ) ⊃ (φ ⊃ χ)) → prfS5 Γ (θ ⊃ (φ ⊃ χ)), from cut,
-specialize h4 h1,
-have h5 : prfS5 Γ ((φ ⊃ ψ) ⊃ (φ ⊃ χ)), from mp pl2 (mp pl1 h2),
-specialize h4 h5,
-exact h4
+exact (cut h1) (mp pl2 (mp pl1 h2))
 end
 
 
 lemma imp_switch {Γ : ctx agents} {φ ψ χ : form agents} : prfS5 Γ (φ ⊃ (ψ ⊃ χ)) → prfS5 Γ (ψ ⊃ (φ ⊃ χ)) :=
 begin
 intro h1,
-have h2 : prfS5 Γ (ψ ⊃ ((φ ⊃ ψ) ⊃ (φ ⊃ χ))), from mp pl1 (mp pl2 h1),
-have h3 : prfS5 Γ ((ψ ⊃ (φ ⊃ ψ)) ⊃ (ψ ⊃ (φ ⊃ χ))), from mp pl2 h2,
-exact mp h3 pl1
+exact mp (mp pl2 (mp pl1 (mp pl2 h1))) pl1
 end
 
 
@@ -164,9 +152,7 @@ end
 lemma double_imp {Γ : ctx agents} {φ ψ : form agents} :
   prfS5 Γ ((φ ⊃ (φ ⊃ ψ)) ⊃ (φ ⊃ ψ)) :=
 begin
-have h1 : prfS5 Γ ((φ ⊃ ψ) ⊃ (φ ⊃ ψ)) → prfS5 Γ (φ ⊃ ((φ ⊃ ψ) ⊃ ψ)), from imp_switch,
-specialize h1 iden,
-exact mp pl2 h1
+exact mp pl2 (imp_switch iden)
 end
 
 
@@ -272,7 +258,7 @@ end
 lemma contra_equiv_false {Γ : ctx agents} {φ : form agents} : 
   prfS5 Γ ((φ & ¬φ) ↔ ⊥) :=
 begin
-have h1 : prfS5 Γ (¬¬⊥ ↔ ¬¬(φ & ¬φ)), from iff_not not_contra_equiv_true,
+have h1 := iff_not not_contra_equiv_true,
 exact (mp (mp pl4 (cut dni (cut (mp pl6 h1) dne))) (cut dni (cut (mp pl5 h1) dne)))
 end
 
@@ -288,8 +274,7 @@ lemma imp_and_imp {Γ : ctx agents} {φ ψ χ : form agents} :
   prfS5 Γ (φ ⊃ ψ) → prfS5 Γ  ((χ & φ) ⊃ (χ & ψ)) :=
 begin
 intros h1,
-have h2 := imp_and_and_imp,
-specialize h2 (mp (mp pl4 iden) h1), exact h2
+exact imp_and_and_imp (mp (mp pl4 iden) h1)
 end
 
 
@@ -301,6 +286,7 @@ exact mp (mp pl4 (imp_and_and_imp (mp (mp pl4 (mp pl5 h1)) (mp pl5 h2))))
   (imp_and_and_imp (mp (mp pl4 (mp pl6 h1)) (mp pl6 h2)))
 end
 
+
 lemma and_commute {Γ : ctx agents} {φ ψ χ : form agents} : prfS5 Γ (((φ & ψ) & χ) ↔ (φ & (ψ & χ))) :=
 begin
 exact mp (mp pl4 (mp double_imp (imp_imp_iff_imp.mp 
@@ -308,6 +294,7 @@ exact mp (mp pl4 (mp double_imp (imp_imp_iff_imp.mp
   (mp double_imp (imp_imp_iff_imp.mp (cut (cut pl6 pl5) 
   (imp_switch (cut pl5 (cut1 pl4 (cut2 (cut pl6 pl6) pl4)))))))
 end
+
 
 lemma demorgans {Γ : ctx agents} {φ ψ : form agents} : 
   prfS5 Γ (¬(φ & ψ)) ↔ prfS5 Γ (φ ⊃ ¬ψ) :=
@@ -319,25 +306,30 @@ intro h1,
 exact (mp (contrapos.mpr (mp pl5 and_switch)) (and_right_imp.mpr h1))
 end
 
+
 lemma explosion {Γ : ctx agents} {ψ : form agents} : prfS5 Γ (⊥ ⊃ ψ) :=
 begin
 apply contrapos.mp, exact (mp pl1 iden)
 end
+
 
 lemma exfalso {Γ : ctx agents} {φ ψ : form agents} : prfS5 Γ ((φ & ¬φ) ⊃ ψ) :=
 begin
 exact cut not_contra explosion
 end
 
+
 lemma box_dn {Γ : ctx agents} {φ : form agents} {a : agents}  : prfS5 Γ ((¬K a φ) ↔ ¬(K a (¬¬φ))) :=
 begin
 exact mp (mp pl4 (contrapos.mpr (mp kdist (nec dne)))) (contrapos.mpr (mp kdist (nec dni)))
 end
+
 
 lemma dual_equiv1 {Γ : ctx agents} {φ : form agents} {a : agents} : prfS5 Γ ((K a φ) ↔ (¬(¬K a ¬(¬φ)))) :=
 begin
 exact mp (mp pl4 (cut (contrapos.mp (mp pl6 box_dn)) dni)) 
   (cut dne (contrapos.mp (mp pl5 box_dn)))
 end
+
 
 end S5lemma

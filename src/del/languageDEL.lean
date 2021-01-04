@@ -1,5 +1,9 @@
--- Following the textbook "Dynamic Epistemic Logic" by 
--- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+/-
+Copyright (c) 2021 Paula Neeley. All rights reserved.
+Author: Paula Neeley
+Following the textbook "Dynamic Epistemic Logic" by 
+Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+-/
 
 -- Def 2.1, pg 12
 inductive form (agents : Type) : Type
@@ -9,6 +13,7 @@ inductive form (agents : Type) : Type
   | impl (φ ψ : form)   : form
   | box  (a : agents)
          (φ : form)     : form
+
 
 -- form notation
 notation `⊥`:80         := form.bot
@@ -31,6 +36,7 @@ inductive formPA (agents : Type) : Type
   | box  {} (a : agents) 
             (φ : formPA)     : formPA
   | update {} (φ ψ : formPA) : formPA
+
 
 -- formPA notation
 notation `⊥`:80         := formPA.bot

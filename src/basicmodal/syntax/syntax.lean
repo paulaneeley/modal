@@ -1,3 +1,8 @@
+/-
+Copyright (c) 2021 Paula Neeley. All rights reserved.
+Author: Paula Neeley
+-/
+
 import basicmodal.language
 
 ---------------------- Proof System ----------------------
@@ -5,6 +10,7 @@ import basicmodal.language
 -- Define a context
 @[reducible] def ctx : Type := set (form)
 notation AX `un` φ := set.insert φ AX
+
 
 -- Proof system, pg. 26
 inductive prfK : ctx → form → Prop 

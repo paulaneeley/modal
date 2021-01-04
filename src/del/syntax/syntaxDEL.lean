@@ -1,18 +1,25 @@
--- Following the textbook "Dynamic Epistemic Logic" by 
--- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+/-
+Copyright (c) 2021 Paula Neeley. All rights reserved.
+Author: Paula Neeley
+Following the textbook "Dynamic Epistemic Logic" by 
+Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+-/
 
 import del.languageDEL data.set.basic
+
 variables {agents : Type}
 
 
 ---------------------- Proof System ----------------------
+
 
 -- Define a context
 @[reducible] def ctx (agents: Type) : Type := set (form agents)
 instance : has_emptyc (ctx agents) := by apply_instance
 notation Γ `∪` φ := set.insert φ Γ
 
--- Proof system, pg. 26
+
+-- Proof system for epistemic logic
 inductive prfS5 : ctx agents → form agents → Prop 
 | ax {Γ} {φ} (h : φ ∈ Γ) : prfS5 Γ φ
 | pl1 {Γ} {φ ψ}          : prfS5 Γ (form.impl φ (form.impl ψ φ))
@@ -39,7 +46,7 @@ inductive prfS5 : ctx agents → form agents → Prop
 --instance : has_emptyc (ctxPA agents) := by apply_instance
 notation Γ `∪` φ := set.insert φ Γ
 
--- Proof system
+-- Proof system for public announcement logic
 inductive prfPA : ctxPA agents → formPA agents → Prop 
 | ax {Γ} {φ} (h : φ ∈ Γ) : prfPA Γ φ
 | pl1 {Γ} {φ ψ}          : prfPA Γ (φ ⊃ (ψ ⊃ φ))
@@ -82,19 +89,19 @@ use h1_φ,
 split,
 exact h,
 refl,
-apply prfPA.pl1,
-apply prfPA.pl2,
-apply prfPA.pl3,
-apply prfPA.pl4,
-apply prfPA.pl5,
-apply prfPA.pl6,
-apply prfPA.pl7,
-apply prfPA.pl8,
-apply prfPA.kdist,
-apply prfPA.truth,
-apply prfPA.posintro,
-apply prfPA.negintro,
-apply prfPA.mp h1_ih_hpq h1_ih_hp,
-apply prfPA.nec h1_ih,
+exact prfPA.pl1,
+exact prfPA.pl2,
+exact prfPA.pl3,
+exact prfPA.pl4,
+exact prfPA.pl5,
+exact prfPA.pl6,
+exact prfPA.pl7,
+exact prfPA.pl8,
+exact prfPA.kdist,
+exact prfPA.truth,
+exact prfPA.posintro,
+exact prfPA.negintro,
+exact prfPA.mp h1_ih_hpq h1_ih_hp,
+exact prfPA.nec h1_ih,
 end
 

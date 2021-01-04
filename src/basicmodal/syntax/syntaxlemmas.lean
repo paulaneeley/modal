@@ -1,10 +1,12 @@
--- Following the textbook "Dynamic Epistemic Logic" by 
--- Hans van Ditmarsch, Wiebe van der Hoek, and Barteld Kooi
+/-
+Copyright (c) 2021 Paula Neeley. All rights reserved.
+Author: Paula Neeley
+-/
 
 import basicmodal.language basicmodal.syntax.syntax data.set.basic
+local attribute [instance] classical.prop_decidable
 
 open prfK
-local attribute [instance] classical.prop_decidable
 
 
 ---------------------- Helper Lemmas ----------------------
@@ -16,10 +18,8 @@ begin
 exact mp (mp (@pl2 _ φ (φ ⊃ φ) φ) pl1) pl1
 end
 
-lemma prtrue {Γ : ctx} : prfK Γ ⊤ :=
-begin
-exact iden
-end
+
+lemma prtrue {Γ : ctx} : prfK Γ ⊤ := iden
 
 
 lemma weak {Γ : ctx} {φ ψ : form} :
@@ -277,9 +277,9 @@ lemma imp_and_imp {Γ : ctx} {φ ψ χ : form} :
   prfK Γ (φ ⊃ ψ) → prfK Γ ((χ & φ) ⊃ (χ & ψ)) :=
 begin
 intros h1,
-have h2 := imp_and_and_imp,
-specialize h2 (mp (mp pl4 iden) h1), exact h2
+exact imp_and_and_imp (mp (mp pl4 iden) h1)
 end
+
 
 lemma demorgans {Γ : ctx} {φ ψ : form} : prfK Γ (¬(φ & ψ)) ↔ prfK Γ (φ ⊃ ¬ψ) :=
 begin
@@ -290,26 +290,31 @@ intro h1,
 exact (mp (contrapos.mpr (mp pl5 and_switch)) (and_right_imp.mpr h1))
 end
 
+
 lemma explosion {Γ : ctx} {ψ : form} : prfK Γ (⊥ ⊃ ψ) :=
 begin
 apply contrapos.mp, exact (mp pl1 iden)
 end
+
 
 lemma exfalso {Γ : ctx} {φ ψ : form} : prfK Γ ((φ & ¬φ) ⊃ ψ) :=
 begin
 exact cut not_contra explosion
 end
 
+
 lemma box_dn {Γ : ctx} {φ : form} : prfK Γ ((¬□φ) ↔ ¬(□(¬¬φ))) :=
 begin
 exact mp (mp pl4 (contrapos.mpr (mp kdist (nec dne)))) (contrapos.mpr (mp kdist (nec dni)))
 end
+
 
 lemma dual_equiv1 {Γ : ctx} {φ : form} : prfK Γ ((□φ) ↔ (¬(◇(¬φ)))) :=
 begin
 exact mp (mp pl4 (cut (contrapos.mp (mp pl6 box_dn)) dni)) 
   (cut dne (contrapos.mp (mp pl5 box_dn)))
 end
+
 
 lemma dual_equiv2 {Γ : ctx} {φ : form} : prfK Γ ((¬(□¬φ)) ↔ (◇φ)) :=
 begin
