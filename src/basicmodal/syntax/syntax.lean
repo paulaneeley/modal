@@ -21,7 +21,7 @@ inductive prfK : ctx → form → Prop
 | pl4 {AX} {φ ψ}           : prfK AX (φ ⊃ (ψ ⊃ (φ & ψ)))
 | pl5 {AX} {φ ψ}           : prfK AX ((φ & ψ) ⊃ φ)
 | pl6 {AX} {φ ψ}           : prfK AX ((φ & ψ) ⊃ ψ)
-| pl8 {AX} {φ ψ}           : prfK AX (((¬φ) ⊃ (¬ψ)) ⊃ (ψ ⊃ φ))
+| pl7 {AX} {φ ψ}           : prfK AX (((¬φ) ⊃ (¬ψ)) ⊃ (ψ ⊃ φ))
 | kdist {AX} {φ ψ}         : prfK AX ((□ (φ ⊃ ψ)) ⊃ ((□ φ) ⊃ (□ ψ)))
 | mp {AX} {φ ψ} 
   (hpq: prfK AX (φ ⊃ ψ)) 

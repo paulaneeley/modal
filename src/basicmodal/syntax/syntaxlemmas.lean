@@ -34,7 +34,7 @@ induction h,
 {exact pl4},
 {exact pl5},
 {exact pl6},
-{exact pl8},
+{exact pl7},
 {exact kdist},
 {apply mp,
   {exact h_ih_hpq},
@@ -86,13 +86,13 @@ lemma dne {Γ : ctx} {φ : form} :
 prfK Γ ((¬¬φ) ⊃ φ) :=
 begin
 have h1 : prfK Γ (φ ⊃ (φ ⊃ φ)), from pl1,
-exact (cut (cut pl1 (cut pl8 pl8)) (mp likemp h1))
+exact (cut (cut pl1 (cut pl7 pl7)) (mp likemp h1))
 end
 
 
 lemma dni {Γ : ctx} {φ : form} : prfK Γ (φ ⊃ ¬¬φ) :=
 begin
-exact mp pl8 dne
+exact mp pl7 dne
 end
 
 
@@ -230,9 +230,9 @@ lemma contrapos {Γ : ctx} {φ ψ : form} :
 begin
 split,
 intro h1,
-exact mp pl8 h1,
+exact mp pl7 h1,
 intro h1,
-exact mp (cut (cut (mp hs1 dni) (mp hs2 dne)) pl8) h1,
+exact mp (cut (cut (mp hs1 dni) (mp hs2 dne)) pl7) h1,
 end
 
 

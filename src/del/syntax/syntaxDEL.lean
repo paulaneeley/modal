@@ -28,8 +28,7 @@ inductive prfS5 : ctx agents → form agents → Prop
 | pl4 {Γ} {φ ψ}          : prfS5 Γ (φ ⊃ (ψ ⊃ (φ & ψ)))
 | pl5 {Γ} {φ ψ}          : prfS5 Γ ((φ & ψ) ⊃ φ)
 | pl6 {Γ} {φ ψ}          : prfS5 Γ ((φ & ψ) ⊃ ψ)
-| pl7 {Γ} {φ}            : prfS5 Γ ((¬¬φ) ⊃ φ)
-| pl8 {Γ} {φ ψ}          : prfS5 Γ (((¬φ) ⊃ (¬ψ)) ⊃ (ψ ⊃ φ))
+| pl7 {Γ} {φ ψ}          : prfS5 Γ (((¬φ) ⊃ (¬ψ)) ⊃ (ψ ⊃ φ))
 | kdist {Γ} {φ ψ} {a}    : prfS5 Γ ((K a (φ ⊃ ψ)) ⊃ ((K a φ) ⊃ (K a ψ)))
 | truth {Γ} {φ} {a}      : prfS5 Γ ((K a φ) ⊃ φ)
 | posintro {Γ} {φ} {a}   : prfS5 Γ ((K a φ) ⊃ (K a (K a φ)))
@@ -55,8 +54,7 @@ inductive prfPA : ctxPA agents → formPA agents → Prop
 | pl4 {Γ} {φ ψ}          : prfPA Γ (φ ⊃ (ψ ⊃ (φ & ψ)))
 | pl5 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ φ)
 | pl6 {Γ} {φ ψ}          : prfPA Γ ((φ & ψ) ⊃ ψ)
-| pl7 {Γ} {φ}            : prfPA Γ ((¬¬φ) ⊃ φ)
-| pl8 {Γ} {φ ψ}          : prfPA Γ (((¬φ) ⊃ (¬ψ)) ⊃ (ψ ⊃ φ))
+| pl7 {Γ} {φ ψ}          : prfPA Γ (((¬φ) ⊃ (¬ψ)) ⊃ (ψ ⊃ φ))
 | kdist {Γ} {φ ψ} {a}    : prfPA Γ ((K a (φ ⊃ ψ)) ⊃ ((K a φ) ⊃ (K a ψ)))
 | truth {Γ} {φ} {a}      : prfPA Γ ((K a φ) ⊃ φ)
 | posintro {Γ} {φ} {a}   : prfPA Γ ((K a φ) ⊃ (K a (K a φ)))
@@ -96,7 +94,6 @@ exact prfPA.pl4,
 exact prfPA.pl5,
 exact prfPA.pl6,
 exact prfPA.pl7,
-exact prfPA.pl8,
 exact prfPA.kdist,
 exact prfPA.truth,
 exact prfPA.posintro,
